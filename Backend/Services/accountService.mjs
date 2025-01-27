@@ -1,4 +1,5 @@
 import { connect, disconnect } from '../Utils/mongodb.mjs';
+import bcrypt from 'bcrypt';
 
 // Sign up for an account 
 async function signUp(name, email, password) {
@@ -7,16 +8,19 @@ async function signUp(name, email, password) {
         db = await connect();
         const collection = db.collection('users');
 
-        // Check if user already exists
+        // Business logic validation
         const existingUser = await collection.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             throw new Error('Email already registered');
         }
 
+        // Security: Hash password before storing
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const result = await collection.insertOne({ 
             name, 
             email: email.toLowerCase(), 
-            password,
+            password: hashedPassword,
             createdAt: new Date()
         });
         
@@ -38,19 +42,20 @@ async function login(email, password) {
         db = await connect();
         const collection = db.collection('users');
         
-        // Find user by email
         const user = await collection.findOne({ email: email.toLowerCase() });
-        
-        // Check if user exists and password matches
         if (!user) {
             throw new Error('User not found');
         }
         
-        if (user.password !== password) {
+        // Security: Compare hashed password
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
             throw new Error('Invalid password');
         }
         
-        return user;
+        // Don't send password back to client
+        const { password: _, ...userWithoutPassword } = user;
+        return userWithoutPassword;
     } catch (error) {
         console.error("Error logging in:", error);
         throw error;
