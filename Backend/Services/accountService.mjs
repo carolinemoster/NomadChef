@@ -1,5 +1,20 @@
 import { connect, disconnect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+export function generateToken(user) {
+    return jwt.sign(
+        { 
+            id: user._id, 
+            email: user.email 
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '24h' }
+    );
+}
+
 
 // Sign up for an account 
 export async function signUp(name, email, password) {
@@ -11,8 +26,7 @@ export async function signUp(name, email, password) {
         throw new Error('Password must be at least 5 characters long');
     }
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        setError('Invalid email format');
-        return;
+        throw new Error('Invalid email format');
     }
     let db;
     try {
@@ -35,14 +49,23 @@ export async function signUp(name, email, password) {
             createdAt: new Date()
         });
         
-        return result;
+        const token = generateToken({ _id: result.insertedId, email });
+        
+        return {
+            statusCode: 201,
+            body: {
+                user: { _id: result.insertedId, name, email },
+                token
+            }
+        };
     } catch (error) {
         console.error("Error signing up:", error);
-        throw error;
+        return {
+            statusCode: error.message === 'Email already registered' ? 409 : 500,
+            body: { error: error.message }
+        };
     } finally {
-        if (db) {
-            await disconnect();
-        }
+        if (db) await disconnect();
     }
 }
 
@@ -55,24 +78,46 @@ export async function login(email, password) {
         
         const user = await collection.findOne({ email: email.toLowerCase() });
         if (!user) {
-            throw new Error('User not found');
+            return {
+                statusCode: 401,
+                body: { error: 'Invalid credentials' }
+            };
         }
         
         // Security: Compare hashed password
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            throw new Error('Invalid password');
+            return {
+                statusCode: 401,
+                body: { error: 'Invalid credentials' }
+            };
         }
         
-        // Don't send password back to client
+        const token = generateToken(user);
+        
         const { password: _, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        return {
+            statusCode: 200,
+            body: {
+                user: userWithoutPassword,
+                token
+            }
+        };
     } catch (error) {
         console.error("Error logging in:", error);
-        throw error;
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
     } finally {
-        if (db) {
-            await disconnect();
-        }
+        if (db) await disconnect();
+    }
+}
+
+export function verifyToken(token) {
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+        return null;
     }
 }
