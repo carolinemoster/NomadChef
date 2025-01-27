@@ -2,7 +2,18 @@ import { connect, disconnect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 
 // Sign up for an account 
-async function signUp(name, email, password) {
+export async function signUp(name, email, password) {
+    // Business logic validation
+    if (!name || !email || !password) {
+        throw new Error('Name, email and password are required');
+    }
+    if (password.length < 5) {
+        throw new Error('Password must be at least 5 characters long');
+    }
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        setError('Invalid email format');
+        return;
+    }
     let db;
     try {
         db = await connect();
@@ -36,7 +47,7 @@ async function signUp(name, email, password) {
 }
 
 //Login to an account (check if user exists and password is correct)
-async function login(email, password) {
+export async function login(email, password) {
     let db;
     try {
         db = await connect();
