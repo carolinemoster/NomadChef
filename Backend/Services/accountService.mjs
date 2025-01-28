@@ -18,16 +18,6 @@ export function generateToken(user) {
 
 // Sign up for an account 
 export async function signUp(name, email, password) {
-    // Business logic validation
-    if (!name || !email || !password) {
-        throw new Error('Name, email and password are required');
-    }
-    if (password.length < 5) {
-        throw new Error('Password must be at least 5 characters long');
-    }
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        throw new Error('Invalid email format');
-    }
     let db;
     try {
         db = await connect();
