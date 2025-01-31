@@ -12,7 +12,8 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: ./Backend
+      run:
+        working-directory: ./Backend
     
     steps:
     - name: Checkout repository
