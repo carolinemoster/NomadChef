@@ -32,26 +32,21 @@ jobs:
     - name: Install dependencies
       run: npm ci  # Inherits default working-directory
 
-    - name: Build
-      run: npm run build
-    
     - name: Prepare for production
       run: npm prune --production
 
     - name: Create deployment package
       run: |
-        cp -r node_modules dist/
-        cd dist
-        zip -r ../../function.zip . -x "*.git*"
-        cd ../..
+        cp -r node_modules
+        zip -r function.zip .
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: us-east-2
     
     - name: Deploy lambda function
       run: |
-        aws lambda update-function-code --function-name ${{ secrets.AUTH_SERVICE_ARN }} --zip-file fileb://../function.zip
+        aws lambda update-function-code --function-name ${{ secrets.AUTH_SERVICE_ARN }} --zip-file fileb://function.zip
