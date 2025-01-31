@@ -11,10 +11,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend  # Set default for all steps
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -23,7 +20,6 @@ jobs:
       run: |
         echo "Current directory: $(pwd)"
         ls -la
-        ls -la ./backend  # Verify backend directory exists
 
     - name: Set up Node.js
       uses: actions/setup-node@v4  # No working-directory needed now
@@ -34,19 +30,16 @@ jobs:
       run: npm ci  # Inherits default working-directory
 
     - name: Build
-      working-directory: ./backend
       run: npm run build
     
     - name: Prepare for production
-      working-directory: ./backend
       run: npm prune --production
 
     - name: Create deployment package
       run: |
-        cd backend
-        cp -r node_modules dist/  # Include production dependencies
+        cp -r node_modules dist/
         cd dist
-        zip -r ../../function.zip . -x "*.git*"  # Exclude unnecessary files
+        zip -r ../../function.zip . -x "*.git*"
         cd ../..
     
     - name: Configure AWS credentials
@@ -57,6 +50,5 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
     
     - name: Deploy lambda function
-      working-directory: ./backend
       run: |
         aws lambda update-function-code --function-name ${{ secrets.AUTH_SERVICE_ARN }} --zip-file fileb://../function.zip
