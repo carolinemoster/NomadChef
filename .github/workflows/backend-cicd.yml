@@ -37,7 +37,6 @@ jobs:
 
     - name: Create deployment package
       run: |
-        cp -r node_modules
         zip -r function.zip .
     
     - name: Configure AWS credentials
