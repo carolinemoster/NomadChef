@@ -11,19 +11,27 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend  # Set default for all steps
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Verify directory structure
+      run: |
+        echo "Current directory: $(pwd)"
+        ls -la
+        ls -la ./backend  # Verify backend directory exists
+
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v4  # No working-directory needed now
       with:
-        node-version: '20'  # specify the Node.js version you need
+        node-version: '20'
 
     - name: Install dependencies
-      working-directory: ./backend
-      run: npm ci
+      run: npm ci  # Inherits default working-directory
 
     - name: Build
       working-directory: ./backend
