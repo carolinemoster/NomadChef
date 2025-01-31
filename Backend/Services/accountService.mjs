@@ -11,7 +11,7 @@ export function generateToken(user) {
             email: user.email 
         }, 
         JWT_SECRET, 
-        { expiresIn: '24h' }
+        { expiresIn: '12h' }
     );
 }
 
@@ -30,7 +30,7 @@ export async function signUp(name, email, password) {
         }
 
         // Security: Hash password before storing
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 12);
 
         const result = await collection.insertOne({ 
             name, 
