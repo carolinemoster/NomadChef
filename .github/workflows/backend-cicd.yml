@@ -37,6 +37,9 @@ jobs:
 
     - name: Run tests
       run: npm test
+      env:
+        MONGO_URI: 
+        JWT_SECRET: 264c8b3cbd28b05405dccdbeca1bef49085f69fa68af15f8f87097c950ebc766
 
     - name: Prepare for production
       run: npm prune --production
