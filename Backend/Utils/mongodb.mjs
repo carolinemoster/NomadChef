@@ -7,7 +7,7 @@ const client = new MongoClient(process.env.MONGO_URI);
 let db;
 
 // Connect to MongoDB
-async function connect() {
+export async function connect() {
     try {
         await client.connect();
         console.log("Connected to MongoDB");
@@ -20,7 +20,7 @@ async function connect() {
 }
 
 // Disconnect from MongoDB
-async function disconnect() {
+export async function disconnect() {
     try {
         await client.close();
         console.log("Disconnected from MongoDB");
@@ -29,5 +29,3 @@ async function disconnect() {
         throw error;
     }
 }
-
-export default { connect, disconnect };

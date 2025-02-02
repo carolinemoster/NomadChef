@@ -35,8 +35,12 @@ jobs:
     - name: Install dependencies
       run: npm ci  # Inherits default working-directory
 
+    - name: Run tests
+      run: npm test
+
     - name: Prepare for production
       run: npm prune --production
+
 
     - name: Create deployment package
       run: |
