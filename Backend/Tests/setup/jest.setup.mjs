@@ -10,11 +10,13 @@ let mongoServer;
 let mongoClient;
 
 // Setup before all tests
-
 beforeAll(async () => {
   // Create MongoDB Memory Server
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
+  
+  // Set the MONGO_URI environment variable for tests
+  process.env.MONGO_URI = mongoUri;
   
   // Create MongoDB client
   mongoClient = new MongoClient(mongoUri);
