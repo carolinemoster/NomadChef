@@ -6,8 +6,6 @@ import { jest, describe, it, expect, beforeEach, afterEach, afterAll } from '@je
 // Load environment variables
 dotenv.config();
 
-process.env.JWT_SECRET = '264c8b3cbd28b05405dccdbeca1bef49085f69fa68af15f8f87097c950ebc766';
-
 let mongoServer;
 let mongoClient;
 
