@@ -3,15 +3,20 @@ import { MongoClient } from 'mongodb';
 
 dotenv.config();
 
-const client = new MongoClient(process.env.MONGO_URI);
-let db;
+let client = null;
+let db = null;
 
 // Connect to MongoDB
-async function connect() {
+export async function connect() {
     try {
-        await client.connect();
-        console.log("Connected to MongoDB");
-        db = client.db(process.env.DB_NAME);
+        if (!client) {
+            // Only create a new client if one doesn't exist
+            const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db';
+            client = new MongoClient(uri);
+            await client.connect();
+            console.log("Connected to MongoDB");
+            db = client.db(process.env.DB_NAME);
+        }
         return db;
     } catch (error) {
         console.error("Error connecting to MongoDB:", error);
@@ -20,14 +25,16 @@ async function connect() {
 }
 
 // Disconnect from MongoDB
-async function disconnect() {
+export async function disconnect() {
     try {
-        await client.close();
-        console.log("Disconnected from MongoDB");
+        if (client) {
+            await client.close();
+            client = null;
+            db = null;
+            console.log("Disconnected from MongoDB");
+        }
     } catch (error) {
         console.error("Error disconnecting from MongoDB:", error);
         throw error;
     }
 }
-
-export default { connect, disconnect };
