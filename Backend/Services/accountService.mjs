@@ -22,6 +22,7 @@ export function generateToken(user) {
 export async function signUp(name, email, password) {
     let db;
     try {
+        console.log("Connecting to MongoDB");
         db = await connect();
         const collection = db.collection('users');
 
