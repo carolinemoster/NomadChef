@@ -23,7 +23,7 @@ export async function signUp(name, email, password) {
         db = await connect();
         const collection = db.collection('users');
 
-        // Business logic validation
+        // First, check if email is already registered
         const existingUser = await collection.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             throw new Error('Email already registered');
