@@ -67,8 +67,6 @@ export async function signUp(name, email, password) {
             statusCode: error.message === 'Email already registered' ? 409 : 500,
             body: { error: error.message }
         };
-    } finally {
-        if (db) await disconnect();
     }
 }
 
@@ -112,8 +110,6 @@ export async function login(email, password) {
             statusCode: 500,
             body: { error: 'Internal server error' }
         };
-    } finally {
-        if (db) await disconnect();
     }
 }
 
