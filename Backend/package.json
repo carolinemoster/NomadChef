@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install",
-    "test": "node --experimental-vm-modules --detectOpenHandles node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles",
     "start": "node index.js"
   },
   "keywords": [],
