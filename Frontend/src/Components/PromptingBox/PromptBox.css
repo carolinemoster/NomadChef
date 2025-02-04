@@ -1,0 +1,73 @@
+/* styles.css */
+
+/* Centering container */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 15vh;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+  }
+  
+  /* Glassmorphic Textbox */
+  .glassmorphic-box {
+    width: 100%;
+    max-width: 5000px;
+    width: 1000px;
+    background: rgba(39, 212, 137, 0.1);
+    background-color: #797979;
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Larger input field */
+  .glassmorphic-box input {
+    flex: 1;
+    background-color: white;
+    border: none;
+    border-radius: 20px;
+    
+    font-size: 20px;
+    padding: 16px;
+    color: rgb(0, 0, 0);
+    width: 100%;
+  }
+  
+  /* Placeholder styling */
+  .glassmorphic-box input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+  }
+  
+  /* Send button */
+  .send-button {
+    background: #ff6f61;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .send-button:hover {
+    background: #ff6a5c;
+    transform: scale(1.1);
+  }
+  
+  .send-button:active {
+    transform: scale(0.9);
+  }
+  
+  .send-button svg {
+    color: white;
+    width: 24px;
+    height: 24px;
+  }
