@@ -45,6 +45,7 @@ export const handler = async (event) => {
                 const { name: rawName, email: rawEmail, password } = parseBody(event);
                 const name = sanitizeInput(rawName);
                 const email = sanitizeInput(rawEmail).toLowerCase();
+                console.log(name, email, password);
 
                 if (!name || !email || !password) {
                     return formatResponse(400, { 
@@ -62,6 +63,7 @@ export const handler = async (event) => {
                     });
                 }
 
+                console.log("Signing up user:", name, email, password);
                 const result = await signUp(name, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
