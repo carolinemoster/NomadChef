@@ -27,8 +27,7 @@ export async function connect() {
         // Essential MongoDB connection options for Lambda
         const client = new MongoClient(uri, {
             maxPoolSize: 1,                    // Essential: Limit pool for Lambda
-            serverSelectionTimeoutMS: 5000,    // Essential: Fail fast if can't connect
-            socketTimeoutMS: 30000,            // Essential: Reasonable operation timeout
+            tls: true,
         });
 
         await client.connect();
