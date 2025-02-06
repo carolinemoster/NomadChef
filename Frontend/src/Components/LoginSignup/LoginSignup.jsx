@@ -9,8 +9,12 @@ import { useNavigate } from 'react-router-dom';
 
 const LoginSignup = () => {
     const navigate = useNavigate();
+    // State for controlling which form to show (Sign In or Create Account)
     const [action, setAction] = useState("Sign In");
+    // State for multi-step form (page 1: basic info, page 2: preferences)
     const [page, setPage] = useState(1);
+
+    // States for user preferences
     const [dietaryRestrictions, setDietaryRestrictions] = useState([]);
     const [otherRestriction, setOtherRestriction] = useState('');
     const [cookingSkill, setCookingSkill] = useState('');
@@ -18,14 +22,11 @@ const LoginSignup = () => {
     const [cuisineInterests, setCuisineInterests] = useState('');
     const [ingredientPreferences, setIngredientPreferences] = useState('');
 
-    const handleNext = () => {
-        setPage(2);
-    };
-
     const handleBack = () => {
         setPage(1);
     };
 
+    // Handle checkbox changes for dietary restrictions
     const handleDietaryChange = (restriction) => {
         if (dietaryRestrictions.includes(restriction)) {
             setDietaryRestrictions(dietaryRestrictions.filter(item => item !== restriction));
@@ -34,7 +35,14 @@ const LoginSignup = () => {
         }
     };
 
+    // Navigation handlers
     const handleSignInClick = () => {
+        // TODO: Add authentication logic
+        navigate('/home');
+    };
+
+    const handleCreateAccountClick = () => {
+        // TODO: Add account creation and preferences storage
         navigate('/home');
     };
 
@@ -250,11 +258,11 @@ const LoginSignup = () => {
                         </div>
                         <div className="submit-container">
                             {page === 1 ? (
-                                <div className="submit" onClick={handleNext}>Next</div>
+                                <div className="submit" onClick={() => setPage(2)}>Next</div>
                             ) : (
                                 <div className="navigation-buttons">
                                     <div className="submit gray" onClick={handleBack}>Back</div>
-                                    <div className="submit" onClick={() => setAction("Create Account")}>Create Account</div>
+                                    <div className="submit" onClick={handleCreateAccountClick}>Create Account</div>
                                 </div>
                             )}
                         </div>
