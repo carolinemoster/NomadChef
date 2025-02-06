@@ -1,56 +1,39 @@
 import { MongoClient } from 'mongodb';
 
-// Initialize outside of handler to enable connection reuse
-let client = null;
-let db = null;
-let isConnecting = false;
+// These variables persist across Lambda invocations in the same container
+let cachedClient = null;
+let cachedDb = null;
 
 // Connect to MongoDB
 export async function connect() {
+    // First, check if we have a valid cached connection
+    if (cachedClient && cachedDb) {
+        try {
+            // Verify the connection still works
+            await cachedClient.db().admin().ping();
+            return cachedDb;  // Reuse existing connection
+        } catch (error) {
+            // Reset if connection is dead
+            cachedClient = null;
+            cachedDb = null;
+        }
+    }
+
+    // Create new connection if needed
     try {
-        // If already connecting, wait for the existing connection attempt
-        if (isConnecting) {
-            let retries = 50; // 5 seconds maximum wait
-            while (isConnecting && retries > 0) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-                retries--;
-            }
-            if (isConnecting) {
-                throw new Error('Connection timeout while waiting for existing connection');
-            }
-            return db;
-        }
-
-        // If client exists, verify connection with ping
-        if (client) {
-            try {
-                await client.db().admin().ping();
-                return db;
-            } catch (error) {
-                console.log("Existing connection is dead, creating new connection");
-                // Don't need to explicitly close here as the connection is already dead
-                client = null;
-                db = null;
-            }
-        }
-
-        if (!client) {
-            isConnecting = true;
-            const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db';
-            client = new MongoClient(uri, {
-                serverSelectionTimeoutMS: 5000,
-                connectTimeoutMS: 5000,
-                maxPoolSize: 1, // Limit pool size for Lambda
-            });
-            await client.connect();
-            console.log("Connected to MongoDB");
-            db = client.db(process.env.DB_NAME);
-            isConnecting = false;
-        }
-        return db;
+        const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db';
+        const client = new MongoClient(uri, {
+            maxPoolSize: 1  // Important for Lambda
+        });
+        await client.connect();
+        const db = client.db(process.env.DB_NAME);
+        
+        // Cache for reuse in future invocations
+        cachedClient = client;
+        cachedDb = db;
+        
+        return cachedDb;
     } catch (error) {
-        isConnecting = false;
-        console.error("Error connecting to MongoDB:", error);
         throw error;
     }
 }
@@ -59,10 +42,10 @@ export async function connect() {
 // but don't use it after regular operations
 export async function disconnect() {
     try {
-        if (client) {
-            await client.close();
-            client = null;
-            db = null;
+        if (cachedClient) {
+            await cachedClient.close();
+            cachedClient = null;
+            cachedDb = null;
             console.log("Disconnected from MongoDB");
         }
     } catch (error) {
