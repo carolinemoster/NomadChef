@@ -1,12 +1,54 @@
 import React, { useState } from 'react';
-import World from '@react-map/world';
+import { VectorMap } from '@south-paw/react-vector-maps';
+import worldMap from "../Components/Assets/world.json"
 import './FrontPage.css';
 import PromptBox from '../Components/PromptingBox/PromptBox';
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
+import styled from 'styled-components'
 
 function FrontPage() {
+    const Map = styled.div`
+        margin: 1rem auto;
+        width: 1000px;
+
+        svg {
+            stroke: rgb(0,0,0);
+
+            // All layers are just path elements
+            path {
+            fill:rgb(255, 255, 255);
+            cursor: pointer;
+            outline: none;
+
+            // When a layer is hovered
+            &:hover {
+                fill: #2d8b4e;
+            }
+
+            // When a layer is focused.
+            &:focus {
+                fill: #2d8b4e;
+            }
+
+            // When a layer is 'checked' (via checkedLayers prop).
+            &[aria-checked='true'] {
+                fill: #2d8b4e;;
+            }
+
+            // When a layer is 'selected' (via currentLayers prop).
+            &[aria-current='true'] {
+                fill: #2d8b4e;;
+            }
+
+            // You can also highlight a specific layer via it's id
+            &[id="nz-can"] {
+                fill: rgba(56,43,168,0.6);
+            }
+            }
+        }
+        `;
     const [zoom, setZoom] = useState(1);
 
     const handleZoomIn = () => {
@@ -74,28 +116,19 @@ function FrontPage() {
                             <button onClick={handleZoomIn}>+</button>
                             <button onClick={handleZoomOut}>-</button>
                         </div>
-                        <World 
-                            size={800} 
-                            hoverColor="#2d8b4e"
-                            type='select-multiple'
-                            tooltip={true}
-                            tooltipStyle={{
-                                background: 'rgba(255, 255, 255, 0.95)',
-                                color: '#0d4725',
-                                border: '2px solid #0d4725',
-                                borderRadius: '8px',
-                                padding: '5px 10px'
-                            }}
-                            viewBox="0 0 800 400"
-                            zoom={zoom}
-                            onSelect={(country) => {
-                                if (country.selected) {
-                                    console.log('Country selected:', country.name);
-                                } else {
-                                    console.log('Country deselected:', country.name);
-                                }
-                            }}
+                        
+                        
+                        <Map>
+                        <VectorMap
+                            {...worldMap}
+                            style={{ width: "80%", height: "100%" }}
+                            checkedLayers={['us', 'in', 'uk']} currentLayers={['cn']}
+                            
+                            
                         />
+                        </Map>
+                       
+                        
                     </div>
                 </div>
             </section>
