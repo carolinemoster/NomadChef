@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@south-paw/react-vector-maps": "^3.2.0",
     "react-simple-maps": "^1.0.0"
   },
   "devDependencies": {
