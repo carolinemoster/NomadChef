@@ -1,31 +1,3 @@
-.container{
-    display: flex;
-    flex-direction: column;
-    margin: 100px auto;
-    background: #fff;
-    padding-bottom: 30px;
-    width: 600px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    margin-bottom: 200px;
-}
-
-.brand {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #0d4725;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
 .whisk {
     width: 35px;
     height: 35px;
@@ -45,6 +17,8 @@
     gap: 9px;
     width: 100%;
     margin-top: 30px;
+    position: relative;
+    z-index: 1;
 }
 
 .text{
@@ -76,13 +50,17 @@
     display: flex;
     flex-direction: column;
     gap: 25px;
+    position: relative;
+    z-index: 1;
+    width: 100%;
 }
 
 .input{
     display: flex;
     align-items: center;
     margin: auto;
-    width: 480px;
+    width: 90%;
+    max-width: 480px;
     height: 80px;
     background: #eaeaea;
     border-radius: 6px;
@@ -93,13 +71,14 @@
 }
 
 .input input{
+    width: 100%;
     height: 50px;
-    width: 400px;
     background: transparent;
     border: none;
     outline: none;
     color: #797979;
     font-size: 19px;
+    padding: 0 15px;
 }
 
 .forgot-password{
@@ -143,14 +122,16 @@
 
 .submit-container{
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 30px;
     margin: 60px auto;
+    position: relative;
+    z-index: 1;
+    width: 100%;
 }
 
 .submit{
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 220px;
     height: 59px;
     color: #fff;
@@ -159,6 +140,9 @@
     font-size: 19px;
     font-weight: 700;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .gray{
@@ -389,5 +373,84 @@ html, body {
 #root {
     min-height: 100vh;
     height: auto;
+}
+
+.login-page {
+    min-height: 100vh;
+    height: auto;
+    background: repeating-linear-gradient(
+        135deg,
+        #0d4725,
+        #525453,
+        #525453,
+        #0d4725 100%
+    );
+    background-size: 200% 200%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-page .brand {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0d4725;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+.login-page .container {
+    position: relative;
+    background: #fff;
+    width: 90%;
+    max-width: 600px;
+    min-height: 600px;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 0;
+    padding: 40px;
+    margin: 100px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media screen and (max-width: 768px) {
+    .login-page .container {
+        width: 95%;
+        max-width: 500px;
+        min-height: auto;
+        padding: 20px;
+        margin: 50px auto;
+    }
+
+    .input {
+        width: 95%;
+        height: 60px;
+    }
+
+    .input input {
+        font-size: 16px;
+    }
+
+    .dietary-restrictions,
+    .cooking-skills,
+    .spice-preference,
+    .cuisine-interests,
+    .ingredient-preferences {
+        width: 95%;
+    }
 }
 
