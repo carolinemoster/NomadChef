@@ -6,14 +6,12 @@ let cachedDb = null;
 
 // Connect to MongoDB
 export async function connect() {
-    // First, check if we have a valid cached connection
     if (cachedClient && cachedDb) {
         try {
-            // Verify the connection still works
             await cachedClient.db().admin().ping();
-            return cachedDb;  // Reuse existing connection
+            return cachedDb;
         } catch (error) {
-            // Reset if connection is dead
+            console.log("Cached connection expired, creating new connection");
             cachedClient = null;
             cachedDb = null;
         }
@@ -21,10 +19,18 @@ export async function connect() {
 
     // Create new connection if needed
     try {
-        const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db';
+        const uri = process.env.MONGO_URI;
+        if (!uri) {
+            throw new Error('MONGO_URI environment variable is not set');
+        }
+
+        // Essential MongoDB connection options for Lambda
         const client = new MongoClient(uri, {
-            maxPoolSize: 1  // Important for Lambda
+            maxPoolSize: 1,                    // Essential: Limit pool for Lambda
+            serverSelectionTimeoutMS: 5000,    // Essential: Fail fast if can't connect
+            socketTimeoutMS: 30000,            // Essential: Reasonable operation timeout
         });
+
         await client.connect();
         const db = client.db(process.env.DB_NAME);
         
@@ -32,8 +38,10 @@ export async function connect() {
         cachedClient = client;
         cachedDb = db;
         
+        console.log("New MongoDB connection established");
         return cachedDb;
     } catch (error) {
+        console.error("MongoDB connection error:", error);
         throw error;
     }
 }

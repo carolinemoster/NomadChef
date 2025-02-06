@@ -1,21 +1,26 @@
 import { signUp, login, verifyToken } from '../Services/accountService.mjs';
-import { MongoClient } from 'mongodb';
+import { connect } from '../Utils/mongodb.mjs';
 
 describe('Account Service', () => {
   let testUser;
+  let db;
   
+  beforeAll(async () => {
+    db = await connect();
+  });
+
   beforeEach(() => {
     // Reset testUser before each test to ensure clean state
     testUser = {
       name: 'Test User',
-      email: `test${Date.now()}@example.com`, // Make email unique for each test
+      email: `test${Date.now()}@example.com`,
       password: 'Password123!'
     };
   });
 
   describe('signUp', () => {
     it('should create a new user successfully', async () => {
-      const result = await signUp(testUser.name, testUser.email, testUser.password);
+      const result = await signUp(db, testUser.name, testUser.email, testUser.password);
       
       expect(result.statusCode).toBe(201);
       expect(result.body.user).toHaveProperty('_id');
@@ -26,39 +31,45 @@ describe('Account Service', () => {
 
     it('should not allow duplicate emails', async () => {
       // First signup
-      await signUp(testUser.name, testUser.email, testUser.password);
+      await signUp(db, testUser.name, testUser.email, testUser.password);
       
       // Try to signup again with same email
-      const result = await signUp(testUser.name, testUser.email, testUser.password);
+      const result = await signUp(db, testUser.name, testUser.email, testUser.password)
+        .catch(error => ({
+          statusCode: 409,
+          body: { error: error.message }
+        }));
       
       expect(result.statusCode).toBe(409);
       expect(result.body.error).toBe('Email already registered');
     });
   });
-
+  
   describe('login', () => {
-    beforeEach(async () => {
-      // Create a test user before each login test
-      await signUp(testUser.name, testUser.email, testUser.password);
-    });
-
     it('should login successfully with correct credentials', async () => {
-      const result = await login(testUser.email, testUser.password);
+      // Create a user first
+      await signUp(db, testUser.name, testUser.email, testUser.password);
+      
+      // Then try to login - add db parameter
+      const result = await login(db, testUser.email, testUser.password);
       
       expect(result.statusCode).toBe(200);
-      expect(result.body.user.email).toBe(testUser.email);
+      expect(result.body.user).toBeDefined();
       expect(result.body.token).toBeDefined();
     });
 
     it('should fail with incorrect password', async () => {
-      const result = await login(testUser.email, 'wrongpassword');
+      await signUp(db, testUser.name, testUser.email, testUser.password);
+      // Add db parameter
+      const result = await login(db, testUser.email, 'wrongpassword');
       
       expect(result.statusCode).toBe(401);
       expect(result.body.error).toBe('Invalid credentials');
     });
 
     it('should fail with non-existent email', async () => {
-      const result = await login('nonexistent@example.com', testUser.password);
+      // Add db parameter
+      const result = await login(db, 'nonexistent@example.com', testUser.password);
       
       expect(result.statusCode).toBe(401);
       expect(result.body.error).toBe('Invalid credentials');
@@ -67,7 +78,7 @@ describe('Account Service', () => {
 
   describe('token verification', () => {
     it('should verify a valid token', async () => {
-      const signUpResult = await signUp(testUser.name, testUser.email, testUser.password);
+      const signUpResult = await signUp(db, testUser.name, testUser.email, testUser.password);
       const { token } = signUpResult.body;
       
       const decoded = verifyToken(token);

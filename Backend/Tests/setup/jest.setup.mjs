@@ -1,7 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoClient } from 'mongodb';
+import { connect, disconnect } from '../../Utils/mongodb.mjs';
+import { jest } from '@jest/globals';
 import dotenv from 'dotenv';
-import { jest, describe, it, expect, beforeEach, afterEach, afterAll } from '@jest/globals';
 
 // Load environment variables
 dotenv.config();
@@ -9,58 +10,60 @@ dotenv.config();
 let mongoServer;
 let mongoClient;
 
-// Setup before all tests
-beforeAll(async () => {
-  // Create MongoDB Memory Server
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  
-  // Set the MONGO_URI environment variable for tests
-  process.env.MONGO_URI = mongoUri;
-  
-  // Create MongoDB client
-  mongoClient = new MongoClient(mongoUri);
-  await mongoClient.connect();
-
-  // Mock the mongodb.mjs connect/disconnect functions
-  jest.mock('../../Utils/mongodb.mjs', () => ({
-    connect: async () => mongoClient.db(),
+// Mock the mongodb.mjs module
+jest.mock('../../Utils/mongodb.mjs', () => ({
+    connect: async () => {
+        console.log('Mock connect called');
+        return mongoClient.db(process.env.DB_NAME);
+    },
     disconnect: async () => {
-      // Do nothing in tests since we manage connection in setup
+        console.log('Mock disconnect called');
+        if (mongoClient) {
+            await mongoClient.close(true);
+            console.log('MongoDB client closed');
+        }
     }
-  }));
+}));
+
+beforeAll(async () => {
+    console.log('Starting MongoMemoryServer...');
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    
+    process.env.MONGO_URI = mongoUri;
+    process.env.DB_NAME = 'test_db';
+    
+    console.log('Connecting to MongoDB...');
+    mongoClient = new MongoClient(mongoUri);
+    await mongoClient.connect();
+    console.log('Connected to MongoDB');
 });
 
 // Clean up after each test
 afterEach(async () => {
-  // Clear all collections
-  if (mongoClient) {
-    const db = mongoClient.db();
-    const collections = await db.collections();
-    for (const collection of collections) {
-      await collection.deleteMany({});
+    if (mongoClient) {
+        const db = mongoClient.db();
+        const collections = await db.collections();
+        for (const collection of collections) {
+            await collection.deleteMany({});
+        }
     }
-  }
-  
-  // Clear all mocks
-  jest.clearAllMocks();
+    jest.clearAllMocks();
 });
 
-// Cleanup after all tests
 afterAll(async () => {
-  // Close MongoDB connection
-  if (mongoClient) {
-    await mongoClient.close();
-  }
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
-});
-
-// Default timeout
-jest.setTimeout(10000);
-
-// Optional: Handle unhandled promise rejections
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Promise Rejection:', error);
-});
+    console.log('Cleaning up...');
+    try {
+        if (mongoClient) {
+            await mongoClient.close(true);
+            console.log('MongoDB client closed');
+        }
+        if (mongoServer) {
+            await mongoServer.stop({ doCleanup: true, force: true });
+            console.log('MongoMemoryServer stopped');
+        }
+    } catch (error) {
+        console.error('Error during cleanup:', error);
+    }
+    console.log('Cleanup complete');
+}, 10000);

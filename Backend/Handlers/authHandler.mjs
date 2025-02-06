@@ -1,4 +1,5 @@
 import { signUp, login } from '../Services/accountService.mjs';
+import { connect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -34,7 +35,15 @@ const INPUT_LIMITS = {
 const sanitizeInput = (str) => str?.trim() || '';
 
 export const handler = async (event) => {
-    // Log request details (helpful for debugging)
+    // Initialize MongoDB connection at handler start
+    let db;
+    try {
+        db = await connect();  // Store the db instance
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        return formatResponse(500, { error: 'Database connection error' });
+    }
+
     console.log('Event:', JSON.stringify(event, null, 2));
     
     try {
@@ -66,7 +75,7 @@ export const handler = async (event) => {
                 }
 
                 console.log("Signing up user:", name, email, password);
-                const result = await signUp(name, email, password);
+                const result = await signUp(db, name, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -83,7 +92,7 @@ export const handler = async (event) => {
                     });
                 }
 
-                const result = await login(email, password);
+                const result = await login(db, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -93,12 +102,17 @@ export const handler = async (event) => {
     } catch (error) {
         console.error('Error:', error);
         
-        // Handle known errors with specific status codes
+        // Enhanced error handling
         if (error.message === 'Invalid request body') {
             return formatResponse(400, { error: error.message });
         }
+        
+        // Handle MongoDB-specific errors
+        if (error.name === 'MongoError' || error.name === 'MongoServerError') {
+            console.error('MongoDB error:', error);
+            return formatResponse(500, { error: 'Database operation failed' });
+        }
 
-        // Generic error handler
         return formatResponse(500, { 
             error: 'Internal server error',
             message: process.env.NODE_ENV === 'development' ? error.message : undefined

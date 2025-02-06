@@ -1,4 +1,4 @@
-import { connect, disconnect } from '../Utils/mongodb.mjs';
+import { connect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -19,11 +19,8 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(name, email, password) {
-    let db;
+export async function signUp(db, name, email, password) {
     try {
-        console.log("Connecting to MongoDB");
-        db = await connect();
         const collection = db.collection('users');
 
         console.log("Signing up user in accountService:", name, email, password);
@@ -63,18 +60,13 @@ export async function signUp(name, email, password) {
         };
     } catch (error) {
         console.error("Error signing up:", error);
-        return {
-            statusCode: error.message === 'Email already registered' ? 409 : 500,
-            body: { error: error.message }
-        };
+        throw error;  // Let handler deal with error formatting
     }
 }
 
 //Login to an account (check if user exists and password is correct)
-export async function login(email, password) {
-    let db;
+export async function login(db, email, password) {
     try {
-        db = await connect();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -106,10 +98,7 @@ export async function login(email, password) {
         };
     } catch (error) {
         console.error("Error logging in:", error);
-        return {
-            statusCode: 500,
-            body: { error: 'Internal server error' }
-        };
+        throw error;  // Let handler deal with error formatting
     }
 }
 
