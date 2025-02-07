@@ -1,5 +1,37 @@
 import { signUp, login, verifyToken } from '../Services/accountService.mjs';
-import { db } from '../Utils/mongodb.mjs';
+import { jest } from '@jest/globals';
+
+// Import the mocked db
+let db;
+
+beforeAll(async () => {
+    // Get the mocked db from our mocked mongodb.mjs
+    const mockModule = await import('../Utils/mongodb.mjs');
+    db = mockModule.db;
+    
+    // Additional verification
+    console.log('Verifying test database setup:');
+    console.log('DB Name:', db.databaseName);
+    console.log('DB URL:', db.client.options.url);
+    
+    // Verify we're using memory server
+    expect(db.databaseName).toBe('test_db');
+    expect(db.client.options.url).toContain('mongodb-memory-server');
+});
+
+// Add a test to verify db operations
+describe('Database Setup', () => {
+    it('should be using in-memory database', async () => {
+        // Try a test write
+        const collection = db.collection('test');
+        await collection.insertOne({ test: true });
+        const result = await collection.findOne({ test: true });
+        expect(result).toBeTruthy();
+        
+        // Verify URL is memory server
+        expect(db.client.options.url).toContain('mongodb-memory-server');
+    });
+});
 
 describe('Account Service', () => {
   let testUser;

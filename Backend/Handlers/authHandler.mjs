@@ -1,7 +1,5 @@
 import { signUp, login } from '../Services/accountService.mjs';
 import { db } from '../Utils/mongodb.mjs';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
 const formatResponse = (statusCode, body) => ({
