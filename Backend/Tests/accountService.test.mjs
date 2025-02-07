@@ -1,14 +1,9 @@
 import { signUp, login, verifyToken } from '../Services/accountService.mjs';
-import { connect } from '../Utils/mongodb.mjs';
+import { db } from '../Utils/mongodb.mjs';
 
 describe('Account Service', () => {
   let testUser;
-  let db;
   
-  beforeAll(async () => {
-    db = await connect();
-  });
-
   beforeEach(() => {
     // Reset testUser before each test to ensure clean state
     testUser = {
@@ -50,7 +45,6 @@ describe('Account Service', () => {
       // Create a user first
       await signUp(db, testUser.name, testUser.email, testUser.password);
       
-      // Then try to login - add db parameter
       const result = await login(db, testUser.email, testUser.password);
       
       expect(result.statusCode).toBe(200);
@@ -60,7 +54,6 @@ describe('Account Service', () => {
 
     it('should fail with incorrect password', async () => {
       await signUp(db, testUser.name, testUser.email, testUser.password);
-      // Add db parameter
       const result = await login(db, testUser.email, 'wrongpassword');
       
       expect(result.statusCode).toBe(401);
@@ -68,7 +61,6 @@ describe('Account Service', () => {
     });
 
     it('should fail with non-existent email', async () => {
-      // Add db parameter
       const result = await login(db, 'nonexistent@example.com', testUser.password);
       
       expect(result.statusCode).toBe(401);

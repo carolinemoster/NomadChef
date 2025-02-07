@@ -1,5 +1,5 @@
 import { signUp, login } from '../Services/accountService.mjs';
-import { connect } from '../Utils/mongodb.mjs';
+import { db } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -35,15 +35,6 @@ const INPUT_LIMITS = {
 const sanitizeInput = (str) => str?.trim() || '';
 
 export const handler = async (event) => {
-    // Initialize MongoDB connection at handler start
-    let db;
-    try {
-        db = await connect();  // Store the db instance
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        return formatResponse(500, { error: 'Database connection error' });
-    }
-
     console.log('Event:', JSON.stringify(event, null, 2));
     
     try {
