@@ -22,6 +22,10 @@ const LoginSignup = () => {
     const [cuisineInterests, setCuisineInterests] = useState('');
     const [ingredientPreferences, setIngredientPreferences] = useState('');
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+
     const handleBack = () => {
         setPage(1);
     };
@@ -36,14 +40,63 @@ const LoginSignup = () => {
     };
 
     // Navigation handlers
-    const handleSignInClick = () => {
-        // TODO: Add authentication logic
-        navigate('/home');
+    const handleSignInClick = async () => {
+        try {
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,        // Add email state
+                    password: password   // Add password state
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);  // Save JWT
+                navigate('/home');
+            } else {
+                console.error('Login failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    const handleCreateAccountClick = () => {
-        // TODO: Add account creation and preferences storage
-        navigate('/home');
+    const handleCreateAccountClick = async () => {
+        try {
+            const response = await fetch('/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,          // Add name state
+                    email: email,
+                    password: password,
+                    preferences: {
+                        dietaryRestrictions,
+                        otherRestriction,
+                        cookingSkill,
+                        spiceLevel,
+                        cuisineInterests,
+                        ingredientPreferences
+                    }
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);  // Save JWT
+                navigate('/home');
+            } else {
+                console.error('Signup failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
@@ -67,11 +120,11 @@ const LoginSignup = () => {
                         <>
                             <div className="input">
                                 <img src={email_icon} alt="" />
-                                <input type="text" placeholder='Email'/>
+                                <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)}/>
                             </div>
                             <div className="input">
                                 <img src={password_icon} alt="" />
-                                <input type="password" placeholder='Password'/>
+                                <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
                             </div>
                         </>
                     ) : (
@@ -79,15 +132,15 @@ const LoginSignup = () => {
                             <>
                                 <div className="input">
                                     <img src={user_icon} alt="" />
-                                    <input type="text" placeholder='Name'/>
+                                    <input type="text" placeholder='Name' value={name} onChange={(e) => setName(e.target.value)}/>
                                 </div>
                                 <div className="input">
                                     <img src={email_icon} alt="" />
-                                    <input type="text" placeholder='Email'/>
+                                    <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)}/>
                                 </div>
                                 <div className="input">
                                     <img src={password_icon} alt="" />
-                                    <input type="password" placeholder='Password'/>
+                                    <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
                                 </div>
                             </>
                         ) : (
