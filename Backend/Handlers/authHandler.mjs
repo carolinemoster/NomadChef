@@ -35,16 +35,34 @@ const INPUT_LIMITS = {
 const sanitizeInput = (str) => str?.trim() || '';
 
 export const handler = async (event) => {
-    console.log('Event:', JSON.stringify(event, null, 2));
+    console.log('Handler started');
+    console.log('MongoDB URI exists:', !!process.env.MONGO_URI);
+    console.log('DB_NAME exists:', !!process.env.DB_NAME);
+    console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
     
     try {
+        console.log('Event:', JSON.stringify(event, null, 2));
+        
+        // Test DB connection
+        console.log('Testing DB connection...');
+        try {
+            await db.command({ ping: 1 });
+            console.log('MongoDB connection successful!');
+        } catch (dbError) {
+            console.error('MongoDB connection failed:', dbError);
+            throw dbError;
+        }
+
         switch(event.path) {
             case '/auth/signup': {
+                console.log('Processing signup request');
                 if (event.httpMethod !== 'POST') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
 
                 const { name: rawName, email: rawEmail, password } = parseBody(event);
+                console.log('Parsed request body');
+                
                 const name = sanitizeInput(rawName);
                 const email = sanitizeInput(rawEmail).toLowerCase();
                 console.log(name, email, password);
@@ -67,6 +85,8 @@ export const handler = async (event) => {
 
                 console.log("Signing up user:", name, email, password);
                 const result = await signUp(db, name, email, password);
+                console.log('SignUp completed');
+                
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -91,16 +111,19 @@ export const handler = async (event) => {
                 return formatResponse(404, { error: 'Route not found' });
         }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Handler error:', error);
+        console.error('Error stack:', error.stack);
         
-        // Enhanced error handling
         if (error.message === 'Invalid request body') {
             return formatResponse(400, { error: error.message });
         }
         
-        // Handle MongoDB-specific errors
         if (error.name === 'MongoError' || error.name === 'MongoServerError') {
-            console.error('MongoDB error:', error);
+            console.error('MongoDB error details:', {
+                name: error.name,
+                code: error.code,
+                message: error.message
+            });
             return formatResponse(500, { error: 'Database operation failed' });
         }
 
