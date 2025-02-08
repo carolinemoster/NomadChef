@@ -6,8 +6,6 @@ const formatResponse = (statusCode, body) => ({
     statusCode,
     headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*', // Configure based on your needs
-        'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify(body)
 });
