@@ -5,9 +5,12 @@ import email_icon from '../Assets/email.png'
 import password_icon from '../Assets/password.png'
 import wisk_icon from '../Assets/wisk.png'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const LoginSignup = () => {
+    const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
     const navigate = useNavigate();
+    //const { setUser, setToken } = useAuth();
     // State for controlling which form to show (Sign In or Create Account)
     const [action, setAction] = useState("Sign In");
     // State for multi-step form (page 1: basic info, page 2: preferences)
@@ -25,8 +28,10 @@ const LoginSignup = () => {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
 
-    const [lovedIngredients, setLovedIngredients] = useState('');
-    const [dislikedIngredients, setDislikedIngredients] = useState('');
+    const [lovedIngredient, setLovedIngredient] = useState('');
+    const [lovedIngredients, setLovedIngredients] = useState([]);
+    const [dislikedIngredient, setDislikedIngredient] = useState('');
+    const [dislikedIngredients, setDislikedIngredients] = useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -34,6 +39,30 @@ const LoginSignup = () => {
 
     const handleBack = () => {
         setPage(1);
+    };
+
+    const addLovedIngredient = (e) => {
+      e.preventDefault();
+      if (lovedIngredient.trim()) {
+          setLovedIngredients([...lovedIngredients, lovedIngredient.trim()]);
+          setLovedIngredient("");
+      }
+    };
+
+    const removeLovedIngredient = (index) => {
+        setLovedIngredients(lovedIngredients.filter((_, i) => i !== index));
+    };
+
+    const addDislikedIngredient = (e) => {
+      e.preventDefault();
+      if (dislikedIngredient.trim()) {
+          setDislikedIngredients([...dislikedIngredients, dislikedIngredient.trim()]);
+          setDislikedIngredient("");
+      }
+    };
+
+    const removeDislikedIngredient = (index) => {
+        setDislikedIngredients(dislikedIngredients.filter((_, i) => i !== index));
     };
 
     // Handle checkbox changes for dietary restrictions
@@ -46,14 +75,65 @@ const LoginSignup = () => {
     };
 
     // Navigation handlers
-    const handleSignInClick = () => {
-        console.log("Sign in clicked");
-        navigate('/home');
-    };
+    const handleSignInClick = async () => {
+      console.log("signing in");
+      try {
+        const loginData = {
+            email,   
+            password
+        };
 
-    const handleCreateAccountClick = () => {
-        console.log("Create account clicked");
+        const response = await axios.post(`${apiBaseUrl}/auth/login`, loginData, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const token = response.data.token;
+        localStorage.setItem('authToken', token);
+
+        console.log('Login successful:', response.data);
+
         navigate('/home');
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Login failed. Please try again.');
+        }
+  };
+  
+    const handleCreateAccountClick = async () => {
+        try {
+            const userData = {
+                name,
+                email,
+                password,
+                preferences: {
+                    dietaryRestrictions: dietaryRestrictions,
+                    cookingSkill,
+                    spiceLevel,
+                    cuisineInterests: cuisineInterests.split(',').map(item => item.trim()),
+                    lovedIngredients: lovedIngredients,
+                    dislikedIngredients: dislikedIngredients,
+                }
+            };
+
+            console.log(userData);
+
+            const response = await axios.post(`${apiBaseUrl}/auth/signup`, userData, {
+              headers: {
+                  'Content-Type': 'application/json'
+              }
+            });
+  
+          console.log('Signup successful:', response.data);
+          console.log(response.data);
+          const token = response.data.token;
+          localStorage.setItem('authToken', token);
+          navigate('/home');
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert('Signup failed. Please try again.');
+        }
     };
 
     return (
@@ -248,15 +328,44 @@ const LoginSignup = () => {
                                         </div>
                                     </div>
                                     <div className="ingredient-preferences">
-                                        <p>Are there any ingredients you love or dislike?</p>
-                                        <div className="input">
-                                            <input 
-                                                type="text"
-                                                placeholder="Enter ingredients you love or dislike"
-                                                value={ingredientPreferences}
-                                                onChange={(e) => setIngredientPreferences(e.target.value)}
-                                            />
-                                        </div>
+                                      <p>What ingredients do you love?</p>
+                                      <form className="input" onSubmit={addLovedIngredient}>
+                                          <input 
+                                              type="text"
+                                              placeholder="Enter an ingredient"
+                                              value={lovedIngredient}
+                                              onChange={(e) => setLovedIngredient(e.target.value)}
+                                          />
+                                          <button type="submit">Add</button>
+                                      </form>
+                                      <ul className="ingredient-list">
+                                          {lovedIngredients.map((item, index) => (
+                                              <li key={index}>
+                                                  {item} 
+                                                  <button onClick={() => removeLovedIngredient(index)}>Remove</button>
+                                              </li>
+                                          ))}
+                                      </ul>
+                                    </div>
+                                    <div className="ingredient-preferences">
+                                      <p>What ingredients do you dislike?</p>
+                                      <form className="input" onSubmit={addDislikedIngredient}>
+                                          <input 
+                                              type="text"
+                                              placeholder="Enter an ingredient"
+                                              value={dislikedIngredient}
+                                              onChange={(e) => setDislikedIngredient(e.target.value)}
+                                          />
+                                          <button type="submit">Add</button>
+                                      </form>
+                                      <ul className="ingredient-list">
+                                          {dislikedIngredients.map((item, index) => (
+                                              <li key={index}>
+                                                  {item} 
+                                                  <button onClick={() => removeDislikedIngredient(index)}>Remove</button>
+                                              </li>
+                                          ))}
+                                      </ul>
                                     </div>
                                 </>
                             )}

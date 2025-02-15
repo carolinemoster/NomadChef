@@ -8,15 +8,13 @@ import AccountPage from './Pages/AccountPage';
 
 function App() {
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route path="/" element={<LoginSignup />} />
-          <Route path="/home" element={<FrontPage />} />
-          <Route path="/account" element={<AccountPage />} />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginSignup />} />
+        <Route path="/home" element={<FrontPage />} />
+        <Route path="/account" element={<AccountPage />} />
+      </Routes>
+    </Router>
   );
 }
 

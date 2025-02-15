@@ -14,11 +14,14 @@ const formatResponse = (statusCode, body) => ({
 // Helper to parse request body
 const parseBody = (event) => {
     try {
+        console.log("Request body: ", event.body);  // Log the raw body
         return JSON.parse(event.body);
     } catch (error) {
+        console.log("Error parsing body: ", error);  // Log the error
         throw new Error('Invalid request body');
     }
 };
+
 
 // Add basic input limits
 const INPUT_LIMITS = {
@@ -41,30 +44,19 @@ export const handler = async (event) => {
                 if (event.httpMethod !== 'POST') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
-
-                const { name: rawName, email: rawEmail, password } = parseBody(event);
-                const name = sanitizeInput(rawName);
-                const email = sanitizeInput(rawEmail).toLowerCase();
-
-                if (!name || !email || !password) {
+            
+                const userData = parseBody(event);
+            
+                if (!userData.name || !userData.email || !userData.password) {
                     return formatResponse(400, { 
                         error: 'Name, email, and password are required' 
                     });
                 }
-
-                // Simple length checks
-                if (name.length > INPUT_LIMITS.NAME_MAX_LENGTH || 
-                    email.length > INPUT_LIMITS.EMAIL_MAX_LENGTH ||
-                    password.length < INPUT_LIMITS.PASSWORD_MIN_LENGTH ||
-                    password.length > INPUT_LIMITS.PASSWORD_MAX_LENGTH) {
-                    return formatResponse(400, { 
-                        error: 'Invalid input length' 
-                    });
-                }
-
-                const result = await signUp(name, email, password);
+            
+                const result = await signUp(userData);
                 return formatResponse(result.statusCode, result.body);
             }
+            
 
             case '/auth/login': {
                 if (event.httpMethod !== 'POST') {
