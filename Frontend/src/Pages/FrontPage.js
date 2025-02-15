@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { VectorMap } from '@south-paw/react-vector-maps';
 import worldMap from "../Components/Assets/world.json"
 import './FrontPage.css';
@@ -7,6 +7,7 @@ import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom';
 
 function FrontPage() {
     const Map = styled.div`
@@ -50,6 +51,11 @@ function FrontPage() {
         }
         `;
     const [zoom, setZoom] = useState(1);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const handleZoomIn = () => {
         if (zoom < 4) {
@@ -61,6 +67,14 @@ function FrontPage() {
         if (zoom > 0.5) {
             setZoom(zoom - 0.5);
         }
+    };
+
+    const handleAccountClick = () => {
+        navigate('/account');
+    };
+
+    const handleBrandClick = () => {
+        navigate('/home');
     };
 
     const responsive = {
@@ -85,27 +99,24 @@ function FrontPage() {
     return (
         <div className="front-page">
             <nav className="navbar background">
-                <div className='brand'>
+                <div className='brand' onClick={handleBrandClick} style={{cursor: 'pointer'}}>
                     NomadChef
                     <img src={wisk_icon} alt="Whisk Icon" className="whisk" />
                 </div>
                 <div className='list-items'>             
                     <ul className="nav-list">
+                        <li><a href="#courses">About</a></li>
+                        <li><a href="#tutorials">Past Recipes</a></li>
+                        <li><a href="#jobs">Settings</a></li>
                         <li>
-                            <a href="#courses">About</a>
-                        </li>
-                        <li>
-                            <a href="#tutorials">Past Recipes</a>
-                        </li>
-                        <li>
-                            <a href="#jobs">Settings</a>
-                        </li>
-                        <li>
-                            <a href="#student">Account</a>
+                            <button 
+                                onClick={handleAccountClick} 
+                                className="nav-button"
+                            >
+                                Account
+                            </button>
                         </li>
                     </ul>
-                </div>
-                <div className="rightNav">
                 </div>
             </nav>
 

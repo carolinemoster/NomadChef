@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@south-paw/react-vector-maps": "^3.2.0",
-    "react-simple-maps": "^1.0.0"
+    "react-simple-maps": "^1.0.0",
+    "styled-components": "^5.3.10"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
