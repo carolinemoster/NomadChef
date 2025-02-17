@@ -4,7 +4,6 @@ import './RecipePage.css';
 import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
 import {useLocation} from 'react-router-dom';
-const API_KEY = "9cfdb05515424fa68e068845dc7edcae";
 const BASE_URL = "https://api.spoonacular.com/recipes/";
 
 function RecipePage() {
@@ -20,13 +19,13 @@ function RecipePage() {
     }, [RecipeID]); // Runs when RecipeID changes
     const getRecipe = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-          const response = await fetch(`${BASE_URL}${recipeID}/information?apiKey=${API_KEY}`);
+          const response = await fetch(`${BASE_URL}${recipeID}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}`);
           const data = await response.json();
           setRecipe(data);
       }
       const getInstructions = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-        const response2 = await fetch(`${BASE_URL}${recipeID}/analyzedInstructions?apiKey=${API_KEY}`);
+        const response2 = await fetch(`${BASE_URL}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}`);
         const data2 = await response2.json();
         setInstructions(data2);
       }

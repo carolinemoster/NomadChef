@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Send } from "lucide-react";
 import './PromptBox.css';
 import { useNavigate } from 'react-router-dom';
-const API_KEY = "9cfdb05515424fa68e068845dc7edcae";
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 
 const AIPromptBox = () => {
@@ -15,7 +14,7 @@ const AIPromptBox = () => {
   }
   const onSubmit = async (query) => {
     //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-      const response = await fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}&addRecipeInformation=true`);
+      const response = await fetch(`${BASE_URL}?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&query=${encodeURIComponent(query)}&addRecipeInformation=true`);
       const data = await response.json();
       setRecipes(data.results || []); // Fixed: store only `results` array
   }
