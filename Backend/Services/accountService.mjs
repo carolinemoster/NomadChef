@@ -1,15 +1,14 @@
+import { connect, disconnect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export function generateToken(user) {
-    console.log("Generating token for user:", user);
     return jwt.sign(
         { 
             id: user._id, 
             email: user.email 
-
         }, 
         JWT_SECRET, 
         { expiresIn: '12h' }
@@ -18,21 +17,17 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(db, name, email, password) {
+export async function signUp(name, email, password) {
+    let db;
     try {
+        db = await connect();
         const collection = db.collection('users');
 
-        console.log("Signing up user in accountService:", name, email, password);
-
-
-        // First, check if email is already registered
+        // Business logic validation
         const existingUser = await collection.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             throw new Error('Email already registered');
         }
-
-        console.log("Email is not registered, proceeding to hash password");
-
 
         // Security: Hash password before storing
         const hashedPassword = await bcrypt.hash(password, 12);
@@ -43,13 +38,9 @@ export async function signUp(db, name, email, password) {
             password: hashedPassword,
             createdAt: new Date()
         });
-
-        console.log("Password hashed, inserting user into database");
-        console.log("Result:", result);
-
+        
         const token = generateToken({ _id: result.insertedId, email });
-        console.log("Token:", token);
-
+        
         return {
             statusCode: 201,
             body: {
@@ -59,13 +50,20 @@ export async function signUp(db, name, email, password) {
         };
     } catch (error) {
         console.error("Error signing up:", error);
-        throw error;  // Let handler deal with error formatting
+        return {
+            statusCode: error.message === 'Email already registered' ? 409 : 500,
+            body: { error: error.message }
+        };
+    } finally {
+        if (db) await disconnect();
     }
 }
 
 //Login to an account (check if user exists and password is correct)
-export async function login(db, email, password) {
+export async function login(email, password) {
+    let db;
     try {
+        db = await connect();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -97,14 +95,53 @@ export async function login(db, email, password) {
         };
     } catch (error) {
         console.error("Error logging in:", error);
-        throw error;  // Let handler deal with error formatting
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
+    } finally {
+        if (db) await disconnect();
     }
 }
 
 export function verifyToken(token) {
     try {
-        return jwt.verify(token, JWT_SECRET);
+        console.log('JWT Secret:', process.env.JWT_SECRET);
+        return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         return null;
+    }
+}
+
+export async function getUserData(id) {
+    let db;
+    try {
+        db = await connect();
+        const collection = db.collection('users');
+        
+        // Find user by ID (from the decoded token)
+        const user = await collection.findOne({ _id: id });
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+
+        // Exclude the password before sending the response
+        const { password, ...userWithoutPassword } = user;
+        
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    } catch (error) {
+        console.error("Error getting user data:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
+    } finally {
+        if (db) await disconnect();
     }
 }
