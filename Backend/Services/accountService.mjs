@@ -1,4 +1,4 @@
-import { connect, disconnect } from '../Utils/mongodb.mjs';
+import { db } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -17,10 +17,8 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(name, email, password) {
-    let db;
+export async function signUp(db, name, email, password) {
     try {
-        db = await connect();
         const collection = db.collection('users');
 
         // Business logic validation
@@ -54,16 +52,12 @@ export async function signUp(name, email, password) {
             statusCode: error.message === 'Email already registered' ? 409 : 500,
             body: { error: error.message }
         };
-    } finally {
-        if (db) await disconnect();
     }
 }
 
 //Login to an account (check if user exists and password is correct)
-export async function login(email, password) {
-    let db;
+export async function login(db, email, password) {
     try {
-        db = await connect();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -99,9 +93,7 @@ export async function login(email, password) {
             statusCode: 500,
             body: { error: 'Internal server error' }
         };
-    } finally {
-        if (db) await disconnect();
-    }
+    } 
 }
 
 export function verifyToken(token) {
@@ -113,12 +105,10 @@ export function verifyToken(token) {
     }
 }
 
-export async function getUserData(id) {
-    let db;
+export async function getUserData(db, id) {
     try {
-        db = await connect();
         const collection = db.collection('users');
-        
+   
         // Find user by ID (from the decoded token)
         const user = await collection.findOne({ _id: id });
         if (!user) {
@@ -141,7 +131,5 @@ export async function getUserData(id) {
             statusCode: 500,
             body: { error: 'Internal server error' }
         };
-    } finally {
-        if (db) await disconnect();
     }
 }
