@@ -1,6 +1,7 @@
-import { db } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
+import { getDb } from '../Utils/mongodb.mjs';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -17,8 +18,9 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(db, name, email, password) {
+export async function signUp(name, email, password) {
     try {
+        const db = await getDb();
         const collection = db.collection('users');
 
         // Business logic validation
@@ -56,8 +58,9 @@ export async function signUp(db, name, email, password) {
 }
 
 //Login to an account (check if user exists and password is correct)
-export async function login(db, email, password) {
+export async function login(email, password) {
     try {
+        const db = await getDb();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -105,12 +108,14 @@ export function verifyToken(token) {
     }
 }
 
-export async function getUserData(db, id) {
+export async function getUserData(id) {
     try {
+        const db = await getDb();
         const collection = db.collection('users');
    
         // Find user by ID (from the decoded token)
-        const user = await collection.findOne({ _id: id });
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
         if (!user) {
             return {
                 statusCode: 404,

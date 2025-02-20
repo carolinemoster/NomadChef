@@ -1,5 +1,4 @@
 import { signUp, login, getUserData } from '../Services/accountService.mjs';
-import { db } from '../Utils/mongodb.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -86,7 +85,7 @@ export const handler = async (event) => {
                     });
                 }
 
-                const result = await signUp(db, name, email, password);
+                const result = await signUp(name, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -103,7 +102,7 @@ export const handler = async (event) => {
                     });
                 }
 
-                const result = await login(db, email, password);
+                const result = await login(email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -112,20 +111,23 @@ export const handler = async (event) => {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
 
-                // Verify and decode the token
+                // Declare decoded outside of try block
+                let decoded;
+                console.log("Decoded token before try block:", decoded);
                 try {
-                    const decoded = verifyToken(event);
+                    decoded = verifyToken(event);
+                    console.log("Decoded token after try block:", decoded);
                 } catch (error) {
                     return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
                 }
 
-                // Fetch user data using the decoded ID
-                const userData = await getUserData(db,decoded.id);
+                // Now decoded is available here
+                const userData = await getUserData(decoded.id);
                 if (!userData) {
                     return formatResponse(404, { error: 'User not found' });
                 }
 
-                return formatResponse(userData.statusCode, userData.body)
+                return formatResponse(userData.statusCode, userData.body);
             }
 
             default:
