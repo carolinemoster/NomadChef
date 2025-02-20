@@ -1,4 +1,5 @@
 import { signUp, login, getUserData } from '../Services/accountService.mjs';
+import { db } from '../Utils/mongodb.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -49,6 +50,11 @@ const verifyToken = (event) => {
     }
 };
 
+//If db not connected, connect to it
+// if (!db.isConnected) {
+//     await db.connect();
+// }
+
 export const handler = async (event) => {
     // Log request details (helpful for debugging)
     console.log('Event:', JSON.stringify(event, null, 2));
@@ -80,7 +86,7 @@ export const handler = async (event) => {
                     });
                 }
 
-                const result = await signUp(name, email, password);
+                const result = await signUp(db, name, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -97,7 +103,7 @@ export const handler = async (event) => {
                     });
                 }
 
-                const result = await login(email, password);
+                const result = await login(db, email, password);
                 return formatResponse(result.statusCode, result.body);
             }
 
@@ -114,7 +120,7 @@ export const handler = async (event) => {
                 }
 
                 // Fetch user data using the decoded ID
-                const userData = await getUserData(decoded.id);
+                const userData = await getUserData(db,decoded.id);
                 if (!userData) {
                     return formatResponse(404, { error: 'User not found' });
                 }
