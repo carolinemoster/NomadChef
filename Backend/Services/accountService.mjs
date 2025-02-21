@@ -1,6 +1,7 @@
-import { connect, disconnect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
+import { getDb } from '../Utils/mongodb.mjs';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -17,60 +18,49 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(userData) {
-    let db;
+export async function signUp(name, email, password) {
     try {
-        console.log('Connecting to DB...');
-        db = await connect();
-        console.log('Database connected');
-
-        // Ensure that the `collection` is available
+        const db = await getDb();
         const collection = db.collection('users');
-        console.log('Collection selected');
 
-        const existingUser = await collection.findOne({ email: userData.email.toLowerCase() });
-        console.log('Existing user check:', existingUser);
-
+        // Business logic validation
+        const existingUser = await collection.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             throw new Error('Email already registered');
         }
 
-        const hashedPassword = await bcrypt.hash(userData.password, 12);
-        console.log('Password hashed');
+        // Security: Hash password before storing
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-        const newUser = {
-            ...userData,
-            email: userData.email.toLowerCase(),
+        const result = await collection.insertOne({ 
+            name, 
+            email: email.toLowerCase(), 
             password: hashedPassword,
             createdAt: new Date()
-        };
-
-        const result = await collection.insertOne(newUser);
-        console.log('User inserted:', result);
-
-        const token = generateToken({ _id: result.insertedId, email: newUser.email });
-        console.log('Token generated:', token);
-
+        });
+        
+        const token = generateToken({ _id: result.insertedId, email });
+        
         return {
             statusCode: 201,
             body: {
-                message: "Sign Up Successful!",
+                user: { _id: result.insertedId, name, email },
                 token
             }
         };
     } catch (error) {
-        console.error('Error in signUp:', error);
-        throw error; // Let the calling function handle it
-    } finally {
-        if (db) await disconnect();
+        console.error("Error signing up:", error);
+        return {
+            statusCode: error.message === 'Email already registered' ? 409 : 500,
+            body: { error: error.message }
+        };
     }
 }
 
 //Login to an account (check if user exists and password is correct)
 export async function login(email, password) {
-    let db;
     try {
-        db = await connect();
+        const db = await getDb();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -106,15 +96,45 @@ export async function login(email, password) {
             statusCode: 500,
             body: { error: 'Internal server error' }
         };
-    } finally {
-        if (db) await disconnect();
-    }
+    } 
 }
 
 export function verifyToken(token) {
     try {
-        return jwt.verify(token, JWT_SECRET);
+        console.log('JWT Secret:', process.env.JWT_SECRET);
+        return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         return null;
+    }
+}
+
+export async function getUserData(id) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+   
+        // Find user by ID (from the decoded token)
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+
+        // Exclude the password before sending the response
+        const { password, ...userWithoutPassword } = user;
+        
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    } catch (error) {
+        console.error("Error getting user data:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
     }
 }
