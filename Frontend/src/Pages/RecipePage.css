@@ -104,9 +104,23 @@ html, body, #root {
     border-radius: 15px;
     padding: 20px;
     margin: 10px;
-    width: 90%;
-    min-width: 90%;
+    width: 95%;
+    min-width: 95%;
     max-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d4725;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.summary-box {
+    border-radius: 15px;
+    background: #a6a7a6;
+    padding: 20px;
+    margin: 10px;
+    width: 50%;
+    min-width: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -117,14 +131,31 @@ html, body, #root {
 .steps-ul {
     align-content: center;
     justify-content: center;
+    display: flex;
+    flex-direction: column;
     list-style-type: none;
-    width: 90%;
-    min-width: 90%;
+    width: 100%;
+    min-width: 100%;
 }
 .step-box-left {
     float: left;
     max-height: 150px;
     width: 10%;
+}
+.finish-recipe {
+    border-radius: 15px;
+    background: #6c6c6c;
+    padding: 20px;
+    margin: 10px;
+    width: 50%;
+    min-width: 50%;
+    max-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d4725;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 .step-box-right {
     float:right;

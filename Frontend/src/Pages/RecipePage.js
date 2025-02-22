@@ -7,14 +7,6 @@ import {useLocation} from 'react-router-dom';
 import { AlignCenter } from 'lucide-react';
 import check_mark from '../Components/Assets/checkmark.png';
 const BASE_URL = "https://api.spoonacular.com/recipes/";
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds){
-        break;
-      }
-    }
-  }
 
 function RecipePage() {
     const location = useLocation();
@@ -57,6 +49,7 @@ function RecipePage() {
             {ingredient.original}
         </li>
       ): <div></div>
+      const finishbutton = (instructions[0]) ? ((clickedSteps.includes(instructions[0].steps.length-1)) ? <div className='finish-recipe'> <h3>Finish Recipe</h3></div> : <div></div>) : <div></div>
       const listinstructions= (instructions[0]) ? instructions[0].steps.map((instruction) =>
         <li>
         <div className='step-box' style={{background: (clickedSteps.includes(instruction.number-1)) ? '#0d4725' : '#919090', width: '70%'}} onClick={() => stepClicked(instruction.number-1)}>
@@ -126,6 +119,9 @@ function RecipePage() {
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
                         <img src={recipe.image} />
                     </div>
+                    <div className="summary-box">
+                        {(recipe.summary) ?  <p>{recipe.summary.replace(/<\/?[^>]+(>|$)/g, "")}</p> : <p></p>}
+                    </div>
                 </div>
                 <h2>Ingredients</h2>
                 <button onClick={handleClick}>Button</button>
@@ -139,6 +135,11 @@ function RecipePage() {
                     <ul className='steps-ul'>
                         {listinstructions}
                     </ul>
+                </div>
+                <div className='box-main'>
+                <div>
+                    {finishbutton}
+                </div>
                 </div>
             </section>
             <footer className="footer">

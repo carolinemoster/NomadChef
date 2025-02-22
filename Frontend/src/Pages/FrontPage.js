@@ -8,6 +8,8 @@ import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
+import RecipeCard from '../Components/RecipeCard/RecipeCard';
+const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 
 function FrontPage() {
     const Map = styled.div`
@@ -52,9 +54,21 @@ function FrontPage() {
         `;
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
+    const [history, setHistory] = useState([]);
+    const historylist = history.length > 0 ? history.map((item) => 
+        <RecipeCard image= {item.image} name={item.title} summary={item.summary}> </RecipeCard>
+    ) :
+    <RecipeCard></RecipeCard>
 
+    const getHistory = async () => {  
+        const response = await fetch(`${BASE_URL}?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&query=pasta&addRecipeInformation=true`);
+        const data = await response.json();
+        setHistory(data.results || []); // Fixed: store only `results` array
+    }
     useEffect(() => {
         window.scrollTo(0, 0);
+        getHistory();
+
     }, []);
 
     const handleZoomIn = () => {
@@ -149,12 +163,10 @@ function FrontPage() {
                 </div>
             </section>
             <section className="section">
+                <h1>History</h1>
                 <div className="slider">
                     <Carousel responsive={responsive}>
-                        <div className="product-box">Item 1</div>
-                        <div className="product-box">Item 2</div>
-                        <div>Item 3</div>
-                        <div>Item 4</div>
+                        {historylist}
                     </Carousel>
                 </div>
             </section>

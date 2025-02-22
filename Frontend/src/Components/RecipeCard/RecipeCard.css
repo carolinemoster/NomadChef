@@ -1,0 +1,25 @@
+.recipe-card {
+    width: 250px;
+    background: rgb(0, 0, 0);
+    color: white;
+    min-height: 200px;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    max-height: 300px;
+    border-radius: 15px;
+}
+.recipe-card-title {
+    width: 90%;
+    background: rgba(0, 0, 0, 1);
+    color: white;
+    vertical-align: top;
+}
+.recipe-summary {
+    overflow: hidden;
+
+}
+.recipe-image {
+    width: 90%;
+    max-height: 100px;
+}
