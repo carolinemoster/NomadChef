@@ -5,7 +5,7 @@ import './PromptBox.css';
 import { useNavigate } from 'react-router-dom';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 
-const AIPromptBox = () => {
+const PromptBox = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [recipes, setRecipes] = useState([]);
@@ -26,7 +26,7 @@ const AIPromptBox = () => {
       <div className="recipe-box-right">
         <h3 className="recipe-title">{recipe.title}</h3>
         <p className="recipe-box-summary">
-          {recipe.summary}
+          {recipe.summary.replace(/<\/?[^>]+(>|$)/g, "")}
         </p>
       </div>
     </div>
@@ -43,7 +43,7 @@ const AIPromptBox = () => {
         <div className="glassmorphic-box">
             <input
                 type="text"
-                placeholder="Begin Generating Recipe..."
+                placeholder="Begin Searching Recipes..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
@@ -59,4 +59,4 @@ const AIPromptBox = () => {
   );
 };
 
-export default AIPromptBox;
+export default PromptBox;

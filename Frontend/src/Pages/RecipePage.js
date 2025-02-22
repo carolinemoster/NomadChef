@@ -4,19 +4,42 @@ import './RecipePage.css';
 import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
 import {useLocation} from 'react-router-dom';
+import { AlignCenter } from 'lucide-react';
+import check_mark from '../Components/Assets/checkmark.png';
 const BASE_URL = "https://api.spoonacular.com/recipes/";
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds){
+        break;
+      }
+    }
+  }
 
 function RecipePage() {
     const location = useLocation();
+    const [clickedSteps, setClickedSteps] = useState([]);
     const RecipeID = location.state?.recipeID;
     const [recipe, setRecipe] = useState([]);
     const [instructions, setInstructions] = useState([]);
     useEffect(() => {
         if (RecipeID) {
-            //getRecipe(RecipeID);
-            getInstructions(RecipeID);
+            getRecipe(RecipeID);
+            //sleep(2000);
+            //getInstructions(RecipeID);
         }
     }, [RecipeID]); // Runs when RecipeID changes
+    const handleClick = () => {
+        getInstructions(RecipeID);
+      };
+    const stepClicked = (index) => {
+        setClickedSteps((prev) =>
+            prev.includes(index)
+              ? prev.filter((i) => i !== index) // Remove if already clicked (toggle off)
+              : [...prev, index] // Add if not clicked
+          );
+    };
+    
     const getRecipe = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
           const response = await fetch(`${BASE_URL}${recipeID}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}`);
@@ -25,7 +48,7 @@ function RecipePage() {
       }
       const getInstructions = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-        const response2 = await fetch(`${BASE_URL}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}`);
+        const response2 = await fetch(`${BASE_URL}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&stepBreakdown=true`);
         const data2 = await response2.json();
         setInstructions(data2);
       }
@@ -34,9 +57,18 @@ function RecipePage() {
             {ingredient.original}
         </li>
       ): <div></div>
-      const listinstructions= (instructions.steps) ? instructions.steps.map((instruction) =>
+      const listinstructions= (instructions[0]) ? instructions[0].steps.map((instruction) =>
         <li>
-            {instruction.step}
+        <div className='step-box' style={{background: (clickedSteps.includes(instruction.number-1)) ? '#0d4725' : '#919090', width: '70%'}} onClick={() => stepClicked(instruction.number-1)}>
+            <div className='step-box-left'>
+                <h3>{instruction.number}</h3>
+            </div>
+            <div className='step-box-right'>
+                {(clickedSteps.includes(instruction.number-1)) ?  <img src={check_mark} style={{maxHeight:'50px'}}></img> :
+                <p>{instruction.step}</p>
+                }
+            </div>
+        </div>
         </li>
       ): <p>No Instructions</p>
         
@@ -96,6 +128,7 @@ function RecipePage() {
                     </div>
                 </div>
                 <h2>Ingredients</h2>
+                <button onClick={handleClick}>Button</button>
                 <div className='box-main'>
                     <ul>
                         {listingredients}
@@ -103,7 +136,7 @@ function RecipePage() {
                 </div>
                 <h2>Instructions</h2>
                 <div className='box-main'>
-                    <ul>
+                    <ul className='steps-ul'>
                         {listinstructions}
                     </ul>
                 </div>
