@@ -1,23 +1,37 @@
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 const API_KEY = process.env.SPOONACULAR_API_KEY;
 
-//Need to fix comma separated values, unsure if working
+// Parameters that accept comma-separated values
+const CSV_PARAMS = new Set([
+    'cuisine',
+    'excludeCuisine',
+    'diet',
+    'intolerances',
+    'equipment',
+    'includeIngredients',
+    'excludeIngredients',
+    'tags'
+]);
 
 // Helper function to build query string from parameters
 const buildQueryString = (params) => {
     const processedParams = Object.entries(params).reduce((acc, [key, value]) => {
-        acc[key] = Array.isArray(value) ? value.join(',') : value;
+        // Skip empty values
+        if (!value) return acc;
+        
+        // Only process arrays for parameters that accept CSV
+        if (CSV_PARAMS.has(key) && (Array.isArray(value) || typeof value === 'string')) {
+            acc[key] = Array.isArray(value) ? value.join(',') : value;
+        } else {
+            acc[key] = value;
+        }
         return acc;
     }, {});
 
-    // Add API key to the params object
-    const queryParams = new URLSearchParams({
+    return `?${new URLSearchParams({
         apiKey: API_KEY,
         ...processedParams
-    });
-    
-    // Prepend ? to the entire string
-    return `?${queryParams.toString()}`;
+    }).toString()}`;
 };
 
 // Helper function to handle API responses
@@ -29,6 +43,24 @@ const handleResponse = async (response) => {
     return response.json();
 };
 
+// Helper function to validate parameters
+const validateParams = (params) => {
+    if (params.number && (isNaN(params.number) || params.number < 1 || params.number > 100)) {
+        throw new Error('Number must be between 1 and 100');
+    }
+    if (params.offset && (isNaN(params.offset) || params.offset < 0)) {
+        throw new Error('Offset must be non-negative');
+    }
+    if (params.maxReadyTime && (isNaN(params.maxReadyTime) || params.maxReadyTime < 0)) {
+        throw new Error('maxReadyTime must be non-negative');
+    }
+    // Add validation for API key
+    if (!API_KEY) {
+        throw new Error('Spoonacular API key is not configured');
+    }
+};
+
+// Recipe service object
 export const recipeService = {
     // Search recipes with queries like cuisine, diet, intolerances, etc.
     async searchRecipes({
@@ -48,22 +80,11 @@ export const recipeService = {
         sortDirection = 'desc'
     } = {}) {
         try {
-            const queryString = buildQueryString({
-                query,
-                cuisine,
-                diet,
-                intolerances,
-                includeIngredients,
-                excludeIngredients,
-                type,
-                maxReadyTime,
-                number,
-                offset,
-                addRecipeInformation,
-                addRecipeNutrition,
-                sort,
-                sortDirection
-            });
+            const params = {
+                query, cuisine, diet, intolerances, includeIngredients, excludeIngredients, type, maxReadyTime, number, offset, addRecipeInformation, addRecipeNutrition, sort, sortDirection
+            };
+            validateParams(params);
+            const queryString = buildQueryString(params);
 
             const response = await fetch(`${BASE_URL}/complexSearch${queryString}`);
             return handleResponse(response);
@@ -75,13 +96,15 @@ export const recipeService = {
 
     // Get detailed recipe information by ID
     async getRecipeById(id, {
-        addRecipeInformation = true,
-        addRecipeNutrition = false
+        includeNutrition = false,
+        addWinePairing = false,
+        addTasteData = false
     } = {}) {
         try {
             const queryString = buildQueryString({
-                addRecipeInformation,
-                addRecipeNutrition
+                includeNutrition,
+                addWinePairing,
+                addTasteData
             });
 
             const response = await fetch(`${BASE_URL}/${id}/information${queryString}`);

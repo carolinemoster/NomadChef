@@ -1,4 +1,5 @@
-import { signUp, login } from '../Services/accountService.mjs';
+import { signUp, login, getUserData } from '../Services/accountService.mjs';
+import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
 const formatResponse = (statusCode, body) => ({
@@ -30,6 +31,28 @@ const INPUT_LIMITS = {
 
 // Simple sanitization
 const sanitizeInput = (str) => str?.trim() || '';
+
+// Token verification helper
+const verifyToken = (event) => {
+    const authHeader = event.headers.Authorization || event.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new Error('Unauthorized: No token provided');
+    }
+    console.log("Verify token handler invoked");
+    const token = authHeader.split(' ')[1];
+    try {
+        console.log("Really?? But token failed?");
+        return jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        console.log('Token verification failed:', error);
+        throw new Error('Unauthorized: Invalid or expired token');
+    }
+};
+
+//If db not connected, connect to it
+// if (!db.isConnected) {
+//     await db.connect();
+// }
 
 export const handler = async (event) => {
     // Log request details (helpful for debugging)
@@ -83,15 +106,42 @@ export const handler = async (event) => {
                 return formatResponse(result.statusCode, result.body);
             }
 
+            case '/auth/getUserData': {
+                if (event.httpMethod !== 'GET') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                // Declare decoded outside of try block
+                let decoded;
+                console.log("Decoded token before try block:", decoded);
+                try {
+                    decoded = verifyToken(event);
+                    console.log("Decoded token after try block:", decoded);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+
+                // Now decoded is available here
+                const userData = await getUserData(decoded.id);
+                if (!userData) {
+                    return formatResponse(404, { error: 'User not found' });
+                }
+
+                return formatResponse(userData.statusCode, userData.body);
+            }
+
             default:
                 return formatResponse(404, { error: 'Route not found' });
         }
     } catch (error) {
         console.error('Error:', error);
-        
+
         // Handle known errors with specific status codes
         if (error.message === 'Invalid request body') {
             return formatResponse(400, { error: error.message });
+        }
+        if (error.message.startsWith('Unauthorized')) {
+            return formatResponse(401, { error: error.message });
         }
 
         // Generic error handler
