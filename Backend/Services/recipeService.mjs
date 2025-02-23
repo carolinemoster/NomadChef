@@ -97,20 +97,24 @@ export const recipeService = {
     // Get detailed recipe information by ID
     async getRecipeById(id, {
         includeNutrition = false,
-        addWinePairing = false,
-        addTasteData = false
     } = {}) {
         try {
-            const queryString = buildQueryString({
-                includeNutrition,
-                addWinePairing,
-                addTasteData
-            });
-
+            // Handle bulk request
+            if (Array.isArray(id)) {
+                const queryString = buildQueryString({
+                    ids: id.join(','),
+                    includeNutrition
+                });
+                const response = await fetch(`${BASE_URL}/informationBulk${queryString}`);
+                return handleResponse(response);
+            }
+            
+            // Handle single recipe request
+            const queryString = buildQueryString({ includeNutrition });
             const response = await fetch(`${BASE_URL}/${id}/information${queryString}`);
             return handleResponse(response);
         } catch (error) {
-            console.error('Error fetching recipe details:', error);
+            console.error('Error fetching recipe information:', error);
             throw error;
         }
     },

@@ -32,12 +32,13 @@ const INPUT_LIMITS = {
     MAX_NUMBER: 100
 };
 
+// Recipe handler
 export const handler = async (event) => {
     console.log('Event:', JSON.stringify(event, null, 2));
 
     try {
         switch(event.path) {
-            case '/recipes/search': {
+            case '/recipes/search': { //handles recipe search
                 if (event.httpMethod !== 'GET') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
@@ -51,7 +52,7 @@ export const handler = async (event) => {
                 return formatResponse(200, recipes);
             }
 
-            case '/recipes/detail': {
+            case '/recipes/detail': { //handles single recipe detail and bulk recipe detail
                 if (event.httpMethod !== 'GET') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
@@ -65,7 +66,7 @@ export const handler = async (event) => {
                 return formatResponse(200, recipe);
             }
 
-            case '/recipes/ingredients': {
+            case '/recipes/ingredients': { //handles recipe search by ingredients
                 if (event.httpMethod !== 'POST') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
