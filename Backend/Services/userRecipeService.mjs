@@ -49,18 +49,19 @@ export const userRecipeService = {
         // Save to users_recipes collection
         await recipesCollection.insertOne(savedRecipe);
 
+        // Initialize stats if they don't exist
+        await usersCollection.updateOne(
+            { _id: new ObjectId(userId), savedRecipeCount: { $exists: false } },
+            { $set: { savedRecipeCount: 0, savedRecipeIds: [] } }
+        );
+
         // Update user's recipe stats
         await usersCollection.updateOne(
             { _id: new ObjectId(userId) },
             {
                 $addToSet: { savedRecipeIds: recipeId },
-                $inc: { savedRecipeCount: 1 },
-                $setOnInsert: {
-                    savedRecipeIds: [],
-                    savedRecipeCount: 0
-                }
-            },
-            { upsert: true }
+                $inc: { savedRecipeCount: 1 }
+            }
         );
 
         return savedRecipe;
