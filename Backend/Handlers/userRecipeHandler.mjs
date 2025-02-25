@@ -1,6 +1,8 @@
 import { userRecipeService } from '../Services/userRecipeService.mjs';
 import { verifyToken } from './authHandler.mjs';
 
+const BASE_URL = process.env.BASE_URL;
+
 // Reuse your existing formatResponse helper
 const formatResponse = (statusCode, body) => ({
     statusCode,
@@ -44,7 +46,7 @@ export const handler = async (event) => {
                     }
 
                     // First fetch recipe details from recipe Lambda
-                    const recipeResponse = await fetch(`${process.env.SPOONACULAR_API_URL}/recipes/detail?id=${recipeId}`);
+                    const recipeResponse = await fetch(`${BASE_URL}/recipes/detail?id=${recipeId}`);
                     if (!recipeResponse.ok) {
                         return formatResponse(404, { error: 'Recipe not found' });
                     }
