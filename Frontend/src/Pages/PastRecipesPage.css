@@ -1,0 +1,344 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+
+/* Main background and layout */
+.front-page {
+    min-height: 100vh;
+    background: repeating-linear-gradient(
+        135deg,
+        #0d4725,
+        #525453,
+        #525453,
+        #0d4725 100%
+    );
+    background-size: 200% 200%;
+    position: relative;
+    height: auto;
+}
+
+html, body, #root {
+    min-height: 100%;
+    height: auto;
+}
+
+.brand {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0d4725;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+/* Navigation styling */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 12px 25px;
+    margin-top: 3px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;          /* Make sure navbar spans full width */
+    height: 60px;         /* Set specific height for navbar */
+}
+
+.list-items {
+    margin-left: auto;  /* This will push the list to the right */
+    padding-right: 40px;  /* Add some padding from the right edge */
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    gap: 30px;  /* Consistent spacing between items */
+}
+
+.nav-list li a {
+    color: #0d4725;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.nav-list li a:hover {
+    color: #525453;
+}
+
+/* Section styling */
+.section {
+    padding: 40px;
+    margin-top: 84px;     /* Increased from 20px to 80px */
+    margin-left: 20px;
+    margin-right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Map container */
+.box-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: 10px;     /* Reduced from 20px */
+}
+
+/* Slider/Carousel styling */
+.slider {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.product-box {
+    background: #eaeaea;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 10px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d4725;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer styling */
+.footer {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    margin-top: 40px;
+}
+
+.text-footer {
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* Whisk icon (keep as is) */
+.whisk {
+    width: 30px;
+    height: 30px;
+    margin-left: 6px;
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease;
+}
+
+.whisk:hover {
+    transform: rotate(15deg);
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .nav-list {
+        gap: 15px;
+        margin-right: 20px;
+    }
+
+    .section {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .slider {
+        width: 95%;
+    }
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo img {
+  width: 180px;
+  border-radius: 50px;
+}
+
+.rightnav {
+  width: 30%;
+  text-align: right;
+}
+
+#search {
+  padding: 5px;
+  font-size: 17px;
+  border: 2px solid rgb(0, 0, 0);
+  border-radius: 9px;
+}
+
+.firsthalf {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.secondhalf {
+  width: 80%;
+  justify-content: center;
+  align-items: center;
+}
+
+.secondhalf img {
+  width: 70%;
+  border: 4px solid white;
+  border-radius: 150px;
+  display: block;
+  margin: auto;
+}
+
+.text-big {
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana,
+      sans-serif;
+  font-size: 30px;
+}
+
+.text-small {
+  font-size: 18px;
+}
+
+.btn {
+  margin-left: 20px;
+  height: 33px;
+  width: 70px;
+  color: #fff;
+  background-color: #000;
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  vertical-align: middle;
+}
+
+.section-Left {
+  flex-direction: row-reverse;
+}
+
+.center {
+  text-align: center;
+}
+
+/* Target the map container and SVG paths */
+.map svg path {
+    transition: all 0.3s ease;
+    stroke: #000000 !important;  /* Keep black borders */
+    stroke-width: 0.5 !important;  /* Maintain thin border lines */
+}
+
+/* Override inline styles for selected paths */
+.map svg path[style*="fill: rgb(255, 0, 0)"],
+.map svg path[style*="fill: #ff0000"],
+.map svg path[style*="fill: red"] {
+    fill: #196033 !important;
+    stroke: #000000 !important;  /* Keep black borders */
+    stroke-width: 0.5 !important;
+}
+
+/* Also target the path directly with !important */
+.map path {
+    &[style*="fill: rgb(255, 0, 0)"],
+    &[style*="fill: #ff0000"],
+    &[style*="fill: red"] {
+        fill: #247a44 !important;
+        stroke: #000000 !important;  /* Keep black borders */
+        stroke-width: 0.5 !important;
+    }
+}
+
+/* Zoom controls styling */
+.map-zoom-controls {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid #0d4725 !important;
+    border-radius: 8px !important;
+    padding: 5px !important;
+}
+
+.map-zoom-button {
+    background: #0d4725 !important;
+    color: white !important;
+    border: none !important;
+    width: 30px !important;
+    height: 30px !important;
+    margin: 2px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: background 0.3s ease !important;
+}
+
+.map-zoom-button:hover {
+    background: #2d8b4e !important;
+}
+
+.map-controls {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 1000;
+    transform: translate(240px, -70px);
+}
+
+.map-controls button {
+    background: #0d4725;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.map-controls button:hover {
+    background: #2d8b4e;
+}
+
+/* Add positioning context to the map container */
+.firstHalf {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: #0d4725;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+}
+
+.nav-button:hover {
+    color: #525453;
+}

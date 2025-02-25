@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 
-function FrontPage() {
+function PastRecipesPage() {
     const Map = styled.div`
         margin: 1rem auto;
         width: 1000px;
@@ -87,13 +87,13 @@ function FrontPage() {
         navigate('/account');
     };
 
-    const handlePastRecipesClick = () => {
-        navigate('/pastrecipes')
-    }
-
     const handleBrandClick = () => {
         navigate('/home');
     };
+    
+    const handlePastRecipesClick = () => {
+        navigate('/pastrecipes');
+    }
 
     const responsive = {
         superLargeDesktop: {
@@ -125,6 +125,7 @@ function FrontPage() {
                     <ul className="nav-list">
                         <li><a href="#courses">About</a></li>
                         <li><button onClick={handlePastRecipesClick} className='nav-button'>Past Recipes</button></li>
+
                         <li><a href="#jobs">Settings</a></li>
                         <li>
                             <button 
@@ -139,40 +140,12 @@ function FrontPage() {
             </nav>
 
             <section className="section">
-                <div className="box-main">
-                    <div className="firstHalf" style={{ overflow: 'visible' }}>
-                        <div className="map-controls">
-                            <button onClick={handleZoomIn}>+</button>
-                            <button onClick={handleZoomOut}>-</button>
-                        </div>
-                        
-                        
-                        <Map>
-                        <VectorMap
-                            {...worldMap}
-                            style={{ width: "80%", height: "100%" }}
-                            checkedLayers={['us', 'in', 'uk']} currentLayers={['cn']}
-                            
-                            
-                        />
-                        </Map>
-                       
-                        
-                    </div>
-                </div>
+                
             </section>
             <section className="section">
-                <div className="box-main">
-                    <PromptBox/>
-                </div>
             </section>
             <section className="section">
-                <h1>History</h1>
-                <div className="slider">
-                    <Carousel responsive={responsive}>
-                        {historylist}
-                    </Carousel>
-                </div>
+                
             </section>
             <footer className="footer">
                 <p className="text-footer">
@@ -183,4 +156,4 @@ function FrontPage() {
     );
 }
 
-export default FrontPage;
+export default PastRecipesPage;

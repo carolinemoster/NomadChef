@@ -6,7 +6,7 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import {useLocation} from 'react-router-dom';
 import { AlignCenter } from 'lucide-react';
 import check_mark from '../Components/Assets/checkmark.png';
-const BASE_URL = "https://api.spoonacular.com/recipes/";
+const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 
 function RecipePage() {
     const location = useLocation();
@@ -34,7 +34,7 @@ function RecipePage() {
     
     const getRecipe = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-          const response = await fetch(`${BASE_URL}${recipeID}/information?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}`);
+          const response = await fetch(`${BASE_URL}detail?id=${recipeID}`);
           const data = await response.json();
           setRecipe(data);
       }
