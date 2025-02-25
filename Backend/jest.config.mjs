@@ -17,6 +17,8 @@ export default {
 
   // Setup file for tests
   setupFilesAfterEnv: ['<rootDir>/Tests/setup/jest.setup.mjs'],
+  forceExit: true,
+  detectOpenHandles: true,
 
   // Coverage configuration
   collectCoverageFrom: [
