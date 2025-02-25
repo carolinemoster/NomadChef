@@ -21,7 +21,6 @@ const LoginSignup = () => {
     const [otherRestriction, setOtherRestriction] = useState('');
     const [cookingSkill, setCookingSkill] = useState('');
     const [spiceLevel, setSpiceLevel] = useState('');
-    const [cuisineInterests, setCuisineInterests] = useState('');
     const [ingredientPreferences, setIngredientPreferences] = useState('');
 
     const [email, setEmail] = useState('');
@@ -32,6 +31,9 @@ const LoginSignup = () => {
     const [lovedIngredients, setLovedIngredients] = useState([]);
     const [dislikedIngredient, setDislikedIngredient] = useState('');
     const [dislikedIngredients, setDislikedIngredients] = useState([]);
+    const [cuisineInterest, setCuisineInterest] = useState('');
+    const [cuisineInterestsList, setCuisineInterestsList] = useState([]);
+
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -65,6 +67,20 @@ const LoginSignup = () => {
         setDislikedIngredients(dislikedIngredients.filter((_, i) => i !== index));
     };
 
+    const addCuisineInterest = (e) => {
+      e.preventDefault();
+      if (cuisineInterest.trim() !== '') {
+          setCuisineInterestsList([...cuisineInterestsList, cuisineInterest.trim()]);
+          setCuisineInterest('');
+      }
+    };
+    
+    const removeCuisineInterest = (index) => {
+        const newList = cuisineInterestsList.filter((_, i) => i !== index);
+        setCuisineInterestsList(newList);
+    };
+  
+
     // Handle checkbox changes for dietary restrictions
     const handleDietaryChange = (restriction) => {
         if (dietaryRestrictions.includes(restriction)) {
@@ -93,6 +109,7 @@ const LoginSignup = () => {
         localStorage.setItem('authToken', token);
 
         console.log('Login successful:', response.data);
+        console.log(token);
 
         navigate('/home');
         } catch (error) {
@@ -111,7 +128,7 @@ const LoginSignup = () => {
                     dietaryRestrictions: dietaryRestrictions,
                     cookingSkill,
                     spiceLevel,
-                    cuisineInterests: cuisineInterests.split(',').map(item => item.trim()),
+                    cuisineInterests: cuisineInterestsList,
                     lovedIngredients: lovedIngredients,
                     dislikedIngredients: dislikedIngredients,
                 }
@@ -317,16 +334,25 @@ const LoginSignup = () => {
                                         </div>
                                     </div>
                                     <div className="cuisine-interests">
-                                        <p>Are there any specific cultures you are particularly interested in exploring through cooking?</p>
-                                        <div className="input">
-                                            <input 
-                                                type="text"
-                                                placeholder="Enter cuisines you're interested in exploring"
-                                                value={cuisineInterests}
-                                                onChange={(e) => setCuisineInterests(e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
+                                      <p>Are there any specific cultures you are particularly interested in exploring through cooking?</p>
+                                      <form className="input" onSubmit={addCuisineInterest}>
+                                          <input 
+                                              type="text"
+                                              placeholder="Enter a cuisine"
+                                              value={cuisineInterest}
+                                              onChange={(e) => setCuisineInterest(e.target.value)}
+                                          />
+                                          <button type="submit">Add</button>
+                                      </form>
+                                      <ul className="ingredient-list">
+                                          {cuisineInterestsList.map((item, index) => (
+                                              <li key={index}>
+                                                  {item} 
+                                                  <button onClick={() => removeCuisineInterest(index)}>Remove</button>
+                                              </li>
+                                          ))}
+                                      </ul>
+                                  </div>
                                     <div className="ingredient-preferences">
                                       <p>What ingredients do you love?</p>
                                       <form className="input" onSubmit={addLovedIngredient}>
@@ -384,38 +410,6 @@ const LoginSignup = () => {
                             )}
                         </div>
                     </>
-                )}
-
-                {page === 5 && (
-                    <div className="survey-page">
-                        <h2>What ingredients do you love?</h2>
-                        <input
-                            type="text"
-                            value={lovedIngredients}
-                            onChange={(e) => setLovedIngredients(e.target.value)}
-                            placeholder="Enter ingredients you love"
-                        />
-                        <div className="button-container">
-                            <button onClick={() => setPage(4)}>Back</button>
-                            <button onClick={() => setPage(6)}>Next</button>
-                        </div>
-                    </div>
-                )}
-
-                {page === 6 && (
-                    <div className="survey-page">
-                        <h2>What ingredients do you dislike?</h2>
-                        <input
-                            type="text"
-                            value={dislikedIngredients}
-                            onChange={(e) => setDislikedIngredients(e.target.value)}
-                            placeholder="Enter ingredients you dislike"
-                        />
-                        <div className="button-container">
-                            <button onClick={() => setPage(5)}>Back</button>
-                            <button onClick={handleCreateAccountClick}>Create Account</button>
-                        </div>
-                    </div>
                 )}
             </div>
         </div>

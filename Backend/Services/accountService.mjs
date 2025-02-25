@@ -18,52 +18,42 @@ export function generateToken(user) {
 
 
 // Sign up for an account 
-export async function signUp(userData) {
-    let db;
+export async function signUp(name, email, password) {
     try {
-        console.log('Connecting to DB...');
-        db = await connect();
-        console.log('Database connected');
-
-        // Ensure that the `collection` is available
+        const db = await getDb();
         const collection = db.collection('users');
-        console.log('Collection selected');
 
-        const existingUser = await collection.findOne({ email: userData.email.toLowerCase() });
-        console.log('Existing user check:', existingUser);
-
+        // Business logic validation
+        const existingUser = await collection.findOne({ email: email.toLowerCase() });
         if (existingUser) {
             throw new Error('Email already registered');
         }
 
-        const hashedPassword = await bcrypt.hash(userData.password, 12);
-        console.log('Password hashed');
+        // Security: Hash password before storing
+        const hashedPassword = await bcrypt.hash(password, 12);
 
-        const newUser = {
-            ...userData,
-            email: userData.email.toLowerCase(),
+        const result = await collection.insertOne({ 
+            name, 
+            email: email.toLowerCase(), 
             password: hashedPassword,
             createdAt: new Date()
-        };
-
-        const result = await collection.insertOne(newUser);
-        console.log('User inserted:', result);
-
-        const token = generateToken({ _id: result.insertedId, email: newUser.email });
-        console.log('Token generated:', token);
-
+        });
+        
+        const token = generateToken({ _id: result.insertedId, email });
+        
         return {
             statusCode: 201,
             body: {
-                message: "Sign Up Successful!",
+                user: { _id: result.insertedId, name, email },
                 token
             }
         };
     } catch (error) {
-        console.error('Error in signUp:', error);
-        throw error; // Let the calling function handle it
-    } finally {
-        if (db) await disconnect();
+        console.error("Error signing up:", error);
+        return {
+            statusCode: error.message === 'Email already registered' ? 409 : 500,
+            body: { error: error.message }
+        };
     }
 }
 

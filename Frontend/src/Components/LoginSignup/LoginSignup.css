@@ -454,3 +454,47 @@ html, body {
     }
 }
 
+.ingredient-preferences .input,
+.disliked-ingredients .input,
+.cuisine-interests .input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.ingredient-preferences .input button,
+.disliked-ingredients .input button,
+.cuisine-interests .input button {
+    background-color: #0d4725;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-color: black;
+}
+
+
+.ingredient-preferences .ingredient-list li,
+.disliked-ingredients .ingredient-list li,
+.cuisine-interests .ingredient-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
+    margin-bottom: 4px;
+    gap: 8px;
+}
+
+.ingredient-preferences .ingredient-list button,
+.disliked-ingredients .ingredient-list button,
+.cuisine-interests .ingredient-list button {
+    background-color: #0d4725;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border-color: black;
+    margin-left: 12px;
+}
+
