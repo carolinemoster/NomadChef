@@ -33,7 +33,7 @@ const INPUT_LIMITS = {
 const sanitizeInput = (str) => str?.trim() || '';
 
 // Token verification helper
-const verifyToken = (event) => {
+export const verifyToken = (event) => {
     const authHeader = event.headers.Authorization || event.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new Error('Unauthorized: No token provided');

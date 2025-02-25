@@ -1,5 +1,5 @@
 import { userRecipeService } from '../Services/userRecipeService.mjs';
-import { verifyToken } from '../Services/accountService.mjs';
+import { verifyToken } from './authHandler.mjs';
 
 // Reuse your existing formatResponse helper
 const formatResponse = (statusCode, body) => ({
