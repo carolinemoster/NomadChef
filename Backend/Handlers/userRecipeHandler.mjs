@@ -44,7 +44,7 @@ export const handler = async (event) => {
                     }
 
                     // First fetch recipe details from recipe Lambda
-                    const recipeResponse = await fetch(`${RECIPE_API_URL}/recipes/detail?id=${recipeId}`);
+                    const recipeResponse = await fetch(`${SPOONACULAR_API_URL}/recipes/detail?id=${recipeId}`);
                     if (!recipeResponse.ok) {
                         return formatResponse(404, { error: 'Recipe not found' });
                     }
