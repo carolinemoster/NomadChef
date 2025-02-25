@@ -31,67 +31,67 @@ export const handler = async (event) => {
             return formatResponse(401, { error: 'Unauthorized' });
         }
 
-        switch(event.path) {
-            case '/user/recipes/save': {
-                if (event.httpMethod !== 'POST') {
-                    return formatResponse(405, { error: 'Method not allowed' });
-                }
+        // Single path with different methods
+        if (event.path === '/user-recipes') {
+            switch(event.httpMethod) {
+                case 'POST': {
+                    const body = parseBody(event);
+                    const { recipeId, ...options } = body;
 
-                const body = parseBody(event);
-                const { recipeId, ...options } = body;
+                    // Validate required fields
+                    if (!recipeId) {
+                        return formatResponse(400, { error: 'Recipe ID is required' });
+                    }
 
-                // Validate required fields
-                if (!recipeId) {
-                    return formatResponse(400, { error: 'Recipe ID is required' });
-                }
+                    // First fetch recipe details from recipe Lambda
+                    const recipeResponse = await fetch(`${RECIPE_API_URL}/recipes/detail?id=${recipeId}`);
+                    if (!recipeResponse.ok) {
+                        return formatResponse(404, { error: 'Recipe not found' });
+                    }
+                    const recipeDetails = await recipeResponse.json();
 
-                // First fetch recipe details from recipe Lambda
-                const recipeResponse = await fetch(`${RECIPE_API_URL}/recipes/detail?id=${recipeId}`);
-                if (!recipeResponse.ok) {
-                    return formatResponse(404, { error: 'Recipe not found' });
-                }
-                const recipeDetails = await recipeResponse.json();
-
-                try {
-                    const savedRecipe = await userRecipeService.saveRecipe(
-                        decoded.id, 
-                        recipeId,
-                        {
-                            ...options,
-                            recipeDetails  // Pass the recipe details to the service
+                    try {
+                        const savedRecipe = await userRecipeService.saveRecipe(
+                            decoded.id, 
+                            recipeId,
+                            {
+                                ...options,
+                                recipeDetails
+                            }
+                        );
+                        return formatResponse(201, savedRecipe);
+                    } catch (error) {
+                        if (error.message === 'Recipe already saved for this user') {
+                            return formatResponse(409, { error: error.message });
                         }
-                    );
-                    return formatResponse(201, savedRecipe);
-                } catch (error) {
-                    if (error.message === 'Recipe already saved for this user') {
-                        return formatResponse(409, { error: error.message });
+                        if (error.message === 'User not found') {
+                            return formatResponse(404, { error: error.message });
+                        }
+                        throw error;
                     }
-                    if (error.message === 'User not found') {
-                        return formatResponse(404, { error: error.message });
+                }
+
+                case 'GET': {
+                    // TODO: Implement get user's saved recipes
+                    return formatResponse(501, { error: 'Not implemented' });
+                }
+
+                case 'DELETE': {
+                    // TODO: Implement delete saved recipe
+                    // Expect recipeId in query parameters
+                    const { recipeId } = event.queryStringParameters || {};
+                    if (!recipeId) {
+                        return formatResponse(400, { error: 'Recipe ID is required' });
                     }
-                    throw error;
+                    return formatResponse(501, { error: 'Not implemented' });
                 }
-            }
 
-            case '/user/recipes': {
-                if (event.httpMethod !== 'GET') {
+                default:
                     return formatResponse(405, { error: 'Method not allowed' });
-                }
-                // TODO: Implement get user's saved recipes
-                return formatResponse(501, { error: 'Not implemented' });
             }
-
-            case '/user/recipes/delete': {
-                if (event.httpMethod !== 'DELETE') {
-                    return formatResponse(405, { error: 'Method not allowed' });
-                }
-                // TODO: Implement delete saved recipe
-                return formatResponse(501, { error: 'Not implemented' });
-            }
-
-            default:
-                return formatResponse(404, { error: 'Route not found' });
         }
+
+        return formatResponse(404, { error: 'Route not found' });
     } catch (error) {
         console.error('Error:', error);
         
