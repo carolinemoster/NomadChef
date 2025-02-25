@@ -32,7 +32,7 @@ export const handler = async (event) => {
         }
 
         // Single path with different methods
-        if (event.path === '/user-recipes') {
+        if (event.path === '/user-recipe') {
             switch(event.httpMethod) {
                 case 'POST': {
                     const body = parseBody(event);
