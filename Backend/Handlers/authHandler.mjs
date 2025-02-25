@@ -1,4 +1,4 @@
-import { signUp, login, getUserData } from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData } from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -129,6 +129,23 @@ export const handler = async (event) => {
 
                 return formatResponse(userData.statusCode, userData.body);
             }
+            case '/auth/updateUserData': {
+                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+            
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+            
+                const updateData = parseBody(event);
+                const result = await updateUserData(decoded.id, updateData);
+                return formatResponse(result.statusCode, result.body);
+            }
+
 
             default:
                 return formatResponse(404, { error: 'Route not found' });
@@ -151,4 +168,3 @@ export const handler = async (event) => {
         });
     }
 };
-
