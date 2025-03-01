@@ -65,6 +65,66 @@ export const userRecipeService = {
         );
 
         return savedRecipe;
+    },
+    
+    async getUserRecipes(userId, options = {}) {
+        const db = await getDb();
+        
+        // Verify user exists in users collection
+        const usersCollection = db.collection('users');
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        // Set up query options
+        const query = { userId: new ObjectId(userId) };
+        
+        // Add filter for favorites if specified
+        if (options.favoritesOnly === true) {
+            query.favorite = true;
+        }
+        
+        // Add filter for tags if specified
+        if (options.tags && options.tags.length > 0) {
+            query.tags = { $all: options.tags };
+        }
+        
+        // Set up pagination
+        const limit = options.limit || 20;
+        const skip = options.page ? (options.page - 1) * limit : 0;
+        
+        // Set up sorting
+        const sortOptions = {};
+        if (options.sortBy) {
+            sortOptions[options.sortBy] = options.sortOrder === 'asc' ? 1 : -1;
+        } else {
+            // Default sort by savedAt date, newest first
+            sortOptions.savedAt = -1;
+        }
+        
+        const recipesCollection = db.collection('users_recipes');
+        
+        // Get total count for pagination
+        const totalCount = await recipesCollection.countDocuments(query);
+        
+        // Get recipes
+        const recipes = await recipesCollection
+            .find(query)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+            
+        return {
+            recipes,
+            pagination: {
+                total: totalCount,
+                page: options.page || 1,
+                limit,
+                pages: Math.ceil(totalCount / limit)
+            }
+        };
     }
 };
 

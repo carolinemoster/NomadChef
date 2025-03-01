@@ -74,8 +74,44 @@ export const handler = async (event) => {
                 }
 
                 case 'GET': {
-                    // TODO: Implement get user's saved recipes
-                    return formatResponse(501, { error: 'Not implemented' });
+                    const { 
+                        page, 
+                        limit, 
+                        favoritesOnly, 
+                        tags,
+                        sortBy,
+                        sortOrder
+                    } = event.queryStringParameters || {};
+                    
+                    // Parse options from query parameters
+                    const options = {
+                        page: page ? parseInt(page) : 1,
+                        limit: limit ? parseInt(limit) : 20
+                    };
+                    
+                    // Add optional filters
+                    if (favoritesOnly === 'true') {
+                        options.favoritesOnly = true;
+                    }
+                    
+                    if (tags) {
+                        options.tags = tags.split(',');
+                    }
+                    
+                    if (sortBy) {
+                        options.sortBy = sortBy;
+                        options.sortOrder = sortOrder || 'desc';
+                    }
+                    
+                    try {
+                        const userRecipes = await userRecipeService.getUserRecipes(decoded.id, options);
+                        return formatResponse(200, userRecipes);
+                    } catch (error) {
+                        if (error.message === 'User not found') {
+                            return formatResponse(404, { error: error.message });
+                        }
+                        throw error;
+                    }
                 }
 
                 case 'DELETE': {
