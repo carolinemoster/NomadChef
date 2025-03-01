@@ -138,3 +138,41 @@ export async function getUserData(id) {
         };
     }
 }
+
+export async function updateUserData(id, updateData) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        
+        // Check if user exists
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+
+        // Update user data
+        await collection.updateOne(
+            { _id: new ObjectId(String(id)) },
+            { $set: updateData }
+        );
+
+        // Get updated user data (reusing the existing 'user' variable)
+        const updatedUser = await collection.findOne({ _id: new ObjectId(String(id)) });
+        const { password: _, ...userWithoutPassword } = updatedUser;
+        
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    } catch (error) {
+        console.error("Error updating user data:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
+    }
+}
