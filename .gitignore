@@ -1,0 +1,7 @@
+build1
+build2
+build1.zip
+build2.zip
+.vscode
+node_modules
+.env
