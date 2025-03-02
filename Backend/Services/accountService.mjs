@@ -1,6 +1,7 @@
-import { connect, disconnect } from '../Utils/mongodb.mjs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { ObjectId } from 'mongodb';
+import { getDb } from '../Utils/mongodb.mjs';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -18,9 +19,8 @@ export function generateToken(user) {
 
 // Sign up for an account 
 export async function signUp(name, email, password) {
-    let db;
     try {
-        db = await connect();
+        const db = await getDb();
         const collection = db.collection('users');
 
         // Business logic validation
@@ -54,16 +54,13 @@ export async function signUp(name, email, password) {
             statusCode: error.message === 'Email already registered' ? 409 : 500,
             body: { error: error.message }
         };
-    } finally {
-        if (db) await disconnect();
     }
 }
 
 //Login to an account (check if user exists and password is correct)
 export async function login(email, password) {
-    let db;
     try {
-        db = await connect();
+        const db = await getDb();
         const collection = db.collection('users');
         
         const user = await collection.findOne({ email: email.toLowerCase() });
@@ -99,15 +96,83 @@ export async function login(email, password) {
             statusCode: 500,
             body: { error: 'Internal server error' }
         };
-    } finally {
-        if (db) await disconnect();
-    }
+    } 
 }
 
 export function verifyToken(token) {
     try {
-        return jwt.verify(token, JWT_SECRET);
+        console.log('JWT Secret:', process.env.JWT_SECRET);
+        return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         return null;
+    }
+}
+
+export async function getUserData(id) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+   
+        // Find user by ID (from the decoded token)
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+
+        // Exclude the password before sending the response
+        const { password, ...userWithoutPassword } = user;
+        
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    } catch (error) {
+        console.error("Error getting user data:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
+    }
+}
+
+export async function updateUserData(id, updateData) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        
+        // Check if user exists
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+
+        // Update user data
+        await collection.updateOne(
+            { _id: new ObjectId(String(id)) },
+            { $set: updateData }
+        );
+
+        // Get updated user data (reusing the existing 'user' variable)
+        const updatedUser = await collection.findOne({ _id: new ObjectId(String(id)) });
+        const { password: _, ...userWithoutPassword } = updatedUser;
+        
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    } catch (error) {
+        console.error("Error updating user data:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Internal server error' }
+        };
     }
 }

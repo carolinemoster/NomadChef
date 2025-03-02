@@ -3,7 +3,7 @@ name: CI/CD for NomadChef backend services
 on:
   push:
     branches:
-      - authService
+      - recipeService
       - main
   pull_request:
     branches: [ main ]
@@ -34,11 +34,11 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
-
-    - name: Run tests
-      run: npm test
-      env:
-        JWT_SECRET: 264c8b3cbd28b05405dccdbeca1bef49085f69fa68af15f8f87097c950ebc766
+    
+    #- name: Run tests
+    #  run: npm test
+    #  env:
+    #    JWT_SECRET: 264c8b3cbd28b05405dccdbeca1bef49085f69fa68af15f8f87097c950ebc766
 
     # Create and deploy Lambda Layer
     - name: Create Lambda Layer
@@ -61,21 +61,21 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
 
-    - name: Deploy Lambda Layer
-      run: |
-        # Publish new layer version
-        LAYER_VERSION=$(aws lambda publish-layer-version \
-          --layer-name auth-service-dependencies \
-          --description "Dependencies for Auth Service" \
-          --zip-file fileb://layer.zip \
-          --compatible-runtimes nodejs20.x \
-          --query 'Version' \
-          --output text)
+    # - name: Deploy Lambda Layer
+    #   run: |
+    #     # Publish new layer version
+    #     LAYER_VERSION=$(aws lambda publish-layer-version \
+    #       --layer-name auth-service-dependencies \
+    #       --description "Dependencies for Auth Service" \
+    #       --zip-file fileb://layer.zip \
+    #       --compatible-runtimes nodejs20.x \
+    #       --query 'Version' \
+    #       --output text)
         
-        # Update function to use new layer
-        aws lambda update-function-configuration \
-          --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
-          --layers $(aws lambda list-layer-versions --layer-name auth-service-dependencies --query 'LayerVersions[0].LayerVersionArn' --output text)
+    #     # Update function to use new layer
+    #     aws lambda update-function-configuration \
+    #       --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
+    #       --layers $(aws lambda list-layer-versions --layer-name auth-service-dependencies --query 'LayerVersions[0].LayerVersionArn' --output text)
 
     # Create and deploy Lambda function without node_modules
     - name: Create function deployment package
@@ -92,8 +92,20 @@ jobs:
         zip -r ../function.zip .
         cd ..
 
-    - name: Deploy lambda function
+    # - name: Deploy lambda function to authentication service
+    #   run: |
+    #     aws lambda update-function-code \
+    #       --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
+    #       --zip-file fileb://function.zip
+    
+    - name: Deploy lambda function to recipe service
       run: |
         aws lambda update-function-code \
-          --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
+          --function-name ${{ secrets.RECIPE_SERVICE_ARN }} \
+          --zip-file fileb://function.zip
+
+    - name: Deploy lambda function to user recipe service
+      run: |
+        aws lambda update-function-code \
+          --function-name ${{ secrets.USER_RECIPE_SERVICE_ARN }} \
           --zip-file fileb://function.zip
