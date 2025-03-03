@@ -10,6 +10,7 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
+const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
 
 function FrontPage() {
     const Map = styled.div`
@@ -54,6 +55,7 @@ function FrontPage() {
         `;
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
+    const [test, setTest] = useState([]);
     const [history, setHistory] = useState([]);
     const historylist = history.length > 0 ? history.map((item) => 
         <RecipeCard image= {item.image} name={item.title} summary={item.summary}> </RecipeCard>
@@ -61,9 +63,18 @@ function FrontPage() {
     <RecipeCard></RecipeCard>
 
     const getHistory = async () => {  
-        const response = await fetch(`${BASE_URL}?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&query=pasta&addRecipeInformation=true`);
+        const token = localStorage.getItem('authToken'); 
+        const response = await fetch(`${BASE_USER_RECIPES}`, {
+            method: "GET",  
+            headers: {
+              "Authorization": `Bearer ${token}`, 
+              "Content-Type": "application/json" 
+            }});
         const data = await response.json();
-        setHistory(data.results || []); // Fixed: store only `results` array
+        setTest(data);
+        if(data) {
+            setHistory(data.recipes || []);
+        }
     }
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -168,6 +179,7 @@ function FrontPage() {
             </section>
             <section className="section">
                 <h1>History</h1>
+                <p>{history}</p>
                 <div className="slider">
                     <Carousel responsive={responsive}>
                         {historylist}

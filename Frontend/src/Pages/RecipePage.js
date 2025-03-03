@@ -6,8 +6,10 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import {useLocation} from 'react-router-dom';
 import { AlignCenter } from 'lucide-react';
 import check_mark from '../Components/Assets/checkmark.png';
+import Heart from "react-animated-heart"
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 const BASE_SPOON = "https://api.spoonacular.com/recipes/"
+const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
 
 function RecipePage() {
     const location = useLocation();
@@ -15,6 +17,10 @@ function RecipePage() {
     const RecipeID = location.state?.recipeID;
     const [recipe, setRecipe] = useState([]);
     const [instructions, setInstructions] = useState([]);
+    const [isClick, setClick] = useState(false);
+    const recipedata = {
+        recipeId: RecipeID
+    };
     useEffect(() => {
         if (RecipeID) {
             getRecipe(RecipeID);
@@ -25,6 +31,22 @@ function RecipePage() {
     const handleClick = () => {
         getInstructions(RecipeID);
       };
+    const favoriteClick = async () => {
+        setClick(!isClick);
+        const token = localStorage.getItem('authToken');
+        const response = await fetch({BASE_USER_RECIPES}, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(recipedata)
+          });
+      
+          
+        const jsonResponse = await response.json();
+
+    };
     const stepClicked = (index) => {
         setClickedSteps((prev) =>
             prev.includes(index)
@@ -115,6 +137,8 @@ function RecipePage() {
             <section className="section">
                 <div className='box-main'>
                     <h1>{recipe.title}</h1>
+                    <Heart isClick={isClick} onClick={() => favoriteClick()} />
+                    <div className='save-button'>Save</div>
                 </div>
                 <div className="box-main">
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
