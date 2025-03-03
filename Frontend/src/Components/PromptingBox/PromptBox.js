@@ -1,17 +1,36 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import './PromptBox.css';
 import { useNavigate } from 'react-router-dom';
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/search";
+const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserData";
 
 const PromptBox = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [recipes, setRecipes] = useState([]);
+  const [userPreferences, setUserPreferences] = useState([]);
   const recipeClicked = (recipeID) => {
     navigate('/Recipe', {state: {recipeID}});
   }
+  const getUserParams = async () => {
+    const token = localStorage.getItem('authToken'); 
+    const response = await fetch(BASE_USER_INFO, {
+        method: "GET",  
+        headers: {
+          "Authorization": `Bearer ${token}`, 
+          "Content-Type": "application/json" 
+        }});
+    const data = await response.json();
+    if(data) {
+        setUserPreferences(data.preferences || []);
+    }
+}
+
+  useEffect(() => {
+    //getUserParams();
+    }, []);
   const onSubmit = async (query) => {
     //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
       const response = await fetch(`${BASE_URL}?query=${encodeURIComponent(query)}`);

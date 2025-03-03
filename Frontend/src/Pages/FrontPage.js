@@ -10,7 +10,8 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
-const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
+const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
+const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
 
 function FrontPage() {
     const Map = styled.div`
@@ -55,23 +56,27 @@ function FrontPage() {
         `;
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
-    const [test, setTest] = useState([]);
     const [history, setHistory] = useState([]);
     const historylist = history.length > 0 ? history.map((item) => 
-        <RecipeCard image= {item.image} name={item.title} summary={item.summary}> </RecipeCard>
+        <div onClick={() => recipeClicked(item.recipeId)}>
+        <RecipeCard image= {item.recipe.image} name={item.recipe.title}> </RecipeCard>
+        </div>
     ) :
-    <RecipeCard></RecipeCard>
+    <p></p>
+
+    const recipeClicked = (recipeID) => {
+        navigate('/Recipe', {state: {recipeID}});
+      }
 
     const getHistory = async () => {  
         const token = localStorage.getItem('authToken'); 
-        const response = await fetch(`${BASE_USER_RECIPES}`, {
+        const response = await fetch(BASE_USER_RECIPES, {
             method: "GET",  
             headers: {
               "Authorization": `Bearer ${token}`, 
               "Content-Type": "application/json" 
             }});
         const data = await response.json();
-        setTest(data);
         if(data) {
             setHistory(data.recipes || []);
         }
@@ -179,7 +184,6 @@ function FrontPage() {
             </section>
             <section className="section">
                 <h1>History</h1>
-                <p>{history}</p>
                 <div className="slider">
                     <Carousel responsive={responsive}>
                         {historylist}

@@ -6,6 +6,7 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import {useLocation} from 'react-router-dom';
 import { AlignCenter } from 'lucide-react';
 import check_mark from '../Components/Assets/checkmark.png';
+import { useNavigate } from 'react-router-dom';
 import Heart from "react-animated-heart"
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 const BASE_SPOON = "https://api.spoonacular.com/recipes/"
@@ -13,6 +14,7 @@ const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.co
 
 function RecipePage() {
     const location = useLocation();
+    const navigate = useNavigate();
     const [clickedSteps, setClickedSteps] = useState([]);
     const RecipeID = location.state?.recipeID;
     const [recipe, setRecipe] = useState([]);
@@ -21,20 +23,24 @@ function RecipePage() {
     const recipedata = {
         recipeId: RecipeID
     };
+    const handleBrandClick = () => {
+        navigate('/home');
+    };
     useEffect(() => {
         if (RecipeID) {
             getRecipe(RecipeID);
-            //sleep(2000);
+            getInstructions(RecipeID);
             //getInstructions(RecipeID);
         }
     }, [RecipeID]); // Runs when RecipeID changes
     const handleClick = () => {
         getInstructions(RecipeID);
+        
       };
     const favoriteClick = async () => {
         setClick(!isClick);
         const token = localStorage.getItem('authToken');
-        const response = await fetch({BASE_USER_RECIPES}, {
+        const response = await fetch(BASE_USER_RECIPES, {
             method: "POST",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -67,12 +73,24 @@ function RecipePage() {
         const data2 = await response2.json();
         setInstructions(data2);
       }
+      const finishClick = async () => {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(BASE_USER_RECIPES, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(recipedata)
+          });
+          navigate('/home');
+      }
       const listingredients = (recipe.extendedIngredients) ? recipe.extendedIngredients.map((ingredient) =>
         <li>
             {ingredient.original}
         </li>
       ): <div></div>
-      const finishbutton = (instructions[0]) ? ((clickedSteps.includes(instructions[0].steps.length-1)) ? <div className='finish-recipe'> <h3>Finish Recipe</h3></div> : <div></div>) : <div></div>
+      const finishbutton = (instructions[0]) ? ((clickedSteps.includes(instructions[0].steps.length-1)) ? <div className='finish-recipe' onClick={finishClick}> <h3>Finish Recipe</h3></div> : <div></div>) : <div></div>
       const listinstructions= (instructions[0]) ? instructions[0].steps.map((instruction) =>
         <li>
         <div className='step-box' style={{background: (clickedSteps.includes(instruction.number-1)) ? '#0d4725' : '#919090', width: '70%'}} onClick={() => stepClicked(instruction.number-1)}>
@@ -110,7 +128,7 @@ function RecipePage() {
     return (
         <div className="front-page">
             <nav className="navbar background">
-                <div className='brand'>
+                <div className='brand' onClick={handleBrandClick}>
                     NomadChef
                     <img src={wisk_icon} alt="Whisk Icon" className="whisk" />
                 </div>
@@ -149,7 +167,6 @@ function RecipePage() {
                     </div>
                 </div>
                 <h2>Ingredients</h2>
-                <button onClick={handleClick}>Button</button>
                 <div className='box-main'>
                     <ul>
                         {listingredients}

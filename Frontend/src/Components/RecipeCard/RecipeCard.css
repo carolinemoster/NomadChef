@@ -6,14 +6,20 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    max-height: 300px;
+    max-height: 325px;
     border-radius: 15px;
 }
+.recipe-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+  }
 .recipe-card-title {
     width: 90%;
     background: rgba(0, 0, 0, 1);
     color: white;
     vertical-align: top;
+    align-content: center;
+    justify-content: center;
 }
 .recipe-summary {
     overflow: hidden;
