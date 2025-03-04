@@ -77,6 +77,13 @@ function FrontPage() {
         navigate('/home');
     };
 
+    const handleLogout = () => {
+        // Clear the auth token
+        localStorage.removeItem('authToken');
+        // Navigate to login page
+        navigate('/');
+    };
+
     const responsive = {
         superLargeDesktop: {
             breakpoint: { max: 4000, min: 3000 },
@@ -114,6 +121,14 @@ function FrontPage() {
                                 className="nav-button"
                             >
                                 Account
+                            </button>
+                        </li>
+                        <li>
+                            <button 
+                                onClick={handleLogout} 
+                                className="nav-button logout-button"
+                            >
+                                Logout
                             </button>
                         </li>
                     </ul>

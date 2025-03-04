@@ -11,6 +11,7 @@ const AccountPage = () => {
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState(null);
+    const [validationErrors, setValidationErrors] = useState({});
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -67,28 +68,48 @@ const AccountPage = () => {
     };
 
     const handleInputChange = (field, value) => {
-        setEditedData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handlePreferenceChange = (field, value) => {
-        setEditedData(prev => ({
-            ...prev,
-            preferences: {
-                ...prev.preferences,
-                [field]: value
+        setEditedData(prev => {
+            if (field === 'cookingSkill' || field === 'spiceLevel') {
+                return {
+                    ...prev,
+                    preferences: {
+                        ...prev.preferences || {},
+                        [field]: value
+                    }
+                };
             }
-        }));
+            return {
+                ...prev,
+                [field]: value
+            };
+        });
     };
 
     const handleArrayInputChange = (field, value) => {
         const arrayValues = value.split(',').map(item => item.trim());
-        handlePreferenceChange(field, arrayValues);
+        setEditedData(prev => ({
+            ...prev,
+            preferences: {
+                ...prev.preferences || {}, // Initialize preferences if it doesn't exist
+                [field]: arrayValues
+            }
+        }));
     };
 
     const handleSave = async () => {
+        // Reset errors
+        setValidationErrors({});
+
+        // Validate
+        const errors = {};
+        if (!editedData.name?.trim()) errors.name = "Name cannot be empty";
+        if (!editedData.email?.trim()) errors.email = "Email cannot be empty";
+
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            return;
+        }
+
         try {
             const payload = {
                 name: editedData.name,
@@ -129,6 +150,12 @@ const AccountPage = () => {
         
     };
     
+    const handleLogout = () => {
+        // Clear the auth token
+        localStorage.removeItem('authToken');
+        // Navigate to login page
+        navigate('/');
+    };
 
     return (
         <div className="account-page">
@@ -143,6 +170,14 @@ const AccountPage = () => {
                         <li><a href="#tutorials">Past Recipes</a></li>
                         <li><a href="#jobs">Settings</a></li>
                         <li><a onClick={handleAccountClick} style={{cursor: 'pointer'}}>Account</a></li>
+                        <li>
+                            <button 
+                                onClick={handleLogout} 
+                                className="nav-button logout-button"
+                            >
+                                Logout
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </nav>
@@ -165,11 +200,14 @@ const AccountPage = () => {
                             <div className="info-item">
                                 <label>Name:</label>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedData.name}
-                                        onChange={(e) => handleInputChange('name', e.target.value)}
-                                    />
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={editedData.name}
+                                            onChange={(e) => handleInputChange('name', e.target.value)}
+                                        />
+                                        {validationErrors.name && <div className="error-message">{validationErrors.name}</div>}
+                                    </>
                                 ) : (
                                     <span>{editedData.name}</span>
                                 )}
@@ -192,80 +230,127 @@ const AccountPage = () => {
                                         placeholder="Separate with commas"
                                     />
                                 ) : (
-                                    <span>{editedData.preferences?.dietaryRestrictions?.join(", ")}</span>
+                                    <span>{editedData.preferences?.dietaryRestrictions?.join(", ") || "None specified"}</span>
                                 )}
                             </div>
                             <div className="info-item">
                                 <label>Cooking Skill Level:</label>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedData.preferences?.cookingSkill || ""} 
-                                        onChange={(e) => handleInputChange('cookingSkill', e.target.value)} 
-                                        placeholder="Enter cooking skill level"
-                                    />
+                                    <div className="radio-group">
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="cookingSkill"
+                                                value="Beginner"
+                                                checked={editedData.preferences?.cookingSkill === "Beginner"}
+                                                onChange={(e) => handleInputChange('cookingSkill', e.target.value)}
+                                            />
+                                            Beginner
+                                        </label>
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="cookingSkill"
+                                                value="Intermediate"
+                                                checked={editedData.preferences?.cookingSkill === "Intermediate"}
+                                                onChange={(e) => handleInputChange('cookingSkill', e.target.value)}
+                                            />
+                                            Intermediate
+                                        </label>
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="cookingSkill"
+                                                value="Advanced"
+                                                checked={editedData.preferences?.cookingSkill === "Advanced"}
+                                                onChange={(e) => handleInputChange('cookingSkill', e.target.value)}
+                                            />
+                                            Advanced
+                                        </label>
+                                    </div>
                                 ) : (
-                                    <span>{editedData.preferences?.cookingSkill}</span> 
+                                    <span>{editedData.preferences?.cookingSkill || "Not specified"}</span>
                                 )}
-
                             </div>
                             <div className="info-item">
                                 <label>Preferred Spice Level:</label>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedData.preferences?.spiceLevel || ""}
-                                        onChange={(e) => handleInputChange('spiceLevel', e.target.value)}
-                                        placeholder="Enter spice level"
-                                    />
+                                    <div className="radio-group">
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="spiceLevel"
+                                                value="Mild"
+                                                checked={editedData.preferences?.spiceLevel === "Mild"}
+                                                onChange={(e) => handleInputChange('spiceLevel', e.target.value)}
+                                            />
+                                            Mild
+                                        </label>
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="spiceLevel"
+                                                value="Medium"
+                                                checked={editedData.preferences?.spiceLevel === "Medium"}
+                                                onChange={(e) => handleInputChange('spiceLevel', e.target.value)}
+                                            />
+                                            Medium
+                                        </label>
+                                        <label className="radio-label">
+                                            <input
+                                                type="radio"
+                                                name="spiceLevel"
+                                                value="Spicy"
+                                                checked={editedData.preferences?.spiceLevel === "Spicy"}
+                                                onChange={(e) => handleInputChange('spiceLevel', e.target.value)}
+                                            />
+                                            Spicy
+                                        </label>
+                                    </div>
                                 ) : (
-                                    <span>{editedData.preferences?.spiceLevel}</span>
+                                    <span>{editedData.preferences?.spiceLevel || "Not specified"}</span>
                                 )}
-                                </div>
-
-                                <div className="info-item">
+                            </div>
+                            <div className="info-item">
                                 <label>Cuisine Interests:</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
-                                        value={editedData.preferences?.cuisineInterests.join(", ") || ""}
+                                        value={editedData.preferences?.cuisineInterests?.join(", ") || ""}
                                         onChange={(e) => handleArrayInputChange('cuisineInterests', e.target.value)}
                                         placeholder="Separate with commas"
                                     />
                                 ) : (
-                                    <span>{editedData.preferences?.cuisineInterests.join(", ")}</span>
+                                    <span>{editedData.preferences?.cuisineInterests?.join(", ") || "None specified"}</span>
                                 )}
-                                </div>
-
-                                <div className="info-item">
+                            </div>
+                            <div className="info-item">
                                 <label>Favorite Ingredients:</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
-                                        value={editedData.preferences?.lovedIngredients.join(", ") || ""}
+                                        value={editedData.preferences?.lovedIngredients?.join(", ") || ""}
                                         onChange={(e) => handleArrayInputChange('lovedIngredients', e.target.value)}
                                         placeholder="Separate with commas"
                                     />
                                 ) : (
-                                    <span>{editedData.preferences?.lovedIngredients.join(", ")}</span>
+                                    <span>{editedData.preferences?.lovedIngredients?.join(", ") || "None specified"}</span>
                                 )}
-                                </div>
-
-                                <div className="info-item">
+                            </div>
+                            <div className="info-item">
                                 <label>Disliked Ingredients:</label>
                                 {isEditing ? (
                                     <input
                                         type="text"
-                                        value={editedData.preferences?.dislikedIngredients.join(", ") || ""}
+                                        value={editedData.preferences?.dislikedIngredients?.join(", ") || ""}
                                         onChange={(e) => handleArrayInputChange('dislikedIngredients', e.target.value)}
                                         placeholder="Separate with commas"
                                     />
                                 ) : (
-                                    <span>{editedData.preferences?.dislikedIngredients.join(", ")}</span>
+                                    <span>{editedData.preferences?.dislikedIngredients?.join(", ") || "None specified"}</span>
                                 )}
-                                </div>
-
-                                                    </div>
+                            </div>
+                        </div>
 
                         {isEditing && (
                             <div className="button-group">

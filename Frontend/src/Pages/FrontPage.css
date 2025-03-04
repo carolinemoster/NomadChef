@@ -342,3 +342,11 @@ html, body, #root {
 .nav-button:hover {
     color: #525453;
 }
+
+.logout-button {
+    color: #d32f2f;
+}
+
+.logout-button:hover {
+    color: #b71c1c;
+}
