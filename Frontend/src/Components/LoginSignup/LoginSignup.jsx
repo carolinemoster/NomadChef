@@ -34,6 +34,9 @@ const LoginSignup = () => {
     const [cuisineInterest, setCuisineInterest] = useState('');
     const [cuisineInterestsList, setCuisineInterestsList] = useState([]);
 
+    // Add new state for validation errors
+    const [loginErrors, setLoginErrors] = useState({});
+    const [signupErrors, setSignupErrors] = useState({});
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -92,64 +95,112 @@ const LoginSignup = () => {
 
     // Navigation handlers
     const handleSignInClick = async () => {
-      console.log("signing in");
-      try {
-        const loginData = {
-            email,   
-            password
-        };
+        setLoginErrors({});
+        
+        // Validate
+        const errors = {};
+        if (!email.trim()) errors.email = "Email is required";
+        if (!password.trim()) errors.password = "Password is required";
+        
+        if (Object.keys(errors).length > 0) {
+            setLoginErrors(errors);
+            return;
+        }
 
-        const response = await axios.post(`${apiBaseUrl}/auth/login`, loginData, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        try {
+            const loginData = {
+                email,   
+                password
+            };
 
-        const token = response.data.token;
-        localStorage.setItem('authToken', token);
+            const response = await axios.post(`${apiBaseUrl}/auth/login`, loginData, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        console.log('Login successful:', response.data);
-        console.log(token);
-
-        navigate('/home');
+            const token = response.data.token;
+            localStorage.setItem('authToken', token);
+            navigate('/home');
         } catch (error) {
             console.error('Login error:', error);
-            alert('Login failed. Please try again.');
+            if (error.response) {
+                switch (error.response.status) {
+                    case 400:
+                        setLoginErrors({ general: 'Please check your email and password format' });
+                        break;
+                    case 401:
+                        setLoginErrors({ general: 'Invalid email or password' });
+                        break;
+                    case 404:
+                        setLoginErrors({ general: 'Account not found' });
+                        break;
+                    default:
+                        setLoginErrors({ general: 'An error occurred during login. Please try again.' });
+                }
+            } else {
+                setLoginErrors({ general: 'Unable to connect to the server. Please try again later.' });
+            }
         }
-  };
+    };
   
     const handleCreateAccountClick = async () => {
+        setSignupErrors({});
+        
+        const errors = {};
+        if (!name.trim()) errors.name = "Name is required";
+        if (!email.trim()) errors.email = "Email is required";
+        if (!password.trim()) errors.password = "Password is required";
+        if (password.length < 5) errors.password = "Password must be at least 5 characters";
+        if (password.length > 72) errors.password = "Password must be less than 72 characters";
+        
+        if (Object.keys(errors).length > 0) {
+            setSignupErrors(errors);
+            setPage(1);
+            return;
+        }
+
         try {
             const userData = {
                 name,
                 email,
                 password,
-                preferences: {
-                    dietaryRestrictions: dietaryRestrictions,
-                    cookingSkill,
-                    spiceLevel,
-                    cuisineInterests: cuisineInterestsList,
-                    lovedIngredients: lovedIngredients,
-                    dislikedIngredients: dislikedIngredients,
-                }
+                preferences: {}
             };
 
-            console.log(userData);
-
             const response = await axios.post(`${apiBaseUrl}/auth/signup`, userData, {
-              headers: {
-                  'Content-Type': 'application/json'
-              }
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
-  
-          console.log('Signup successful:', response.data);
-          console.log(response.data);
-          const token = response.data.token;
-          localStorage.setItem('authToken', token);
-          navigate('/home');
+
+            const token = response.data.token;
+            localStorage.setItem('authToken', token);
+            navigate('/home');
         } catch (error) {
             console.error('Signup error:', error);
-            alert('Signup failed. Please try again.');
+            if (error.response) {
+                switch (error.response.status) {
+                    case 400:
+                        if (error.response.data.error === 'Invalid input length') {
+                            setSignupErrors({ general: 'Please check the length of your inputs' });
+                        } else {
+                            setSignupErrors({ general: 'Please check your input format' });
+                        }
+                        break;
+                    case 409:
+                        setSignupErrors({ email: 'This email is already registered' });
+                        break;
+                    case 422:
+                        setSignupErrors({ general: 'Invalid email format' });
+                        break;
+                    default:
+                        setSignupErrors({ general: 'An error occurred during signup. Please try again.' });
+                }
+            } else {
+                setSignupErrors({ general: 'Unable to connect to the server. Please try again later.' });
+            }
+            setPage(1);
         }
     };
 
@@ -167,17 +218,31 @@ const LoginSignup = () => {
                             <div className="underline"></div>
                         </div>
                         <div className="inputs">
-                            <div className="input">
-                                <img src={email_icon} alt="" />
-                                <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)}/>
+                            <div className="input-container">
+                                <div className="input">
+                                    <img src={email_icon} alt="" />
+                                    <input 
+                                        type="text" 
+                                        placeholder='Email' 
+                                        value={email} 
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </div>
+                                {loginErrors.email && <div className="error-message">{loginErrors.email}</div>}
                             </div>
-                            <div className="input">
-                                <img src={password_icon} alt="" />
-                                <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                            <div className="input-container">
+                                <div className="input">
+                                    <img src={password_icon} alt="" />
+                                    <input 
+                                        type="password" 
+                                        placeholder='Password' 
+                                        value={password} 
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                                {loginErrors.password && <div className="error-message">{loginErrors.password}</div>}
                             </div>
-                        </div>
-                        <div className="forgot-password">
-                            <span>Forgot Password?</span>
+                            {loginErrors.general && <div className="error-message">{loginErrors.general}</div>}
                         </div>
                         <div className="create-account">
                             New to NomadChef? <span onClick={() => setAction("Create Account")}>Create Account</span>
@@ -198,18 +263,43 @@ const LoginSignup = () => {
                         <div className="inputs">
                             {page === 1 ? (
                                 <>
-                                    <div className="input">
-                                        <img src={user_icon} alt="" />
-                                        <input type="text" placeholder='Name' value={name} onChange={(e) => setName(e.target.value)}/>
+                                    <div className="input-container">
+                                        <div className="input">
+                                            <img src={user_icon} alt="" />
+                                            <input 
+                                                type="text" 
+                                                placeholder='Name' 
+                                                value={name} 
+                                                onChange={(e) => setName(e.target.value)}
+                                            />
+                                        </div>
+                                        {signupErrors.name && <div className="error-message">{signupErrors.name}</div>}
                                     </div>
-                                    <div className="input">
-                                        <img src={email_icon} alt="" />
-                                        <input type="text" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)}/>
+                                    <div className="input-container">
+                                        <div className="input">
+                                            <img src={email_icon} alt="" />
+                                            <input 
+                                                type="text" 
+                                                placeholder='Email' 
+                                                value={email} 
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        {signupErrors.email && <div className="error-message">{signupErrors.email}</div>}
                                     </div>
-                                    <div className="input">
-                                        <img src={password_icon} alt="" />
-                                        <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                                    <div className="input-container">
+                                        <div className="input">
+                                            <img src={password_icon} alt="" />
+                                            <input 
+                                                type="password" 
+                                                placeholder='Password' 
+                                                value={password} 
+                                                onChange={(e) => setPassword(e.target.value)}
+                                            />
+                                        </div>
+                                        {signupErrors.password && <div className="error-message">{signupErrors.password}</div>}
                                     </div>
+                                    {signupErrors.general && <div className="error-message">{signupErrors.general}</div>}
                                 </>
                             ) : (
                                 <>

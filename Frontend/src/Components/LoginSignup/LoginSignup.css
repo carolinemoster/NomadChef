@@ -498,3 +498,22 @@ html, body {
     margin-left: 12px;
 }
 
+.error-message {
+    background-color: #ffebee;
+    color: #d32f2f;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-top: 5px;
+    border: 1px solid #ffcdd2;
+    width: 90%;
+    max-width: 480px;
+    margin: 5px auto;
+    text-align: left;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
