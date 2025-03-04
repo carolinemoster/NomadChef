@@ -10,10 +10,8 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
-const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
-const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
 
-function FrontPage() {
+function PastRecipesPage() {
     const Map = styled.div`
         margin: 1rem auto;
         width: 1000px;
@@ -58,28 +56,14 @@ function FrontPage() {
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const historylist = history.length > 0 ? history.map((item) => 
-        <div onClick={() => recipeClicked(item.recipeId)}>
-        <RecipeCard image= {item.recipe.image} name={item.recipe.title}> </RecipeCard>
-        </div>
+        <RecipeCard image= {item.image} name={item.title} summary={item.summary}> </RecipeCard>
     ) :
-    <p></p>
-
-    const recipeClicked = (recipeID) => {
-        navigate('/Recipe', {state: {recipeID}});
-      }
+    <RecipeCard></RecipeCard>
 
     const getHistory = async () => {  
-        const token = localStorage.getItem('authToken'); 
-        const response = await fetch(BASE_USER_RECIPES, {
-            method: "GET",  
-            headers: {
-              "Authorization": `Bearer ${token}`, 
-              "Content-Type": "application/json" 
-            }});
+        const response = await fetch(`${BASE_URL}?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&query=pasta&addRecipeInformation=true`);
         const data = await response.json();
-        if(data) {
-            setHistory(data.recipes || []);
-        }
+        setHistory(data.results || []); // Fixed: store only `results` array
     }
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -103,20 +87,13 @@ function FrontPage() {
         navigate('/account');
     };
 
-    const handlePastRecipesClick = () => {
-        navigate('/pastrecipes')
-    }
-
     const handleBrandClick = () => {
         navigate('/home');
     };
-
-    const handleLogout = () => {
-        // Clear the auth token
-        localStorage.removeItem('authToken');
-        // Navigate to login page
-        navigate('/');
-    };
+    
+    const handlePastRecipesClick = () => {
+        navigate('/pastrecipes');
+    }
 
     const responsive = {
         superLargeDesktop: {
@@ -148,6 +125,7 @@ function FrontPage() {
                     <ul className="nav-list">
                         <li><a href="#courses">About</a></li>
                         <li><button onClick={handlePastRecipesClick} className='nav-button'>Past Recipes</button></li>
+
                         <li><a href="#jobs">Settings</a></li>
                         <li>
                             <button 
@@ -157,53 +135,17 @@ function FrontPage() {
                                 Account
                             </button>
                         </li>
-                        <li>
-                            <button 
-                                onClick={handleLogout} 
-                                className="nav-button logout-button"
-                            >
-                                Logout
-                            </button>
-                        </li>
                     </ul>
                 </div>
             </nav>
 
             <section className="section">
-                <div className="box-main">
-                    <div className="firstHalf" style={{ overflow: 'visible' }}>
-                        <div className="map-controls">
-                            <button onClick={handleZoomIn}>+</button>
-                            <button onClick={handleZoomOut}>-</button>
-                        </div>
-                        
-                        
-                        <Map>
-                        <VectorMap
-                            {...worldMap}
-                            style={{ width: "80%", height: "100%" }}
-                            checkedLayers={['us', 'in', 'uk']} currentLayers={['cn']}
-                            
-                            
-                        />
-                        </Map>
-                       
-                        
-                    </div>
-                </div>
+                
             </section>
             <section className="section">
-                <div className="box-main">
-                    <PromptBox/>
-                </div>
             </section>
             <section className="section">
-                <h1>History</h1>
-                <div className="slider">
-                    <Carousel responsive={responsive}>
-                        {historylist}
-                    </Carousel>
-                </div>
+                
             </section>
             <footer className="footer">
                 <p className="text-footer">
@@ -214,4 +156,4 @@ function FrontPage() {
     );
 }
 
-export default FrontPage;
+export default PastRecipesPage;
