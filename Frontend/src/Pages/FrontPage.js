@@ -9,6 +9,7 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
+import ProgressBar from '@ramonak/react-progress-bar'
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
@@ -57,6 +58,7 @@ function FrontPage() {
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
+    const [completedCountries, setCountries] = useState([]);
     const historylist = history.length > 0 ? history.map((item) => 
         <div onClick={() => recipeClicked(item.recipeId)}>
         <RecipeCard image= {item.recipe.image} name={item.recipe.title}> </RecipeCard>
@@ -177,19 +179,21 @@ function FrontPage() {
                             <button onClick={handleZoomOut}>-</button>
                         </div>
                         
-                        
+                        <div>
                         <Map>
                         <VectorMap
                             {...worldMap}
                             style={{ width: "80%", height: "100%" }}
-                            checkedLayers={['us', 'in', 'uk']} currentLayers={['cn']}
+                            checkedLayers={['us', 'in', 'uk']}
                             
                             
                         />
                         </Map>
-                       
-                        
+                        </div>
                     </div>
+                </div>
+                <div className='box-main'>
+                    <ProgressBar bgColor='#0d4725' width='100%' className='progress-bar' completed={60}/>
                 </div>
             </section>
             <section className="section">
