@@ -1,117 +1,171 @@
 import React, { useState, useEffect } from 'react';
-import { VectorMap } from '@south-paw/react-vector-maps';
-import worldMap from "../Components/Assets/world.json"
-import './FrontPage.css';
-import PromptBox from '../Components/PromptingBox/PromptBox';
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
+import './PastRecipesPage.css';
 import wisk_icon from '../Components/Assets/wisk.png';
-import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
-const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
+import axios from 'axios';
+
+const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
+const API_BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev";
 
 function PastRecipesPage() {
-    const Map = styled.div`
-        margin: 1rem auto;
-        width: 1000px;
-
-        svg {
-            stroke: rgb(0,0,0);
-
-            // All layers are just path elements
-            path {
-            fill:rgb(255, 255, 255);
-            cursor: pointer;
-            outline: none;
-
-            // When a layer is hovered
-            &:hover {
-                fill: #2d8b4e;
-            }
-
-            // When a layer is focused.
-            &:focus {
-                fill: #2d8b4e;
-            }
-
-            // When a layer is 'checked' (via checkedLayers prop).
-            &[aria-checked='true'] {
-                fill: #2d8b4e;;
-            }
-
-            // When a layer is 'selected' (via currentLayers prop).
-            &[aria-current='true'] {
-                fill: #2d8b4e;;
-            }
-
-            // You can also highlight a specific layer via it's id
-            &[id="nz-can"] {
-                fill: rgba(56,43,168,0.6);
-            }
-            }
-        }
-        `;
-    const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
-    const historylist = history.length > 0 ? history.map((item) => 
-        <RecipeCard image= {item.image} name={item.title} summary={item.summary}> </RecipeCard>
-    ) :
-    <RecipeCard></RecipeCard>
+    const [currentPage, setCurrentPage] = useState(-1);
+    const [isFlipping, setIsFlipping] = useState(false);
+    const [userName, setUserName] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredHistory, setFilteredHistory] = useState([]);
 
     const getHistory = async () => {  
-        const response = await fetch(`${BASE_URL}?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&query=pasta&addRecipeInformation=true`);
-        const data = await response.json();
-        setHistory(data.results || []); // Fixed: store only `results` array
+        try {
+            const token = localStorage.getItem('authToken'); 
+            if (!token) {
+                navigate('/');
+                return;
+            }
+            const response = await fetch(BASE_USER_RECIPES, {
+                method: "GET",  
+                headers: {
+                  "Authorization": `Bearer ${token}`, 
+                  "Content-Type": "application/json" 
+                }});
+            const data = await response.json();
+            if(data) {
+                setHistory(data.recipes || []);
+                setFilteredHistory(data.recipes || []);
+            }
+        } catch (error) {
+            console.error('Error fetching recipes:', error);
+            setHistory([]);
+            setFilteredHistory([]);
+        }
     }
+
+    const getUserInfo = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                navigate('/');
+                return;
+            }
+            const response = await axios.get(`${API_BASE_URL}/auth/getUserData`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.data && response.data.name) {
+                setUserName(response.data.name);
+            }
+        } catch (error) {
+            console.error('Error fetching user info:', error);
+            setUserName('Nomad Chef');
+        }
+    }
+
     useEffect(() => {
         window.scrollTo(0, 0);
         getHistory();
-
+        getUserInfo();
     }, []);
 
-    const handleZoomIn = () => {
-        if (zoom < 4) {
-            setZoom(zoom + 0.5);
+    useEffect(() => {
+        if (searchQuery) {
+            const filtered = history.filter(recipe => 
+                recipe.recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredHistory(filtered);
+            setCurrentPage(filtered.length > 0 ? 0 : -1);
+        } else {
+            setFilteredHistory(history);
+            setCurrentPage(-1);
         }
+    }, [searchQuery, history]);
+
+    const handleBrandClick = () => {
+        navigate('/home');
     };
 
-    const handleZoomOut = () => {
-        if (zoom > 0.5) {
-            setZoom(zoom - 0.5);
-        }
+    const handlePastRecipesClick = () => {
+        navigate('/pastrecipes');
     };
 
     const handleAccountClick = () => {
         navigate('/account');
     };
 
-    const handleBrandClick = () => {
-        navigate('/home');
+    const recipeClicked = (recipeID) => {
+        navigate('/Recipe', {state: {recipeID}});
     };
-    
-    const handlePastRecipesClick = () => {
-        navigate('/pastrecipes');
-    }
 
-    const responsive = {
-        superLargeDesktop: {
-            breakpoint: { max: 4000, min: 3000 },
-            items: 5
-        },
-        desktop: {
-            breakpoint: { max: 3000, min: 1024 },
-            items: 4
-        },
-        tablet: {
-            breakpoint: { max: 1024, min: 464 },
-            items: 2
-        },
-        mobile: {
-            breakpoint: { max: 464, min: 0 },
-            items: 1
+    const nextPage = () => {
+        if (currentPage < filteredHistory.length - 1) {
+            setIsFlipping(true);
+            setTimeout(() => {
+                setCurrentPage(currentPage + 1);
+                setIsFlipping(false);
+            }, 300);
         }
+    };
+
+    const prevPage = () => {
+        const minPage = searchQuery ? 0 : -1;
+        if (currentPage > minPage) {
+            setIsFlipping(true);
+            setTimeout(() => {
+                setCurrentPage(currentPage - 1);
+                setIsFlipping(false);
+            }, 300);
+        }
+    };
+
+    const renderPassportContent = () => {
+        if (currentPage === -1 && !searchQuery) {
+            return (
+                <div className="passport-cover">
+                    <div className="passport-emblem"></div>
+                    <h1>{userName}'s</h1>
+                    <h2>NomadChef Passport</h2>
+                    <div className="passport-subtitle">Culinary Adventures</div>
+                    <div className="passport-decoration"></div>
+                </div>
+            );
+        }
+
+        if (filteredHistory.length === 0) {
+            return (
+                <div className="recipe-content">
+                    <h2>No recipes found</h2>
+                    <p>{searchQuery ? 'Try a different search term.' : 'Start cooking to build your recipe passport.'}</p>
+                </div>
+            );
+        }
+
+        if (currentPage >= 0 && currentPage < filteredHistory.length) {
+            const currentRecipe = filteredHistory[currentPage];
+            return (
+                <div className="recipe-content" onClick={() => recipeClicked(currentRecipe.recipeId)}>
+                    <h2>{currentRecipe.recipe.title}</h2>
+                    <div className="recipe-image">
+                        <img src={currentRecipe.recipe.image} alt={currentRecipe.recipe.title} />
+                    </div>
+                    <div className="recipe-details">
+                        <p>{currentRecipe.recipe.summary?.replace(/<\/?[^>]+(>|$)/g, "")}</p>
+                    </div>
+                    <div className="page-number">
+                        Recipe {currentPage + 1} of {filteredHistory.length}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="recipe-content">
+                <h2>No recipes yet</h2>
+                <p>Start cooking to build your recipe passport.</p>
+            </div>
+        );
     };
 
     return (
@@ -125,7 +179,6 @@ function PastRecipesPage() {
                     <ul className="nav-list">
                         <li><a href="#courses">About</a></li>
                         <li><button onClick={handlePastRecipesClick} className='nav-button'>Past Recipes</button></li>
-
                         <li><a href="#jobs">Settings</a></li>
                         <li>
                             <button 
@@ -140,13 +193,40 @@ function PastRecipesPage() {
             </nav>
 
             <section className="section">
-                
+                <div className="search-container">
+                    <input
+                        type="text"
+                        placeholder="Search your recipes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+                <div className="passport-container">
+                    <div className={`passport-book ${currentPage === -1 && !searchQuery ? 'cover-page' : ''}`}>
+                        <div className={`passport-page ${isFlipping ? 'flipping' : ''}`}>
+                            {renderPassportContent()}
+                        </div>
+                    </div>
+                    <div className="passport-controls">
+                        <button 
+                            onClick={prevPage} 
+                            className="control-button"
+                            disabled={currentPage === (searchQuery ? 0 : -1) || filteredHistory.length === 0}
+                        >
+                            Previous
+                        </button>
+                        <button 
+                            onClick={nextPage} 
+                            className="control-button"
+                            disabled={currentPage === filteredHistory.length - 1 || filteredHistory.length === 0}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             </section>
-            <section className="section">
-            </section>
-            <section className="section">
-                
-            </section>
+            
             <footer className="footer">
                 <p className="text-footer">
                     Copyright ©-All rights are reserved
