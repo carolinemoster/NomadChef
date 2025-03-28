@@ -75,127 +75,243 @@ html, body, #root {
 /* Section styling */
 .section {
     padding: 40px;
-    margin-top: 20px;     /* Reduced from 40px */
-    margin-left: 20px;
-    margin-right: 20px;
+    margin: 20px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Map container */
+.section h1 {
+    color: #0d4725;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.section h2 {
+    color: #0d4725;
+    font-size: 1.8rem;
+    margin: 30px 0 20px 40px;
+    font-weight: 600;
+}
+
 .box-main {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
-    margin-top: 10px;     /* Reduced from 20px */
+    gap: 30px;
+    flex-wrap: nowrap;
 }
 
-/* Slider/Carousel styling */
-.slider {
-    width: 90%;
-    max-width: 1200px;
+/* Recipe image styling */
+.firstHalf {
+    flex: 0 0 auto;
+}
+
+.firstHalf img {
+    max-width: 500px;
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(13, 71, 37, 0.2);
+}
+
+/* Summary box styling */
+.summary-box {
+    flex: 1;
+    background: white;
+    padding: 25px;
+    margin: 10px;
+    min-width: 300px;
+    border-radius: 15px;
+    color: #525453;
+    font-weight: normal;
+    line-height: 1.6;
+    box-shadow: 0 4px 12px rgba(13, 71, 37, 0.1);
+    border: 1px solid rgba(13, 71, 37, 0.1);
+}
+
+/* Ingredients list specific styling */
+.box-main h2 + .box-main ul {  /* Target only the ul after the Ingredients heading */
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
+    column-count: 2;
+    column-gap: 40px;
+}
+
+.box-main h2 + .box-main ul li {
+    color: #525453;
+    padding: 8px 0;
+    margin: 5px 0;
+    break-inside: avoid;
+    line-height: 1.4;
+    font-size: 1.1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .box-main h2 + .box-main ul {
+        column-count: 1;
+    }
+}
+
+/* Instructions list styling */
+.steps-ul {
+    list-style-type: decimal;
+    padding-left: 40px;
+    padding: 0 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .step-box {
+    background: white;
     border-radius: 15px;
     padding: 20px;
-    margin: 10px;
-    width: 95%;
-    min-width: 95%;
-    max-height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0d4725;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-.save-button {
-    border-radius: 15px;
-    padding: 20px;
-    margin: 10px;
-    max-width: 50px;
-    max-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0d4725;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-.summary-box {
-    border-radius: 15px;
-    background: #a6a7a6;
-    padding: 20px;
-    margin: 10px;
-    width: 50%;
-    min-width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0d4725;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-.steps-ul {
-    align-content: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    list-style-type: none;
+    margin: 15px 0;
     width: 100%;
-    min-width: 100%;
+    display: flex;
+    align-items: flex-start;
+    color: #525453;
+    box-shadow: 0 4px 8px rgba(13, 71, 37, 0.1);
+    border: 1px solid rgba(13, 71, 37, 0.1);
+    transition: all 0.3s ease;
 }
+
 .step-box-left {
-    float: left;
-    max-height: 150px;
-    width: 10%;
-}
-.finish-recipe {
-    border-radius: 15px;
-    background: #6c6c6c;
-    padding: 20px;
-    margin: 10px;
-    width: 50%;
-    min-width: 50%;
-    max-height: 100px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    margin-right: 20px;
+}
+
+.step-number {
     color: #0d4725;
     font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    min-width: 25px;
 }
-.finish-recipe:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+
+.step-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #0d4725;
 }
+
 .step-box-right {
-    float:right;
-    max-height: 150px;
-    width: 90%;
+    flex: 1;
+    line-height: 1.6;
 }
-.step-image {
+
+.step-box.completed {
+    background: rgba(13, 71, 37, 0.05);
+}
+
+.step-box.completed .step-box-right p {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.finish-recipe {
+    background: #0d4725;
+    color: white;
+    padding: 20px 40px;
+    margin: 30px auto;
+    width: fit-content;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(13, 71, 37, 0.2);
+    display: block;
+}
+
+.finish-recipe:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(13, 71, 37, 0.3);
+    background: #196033;
+}
+
+.finish-recipe h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Title and buttons container */
+.box-main:first-of-type {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
     width: 100%;
-    max-height: 100px;
-    border-radius: 15px;
 }
-.product-box {
-    background: #eaeaea;
-    border-radius: 15px;
-    padding: 20px;
-    margin: 10px;
-    min-height: 200px;
+
+.box-main:first-of-type h1 {
+    margin: 0;
+    text-align: left;
+    flex: 1;
+}
+
+/* Container for heart and save buttons */
+.action-buttons {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    margin-left: -5px;
+    transform: translateX(-5px);
+}
+
+/* Heart button styling */
+.heart-button {
+    cursor: pointer;
+    transform: scale(0.7);
+    display: flex;
+    align-items: center;
+    margin-right: -10px;
+}
+
+/* Save button styling */
+.save-button {
+    background: white;
     color: #0d4725;
+    padding: 12px 25px;
+    border-radius: 25px;
     font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(13, 71, 37, 0.1);
+    border: 2px solid #0d4725;
+    white-space: nowrap;
+    margin-left: -5px;
+}
+
+.save-button:hover {
+    background: #0d4725;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 71, 37, 0.2);
+}
+
+/* Responsive design for title area */
+@media screen and (max-width: 768px) {
+    .box-main:first-of-type {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .box-main:first-of-type h1 {
+        text-align: center;
+    }
+
+    .action-buttons {
+        margin-left: 0;
+    }
 }
 
 /* Footer styling */
@@ -225,19 +341,17 @@ html, body, #root {
 }
 
 /* Responsive design */
-@media screen and (max-width: 768px) {
-    .nav-list {
-        gap: 15px;
-        margin-right: 20px;
+@media screen and (max-width: 1024px) {
+    .box-main {
+        flex-wrap: wrap;
     }
 
-    .section {
-        padding: 20px;
-        margin: 10px;
+    .summary-box {
+        width: 100%;
     }
 
-    .slider {
-        width: 95%;
+    .box-main ul {
+        columns: 1;
     }
 }
 
@@ -246,10 +360,6 @@ html, body, #root {
   justify-content: center;
   align-items: center;
 }
-.step-box:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
-  }
 .logo img {
   width: 180px;
   border-radius: 50px;
