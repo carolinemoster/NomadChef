@@ -13,6 +13,7 @@ import ProgressBar from '@ramonak/react-progress-bar'
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
+const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
 
 function FrontPage() {
     const Map = styled.div`
@@ -59,6 +60,7 @@ function FrontPage() {
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const [completedCountries, setCountries] = useState([]);
+    const [completedCountriesCount, setCountriesCount] = useState(0);
     const historylist = history.length > 0 ? history.map((item) => 
         <div onClick={() => recipeClicked(item.recipeId)}>
         <RecipeCard image= {item.recipe.image} name={item.recipe.title}> </RecipeCard>
@@ -69,7 +71,20 @@ function FrontPage() {
     const recipeClicked = (recipeID) => {
         navigate('/Recipe', {state: {recipeID}});
       }
-
+    const getCountries= async () => {
+        const token = localStorage.getItem('authToken'); 
+        console.log("Setting countries...")
+        const response = await fetch(BASE_USER_COUNTRIES, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }});
+        const jsonResponse = await response.json();
+        console.log(jsonResponse.countriesCompletedIDs[0]);
+        setCountriesCount(jsonResponse.countriesCompleted);
+        setCountries(jsonResponse.countriesCompletedIDs || []);
+    }
     const getHistory = async () => {  
         const token = localStorage.getItem('authToken'); 
         const response = await fetch(BASE_USER_RECIPES, {
@@ -86,6 +101,7 @@ function FrontPage() {
     useEffect(() => {
         window.scrollTo(0, 0);
         getHistory();
+        getCountries();
 
     }, []);
 
@@ -184,7 +200,7 @@ function FrontPage() {
                         <VectorMap
                             {...worldMap}
                             style={{ width: "80%", height: "100%" }}
-                            checkedLayers={['us', 'in', 'uk']}
+                            checkedLayers={completedCountries}
                             
                             
                         />
@@ -193,7 +209,7 @@ function FrontPage() {
                     </div>
                 </div>
                 <div className='box-main'>
-                    <ProgressBar bgColor='#0d4725' width='100%' className='progress-bar' completed={60}/>
+                    <ProgressBar bgColor='#0d4725' width='100%' className='progress-bar' completed={Math.round((completedCountriesCount/195)*100)}/>
                 </div>
             </section>
             <section className="section">
