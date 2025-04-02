@@ -98,14 +98,14 @@ jobs:
     #       --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
     #       --zip-file fileb://function.zip
     
-    - name: Deploy lambda function to recipe service
-      run: |
-        aws lambda update-function-code \
-          --function-name ${{ secrets.RECIPE_SERVICE_ARN }} \
-          --zip-file fileb://function.zip
+    # - name: Deploy lambda function to recipe service
+    #  run: |
+    #   aws lambda update-function-code \
+    #      --function-name ${{ secrets.RECIPE_SERVICE_ARN }} \
+    #      --zip-file fileb://function.zip
 
-    - name: Deploy lambda function to user recipe service
-      run: |
-        aws lambda update-function-code \
-          --function-name ${{ secrets.USER_RECIPE_SERVICE_ARN }} \
-          --zip-file fileb://function.zip
+    # - name: Deploy lambda function to user recipe service
+    #  run: |
+    #    aws lambda update-function-code \
+    #      --function-name ${{ secrets.USER_RECIPE_SERVICE_ARN }} \
+    #      --zip-file fileb://function.zip
