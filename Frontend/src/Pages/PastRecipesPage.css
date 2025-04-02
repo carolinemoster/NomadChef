@@ -342,3 +342,279 @@ html, body, #root {
 .nav-button:hover {
     color: #525453;
 }
+
+/* Search styling */
+.search-container {
+    width: 100%;
+    max-width: 500px; /* Match passport width */
+    margin: 0 auto 20px;
+    padding: 0 20px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: 2px solid #0d4725;
+    border-radius: 5px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #f8f4e5;
+    color: #333;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 10px rgba(13, 71, 37, 0.2);
+    border-color: #196033;
+    background: white;
+}
+
+.search-input::placeholder {
+    color: #666;
+    font-style: italic;
+}
+
+/* Passport Book Styling */
+.passport-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.passport-book {
+    width: 500px;
+    height: 700px;
+    background: #f8f4e5;
+    border-radius: 5px;
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        0 16px 32px rgba(0, 0, 0, 0.1),
+        -5px 0 15px rgba(0, 0, 0, 0.1);
+    perspective: 1500px;
+    padding: 30px;
+    position: relative;
+}
+
+/* Book spine effect */
+.passport-book::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, 
+        rgba(0, 0, 0, 0.1),
+        rgba(0, 0, 0, 0.05) 50%,
+        transparent
+    );
+    border-radius: 5px 0 0 5px;
+}
+
+.passport-book.cover-page {
+    background: #1a4d2e;
+    border: none;
+}
+
+.passport-book.cover-page::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    border: 2px solid gold;
+    pointer-events: none;
+}
+
+.passport-page {
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform-origin: left center;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.passport-page.flipping {
+    transform: rotateY(-180deg);
+}
+
+/* Recipe content styling */
+.recipe-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.recipe-content h2 {
+    color: #0d4725;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 10px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.recipe-image {
+    width: 100%;
+    height: 180px; /* Reduced from 250px */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin: 5px 0;
+}
+
+.recipe-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipe-details {
+    flex: 1;
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #333;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.page-number {
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #666;
+    margin-top: auto;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.passport-controls {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.control-button {
+    padding: 10px 20px;
+    background: #0d4725;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    background: #196033;
+    transform: translateY(-2px);
+}
+
+.control-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Passport Cover Styling */
+.passport-cover {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: gold;
+    text-align: center;
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    position: relative;
+}
+
+.passport-emblem {
+    width: 150px;
+    height: 150px;
+    background: url('../Components/Assets/wisk.png') center/contain no-repeat;
+    margin-bottom: 30px;
+    filter: brightness(0) saturate(100%) invert(79%) sepia(75%) saturate(552%) hue-rotate(359deg) brightness(89%) contrast(107%);
+}
+
+.passport-cover h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.passport-cover h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.passport-subtitle {
+    font-size: 24px;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+.passport-decoration {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 2px;
+    background: gold;
+}
+
+.passport-decoration::before,
+.passport-decoration::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: gold;
+    border-radius: 50%;
+    top: -4px;
+}
+
+.passport-decoration::before {
+    left: 0;
+}
+
+.passport-decoration::after {
+    right: 0;
+}
+
+@media (max-width: 600px) {
+    .passport-book {
+        width: 90%;
+        height: 600px;
+        padding: 20px;
+    }
+
+    .recipe-image {
+        height: 150px;
+    }
+
+    .recipe-details {
+        font-size: 12px;
+    }
+}

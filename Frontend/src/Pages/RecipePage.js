@@ -110,20 +110,23 @@ function RecipePage() {
         </li>
       ): <div></div>
       const finishbutton = (instructions[0]) ? ((clickedSteps.includes(instructions[0].steps.length-1)) ? <div className='finish-recipe' onClick={finishClick}> <h3>Finish Recipe</h3></div> : <div></div>) : <div></div>
-      const listinstructions= (instructions[0]) ? instructions[0].steps.map((instruction) =>
-        <li>
-        <div className='step-box' style={{background: (clickedSteps.includes(instruction.number-1)) ? '#0d4725' : '#919090', width: '70%'}} onClick={() => stepClicked(instruction.number-1)}>
-            <div className='step-box-left'>
-                <h3>{instruction.number}</h3>
+      const listinstructions = (instructions[0]) ? instructions[0].steps.map((instruction) =>
+        <li key={instruction.number}>
+            <div className={`step-box ${clickedSteps.includes(instruction.number-1) ? 'completed' : ''}`}>
+                <div className='step-box-left'>
+                    <input
+                        type="checkbox"
+                        className="step-checkbox"
+                        checked={clickedSteps.includes(instruction.number-1)}
+                        onChange={() => stepClicked(instruction.number-1)}
+                    />
+                </div>
+                <div className='step-box-right'>
+                    <p>{instruction.step}</p>
+                </div>
             </div>
-            <div className='step-box-right'>
-                {(clickedSteps.includes(instruction.number-1)) ?  <img src={check_mark} style={{maxHeight:'50px'}}></img> :
-                <p>{instruction.step}</p>
-                }
-            </div>
-        </div>
         </li>
-      ): <p>No Instructions</p>
+      ) : <p>No Instructions</p>
         
     const responsive = {
         superLargeDesktop: {
@@ -174,8 +177,12 @@ function RecipePage() {
             <section className="section">
                 <div className='box-main'>
                     <h1>{recipe.title}</h1>
-                    <Heart isClick={isClick} onClick={() => favoriteClick()} />
-                    <div className='save-button'>Save</div>
+                    <div className="action-buttons">
+                        <div className="heart-button">
+                            <Heart isClick={isClick} onClick={() => favoriteClick()} />
+                        </div>
+                        <div className='save-button'>Save</div>
+                    </div>
                 </div>
                 <div className="box-main">
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
@@ -198,9 +205,9 @@ function RecipePage() {
                     </ul>
                 </div>
                 <div className='box-main'>
-                <div>
-                    {finishbutton}
-                </div>
+                    <div className='finish-recipe' onClick={finishClick}>
+                        <h3>Finish Recipe</h3>
+                    </div>
                 </div>
             </section>
             <footer className="footer">
