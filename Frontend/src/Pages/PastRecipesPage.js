@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './PastRecipesPage.css';
 import wisk_icon from '../Components/Assets/wisk.png';
 import { useNavigate } from 'react-router-dom';
-import RecipeCard from '../Components/RecipeCard/RecipeCard';
 import axios from 'axios';
+import { FaStar } from 'react-icons/fa';
 
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const API_BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev";
@@ -31,6 +31,8 @@ function PastRecipesPage() {
                   "Content-Type": "application/json" 
                 }});
             const data = await response.json();
+            console.log('Full recipe history data:', data);
+            console.log('First recipe example:', data.recipes?.[0]);
             if(data) {
                 setHistory(data.recipes || []);
                 setFilteredHistory(data.recipes || []);
@@ -68,7 +70,8 @@ function PastRecipesPage() {
         window.scrollTo(0, 0);
         getHistory();
         getUserInfo();
-    }, []);
+    }, []); // Add comment to explain why we're ignoring the dependency warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         if (searchQuery) {
@@ -150,8 +153,43 @@ function PastRecipesPage() {
                     <div className="recipe-image">
                         <img src={currentRecipe.recipe.image} alt={currentRecipe.recipe.title} />
                     </div>
+                    <div className="recipe-rating" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        gap: '4px',
+                        margin: '10px 0'
+                    }}>
+                        {[...Array(5)].map((_, index) => (
+                            <FaStar
+                                key={index}
+                                size={20}
+                                style={{
+                                    color: index < (currentRecipe.rating || currentRecipe.personalRating || 0) ? '#ffc107' : '#e4e5e9'
+                                }}
+                            />
+                        ))}
+                        {currentRecipe.wouldCookAgain && (
+                            <span style={{ 
+                                marginLeft: '10px', 
+                                fontSize: '14px',
+                                color: '#0d4725'
+                            }}>
+                                • Would cook again: {currentRecipe.wouldCookAgain}
+                            </span>
+                        )}
+                    </div>
+                    <div className="recipe-origin" style={{
+                        textAlign: 'center',
+                        color: '#0d4725',
+                        fontSize: '14px',
+                        marginBottom: '10px'
+                    }}>
+                        Country of Origin: Not specified
+                    </div>
                     <div className="recipe-details">
-                        <p>{currentRecipe.recipe.summary?.replace(/<\/?[^>]+(>|$)/g, "")}</p>
+                        <p>{currentRecipe.recipe?.summary?.replace(/<\/?[^>]+(>|$)/g, "") || 
+                            "No description available for this recipe."}</p>
                     </div>
                     <div className="page-number">
                         Recipe {currentPage + 1} of {filteredHistory.length}

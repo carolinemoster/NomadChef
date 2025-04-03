@@ -355,3 +355,58 @@ html, body, #root {
 .logout-button:hover {
     color: #b71c1c;
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.survey-question {
+    margin: 1.5rem 0;
+}
+
+.ingredients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.cook-again-options {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.submit-survey {
+    background: #0d4725;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.submit-survey:hover {
+    background: #196033;
+}

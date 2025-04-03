@@ -21,7 +21,18 @@ export const userRecipeService = {
         });
 
         if (existingRecipe) {
-            throw new Error('Recipe already saved for this user');
+            // If recipe exists, update with new rating and wouldCookAgain
+            await recipesCollection.updateOne(
+                { _id: existingRecipe._id },
+                {
+                    $set: {
+                        personalRating: options.rating,
+                        wouldCookAgain: options.wouldCookAgain,
+                        updatedAt: new Date()
+                    }
+                }
+            );
+            return existingRecipe;
         }
 
         // Get recipe details from Spoonacular
@@ -32,8 +43,10 @@ export const userRecipeService = {
             userId: new ObjectId(userId),
             recipeId: recipeId,
             savedAt: new Date(),
+            updatedAt: new Date(), // Add this
             favorite: options.favorite || false,
-            personalRating: options.rating,
+            personalRating: options.rating || null, // Add null as fallback
+            wouldCookAgain: options.wouldCookAgain || null, // Add null as fallback
             notes: options.notes,
             tags: options.tags || [],
             recipe: {
@@ -42,7 +55,8 @@ export const userRecipeService = {
                 servings: recipeDetails.servings,
                 readyInMinutes: recipeDetails.readyInMinutes,
                 sourceName: recipeDetails.sourceName,
-                sourceUrl: recipeDetails.sourceUrl
+                sourceUrl: recipeDetails.sourceUrl,
+                summary: recipeDetails.summary // Add this
             }
         };
 

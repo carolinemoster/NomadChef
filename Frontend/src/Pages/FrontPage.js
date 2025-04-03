@@ -155,6 +155,17 @@ function FrontPage() {
         }
     };
 
+    const CustomProgressBar = () => {
+        return (
+            <ProgressBar 
+                bgColor='#0d4725' 
+                width='100%' 
+                className='progress-bar' 
+                completed={Math.round((completedCountriesCount/195)*100)}
+            />
+        );
+    };
+
     return (
         <div className="front-page">
             <nav className="navbar background">
@@ -209,7 +220,7 @@ function FrontPage() {
                     </div>
                 </div>
                 <div className='box-main'>
-                    <ProgressBar bgColor='#0d4725' width='100%' className='progress-bar' completed={Math.round((completedCountriesCount/195)*100)}/>
+                    <CustomProgressBar />
                 </div>
             </section>
             <section className="section">
