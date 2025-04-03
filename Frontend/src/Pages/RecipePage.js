@@ -11,6 +11,7 @@ import Heart from "react-animated-heart"
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 const BASE_SPOON = "https://api.spoonacular.com/recipes/"
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
+const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/updateUserCountries"
 
 function RecipePage() {
     const location = useLocation();
@@ -37,6 +38,24 @@ function RecipePage() {
         getInstructions(RecipeID);
         
       };
+      
+      const setCountry = async (countryCode) => {
+        const payload = {
+            code: countryCode
+        }
+        const token = localStorage.getItem('authToken'); 
+        console.log("Setting countries...")
+        const response = await fetch(BASE_USER_COUNTRIES, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+          });
+        const jsonResponse = await response.json();
+        console.log(jsonResponse)
+    };
     const favoriteClick = async () => {
         setClick(!isClick);
         const token = localStorage.getItem('authToken');

@@ -125,6 +125,10 @@ html, body, #root {
     margin-top: 40px;
 }
 
+.progress-bar {
+    width: 100%;
+}
+
 .text-footer {
     color: #fff;
     text-align: center;
@@ -194,6 +198,7 @@ html, body, #root {
 
 .secondhalf {
   width: 80%;
+  min-width: 80%;
   justify-content: center;
   align-items: center;
 }
