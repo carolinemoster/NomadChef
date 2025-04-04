@@ -1,11 +1,10 @@
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import { recipeService } from './recipeService.mjs';
 
-// Initialize OpenAI
-const configuration = new Configuration({
+// Initialize OpenAI with the new pattern
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-const openai = new OpenAIApi(configuration);
 
 export const culturalContextService = {
   // Extract geographic origin from recipe
@@ -13,12 +12,12 @@ export const culturalContextService = {
     try {
       const recipeText = `${recipe.title} ${recipe.summary || ''} ${recipe.instructions || ''}`;
       
-      const response = await openai.createChatCompletion({
-        model: "gpt-4",
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are a culinary geography expert. Extract the country, region, and locality of origin for recipes. Return JSON with country, region, and locality fields. If any field is unknown, set it to null."
+            content: "You are a culinary geography expert. Extract the country, region, and locality of origin for recipes. Return ONLY a JSON object with country, region, and locality fields. If any field is unknown, set it to null. If any field is unknown, set it to null."
           },
           {
             role: "user",
@@ -26,10 +25,11 @@ export const culturalContextService = {
           }
         ],
         temperature: 0.3,
-        max_tokens: 150
+        max_tokens: 150,
+        response_format: { type: "json_object" }
       });
       
-      const result = JSON.parse(response.data.choices[0].message.content);
+      const result = JSON.parse(response.choices[0].message.content);
       return {
         country: result.country,
         region: result.region,
@@ -52,8 +52,8 @@ export const culturalContextService = {
         .filter(Boolean)
         .join(", ");
         
-      const response = await openai.createChatCompletion({
-        model: "gpt-4",
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -68,7 +68,7 @@ export const culturalContextService = {
         max_tokens: 400
       });
       
-      return response.data.choices[0].message.content;
+      return response.choices[0].message.content;
     } catch (error) {
       console.error('Error generating cultural context:', error);
       return null;
@@ -106,7 +106,7 @@ export const culturalContextService = {
       const culturalContext = await this.generateCulturalContext(origin);
       
       return {
-        recipeId: recipe.id,
+        recipeId: recipe.id || null,
         origin,
         culturalContext
       };
