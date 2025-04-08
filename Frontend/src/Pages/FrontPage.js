@@ -81,7 +81,6 @@ function FrontPage() {
               "Content-Type": "application/json"
             }});
         const jsonResponse = await response.json();
-        console.log(jsonResponse.countriesCompletedIDs[0]);
         setCountriesCount(jsonResponse.countriesCompleted);
         setCountries(jsonResponse.countriesCompletedIDs || []);
     }

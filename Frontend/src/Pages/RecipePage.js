@@ -8,12 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import Heart from "react-animated-heart"
 import { FaStar } from 'react-icons/fa';
 
+
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 const BASE_SPOON = "https://api.spoonacular.com/recipes/"
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/updateUserCountries"
 const API_BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev"
-
+const BASE_ORIGIN = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/culture"
 const StarRating = ({ rating, setRating }) => {
     return (
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -165,6 +166,8 @@ function RecipePage() {
     const [instructions, setInstructions] = useState([]);
     const [isClick, setClick] = useState(false);
     const [showSurvey, setShowSurvey] = useState(false);
+    const { getCode, getName } = require('country-list');
+    const [recipeOrigin, setRecipeOrigin] = useState();
     const recipedata = {
         recipeId: RecipeID
     };
@@ -185,7 +188,7 @@ function RecipePage() {
       
       const setCountry = async (countryCode) => {
         const payload = {
-            code: countryCode
+            code: countryCode.toLowerCase()
         }
         const token = localStorage.getItem('authToken'); 
         await fetch(BASE_USER_COUNTRIES, {
@@ -217,12 +220,37 @@ function RecipePage() {
           );
     };
     
+    const getOrigin = async (recipeData) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const recipeOriginresponse = await fetch(`${BASE_ORIGIN}/origin`, {
+                method: 'POST',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(recipeData)
+            });
+
+            if(!recipeOriginresponse.ok) {
+                throw new Error("Error getting recipe origin");
+            }
+            const recOrigin = await recipeOriginresponse.json();
+            //console.log(recOrigin.origin.country);
+            setRecipeOrigin(recOrigin.origin);
+        }
+        catch {
+            console.error("Error getting recipe origin");
+        }
+    }
     const getRecipe = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
           const response = await fetch(`${BASE_URL}detail?id=${recipeID}`);
           const data = await response.json();
           setRecipe(data);
+          getOrigin(data);
       }
+      
       const getInstructions = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
         const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&stepBreakdown=true`);
@@ -298,8 +326,11 @@ function RecipePage() {
             }
 
             // Update the country if available
-            if (recipe.cuisineCountry) {
-                await setCountry(recipe.cuisineCountry);
+            console.log("sending country");
+            console.log(recipeOrigin.country);
+            console.log(getCode(recipeOrigin.country));
+            if (getCode(recipeOrigin.country)) {
+                await setCountry(getCode(recipeOrigin.country));
             }
             
             navigate('/home');
