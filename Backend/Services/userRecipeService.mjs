@@ -21,32 +21,38 @@ export const userRecipeService = {
         });
 
         if (existingRecipe) {
-            // If recipe exists, update with new rating and wouldCookAgain
+            // If recipe exists, update with new data
+            const updateData = {
+                updatedAt: new Date()
+            };
+
+            // Only update fields that are provided
+            if (options.rating !== undefined) updateData.personalRating = options.rating;
+            if (options.wouldCookAgain !== undefined) updateData.wouldCookAgain = options.wouldCookAgain;
+            if (options.origin) updateData['recipe.origin'] = options.origin;
+            if (options.culturalContext) updateData['recipe.culturalContext'] = options.culturalContext;
+
             await recipesCollection.updateOne(
                 { _id: existingRecipe._id },
-                {
-                    $set: {
-                        personalRating: options.rating,
-                        wouldCookAgain: options.wouldCookAgain,
-                        updatedAt: new Date()
-                    }
-                }
+                { $set: updateData }
             );
-            return existingRecipe;
+            
+            // Return updated recipe
+            return await recipesCollection.findOne({ _id: existingRecipe._id });
         }
 
         // Get recipe details from Spoonacular
         const recipeDetails = await recipeService.getRecipeById(recipeId);
         
-        // Prepare recipe document
+        // Prepare recipe document with cultural information if provided
         const savedRecipe = {
             userId: new ObjectId(userId),
             recipeId: recipeId,
             savedAt: new Date(),
-            updatedAt: new Date(), // Add this
+            updatedAt: new Date(),
             favorite: options.favorite || false,
-            personalRating: options.rating || null, // Add null as fallback
-            wouldCookAgain: options.wouldCookAgain || null, // Add null as fallback
+            personalRating: options.rating || null,
+            wouldCookAgain: options.wouldCookAgain || null,
             notes: options.notes,
             tags: options.tags || [],
             recipe: {
@@ -56,7 +62,10 @@ export const userRecipeService = {
                 readyInMinutes: recipeDetails.readyInMinutes,
                 sourceName: recipeDetails.sourceName,
                 sourceUrl: recipeDetails.sourceUrl,
-                summary: recipeDetails.summary // Add this
+                summary: recipeDetails.summary,
+                // Include cultural information if provided, otherwise use existing or null
+                origin: options.origin || recipeDetails.origin || null,
+                culturalContext: options.culturalContext || recipeDetails.culturalContext || null
             }
         };
 

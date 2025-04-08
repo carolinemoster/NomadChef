@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import './PromptBox.css';
@@ -58,7 +57,7 @@ const PromptBox = () => {
   };
 
   return (
-    <div>
+    <div className="prompt-container">
         <div className="glassmorphic-box">
             <input
                 type="text"
@@ -67,14 +66,14 @@ const PromptBox = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-        <button className="send-button" onClick={handleSend}>
-          <Send />
-        </button>
-      </div>
-      <div>
-      <ul>{listrecipes}</ul>
-      </div>
-      </div>
+            <button className="send-button" onClick={handleSend}>
+                <Send />
+            </button>
+        </div>
+        <div className="results-container">
+            <ul>{listrecipes}</ul>
+        </div>
+    </div>
   );
 };
 
