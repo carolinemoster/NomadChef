@@ -1,18 +1,26 @@
 import { userRecipeService } from '../Services/userRecipeService.mjs';
 import { verifyToken } from './authHandler.mjs';
+import fetch from 'node-fetch';
 
 const BASE_URL = process.env.BASE_URL;
 
-// Reuse your existing formatResponse helper
-const formatResponse = (statusCode, body) => ({
-    statusCode,
-    headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-    },
-    body: JSON.stringify(body)
-});
+// Update the formatResponse helper to handle status codes
+const formatResponse = (statusCodeOrData, data = null) => {
+    const isStatusCode = typeof statusCodeOrData === 'number';
+    const statusCode = isStatusCode ? statusCodeOrData : 200;
+    const responseData = isStatusCode ? data : statusCodeOrData;
+
+    return {
+        statusCode: statusCode,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(responseData)
+    };
+};
 
 // Helper to parse request body
 const parseBody = (event) => {
@@ -31,6 +39,20 @@ export const handler = async (event) => {
         const decoded = verifyToken(event);
         if (!decoded) {
             return formatResponse(401, { error: 'Unauthorized' });
+        }
+
+        // Handle OPTIONS requests first
+        if (event.httpMethod === 'OPTIONS') {
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+                    'Content-Type': 'application/json'
+                },
+                body: ''
+            };
         }
 
         // Single path with different methods
@@ -74,43 +96,51 @@ export const handler = async (event) => {
                 }
 
                 case 'GET': {
-                    const { 
-                        page, 
-                        limit, 
-                        favoritesOnly, 
-                        tags,
-                        sortBy,
-                        sortOrder
-                    } = event.queryStringParameters || {};
-                    
-                    // Parse options from query parameters
-                    const options = {
-                        page: page ? parseInt(page) : 1,
-                        limit: limit ? parseInt(limit) : 20
-                    };
-                    
-                    // Add optional filters
-                    if (favoritesOnly === 'true') {
-                        options.favoritesOnly = true;
-                    }
-                    
-                    if (tags) {
-                        options.tags = tags.split(',');
-                    }
-                    
-                    if (sortBy) {
-                        options.sortBy = sortBy;
-                        options.sortOrder = sortOrder || 'desc';
-                    }
-                    
                     try {
+                        console.log('Processing GET request for user recipes');
+                        const { 
+                            page, 
+                            limit, 
+                            favoritesOnly, 
+                            tags,
+                            sortBy,
+                            sortOrder
+                        } = event.queryStringParameters || {};
+                        
+                        // Parse options from query parameters
+                        const options = {
+                            page: page ? parseInt(page) : 1,
+                            limit: limit ? parseInt(limit) : 20
+                        };
+                        
+                        // Add optional filters
+                        if (favoritesOnly === 'true') {
+                            options.favoritesOnly = true;
+                        }
+                        
+                        if (tags) {
+                            options.tags = tags.split(',');
+                        }
+                        
+                        if (sortBy) {
+                            options.sortBy = sortBy;
+                            options.sortOrder = sortOrder || 'desc';
+                        }
+                        
+                        console.log('Fetching user recipes with options:', options);
                         const userRecipes = await userRecipeService.getUserRecipes(decoded.id, options);
+                        console.log('Successfully retrieved user recipes');
+                        
                         return formatResponse(200, userRecipes);
                     } catch (error) {
+                        console.error('Error in GET /user-recipe:', error);
                         if (error.message === 'User not found') {
                             return formatResponse(404, { error: error.message });
                         }
-                        throw error;
+                        return formatResponse(500, { 
+                            error: 'Internal server error',
+                            message: process.env.NODE_ENV === 'development' ? error.message : undefined
+                        });
                     }
                 }
 
@@ -132,13 +162,9 @@ export const handler = async (event) => {
         return formatResponse(404, { error: 'Route not found' });
     } catch (error) {
         console.error('Error:', error);
-        
-        if (error.message === 'Invalid request body') {
-            return formatResponse(400, { error: error.message });
-        }
-
-        return formatResponse(500, { 
-            error: 'Internal server error',
+        const statusCode = error.message === 'Invalid request body' ? 400 : 500;
+        return formatResponse(statusCode, { 
+            error: statusCode === 500 ? 'Internal server error' : error.message,
             message: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

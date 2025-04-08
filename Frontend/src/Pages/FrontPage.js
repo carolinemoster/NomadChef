@@ -61,61 +61,85 @@ function FrontPage() {
     const [history, setHistory] = useState([]);
     const [completedCountries, setCountries] = useState([]);
     const [completedCountriesCount, setCountriesCount] = useState(0);
-    const historylist = history.length > 0 ? history.map((item) => 
-        <div onClick={() => recipeClicked(item.recipeId)}>
-        <RecipeCard image= {item.recipe.image} name={item.recipe.title}> </RecipeCard>
+    const historylist = history && history.length > 0 ? history.map((item, index) => 
+        <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
+            <RecipeCard 
+                image={item.recipe?.image} 
+                name={item.recipe?.title}
+            /> 
         </div>
-    ) :
-    <p></p>
+    ) : <p>No recipe history available</p>;
 
     const recipeClicked = (recipeID) => {
         navigate('/Recipe', {state: {recipeID}});
       }
-    const getCountries= async () => {
-        const token = localStorage.getItem('authToken'); 
-        console.log("Setting countries...")
-        const response = await fetch(BASE_USER_COUNTRIES, {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            }});
-        const jsonResponse = await response.json();
-        console.log(jsonResponse.countriesCompletedIDs[0]);
-        setCountriesCount(jsonResponse.countriesCompleted);
-        setCountries(jsonResponse.countriesCompletedIDs || []);
-    }
-    const getHistory = async () => {  
-        const token = localStorage.getItem('authToken'); 
-        const response = await fetch(BASE_USER_RECIPES, {
-            method: "GET",  
-            headers: {
-              "Authorization": `Bearer ${token}`, 
-              "Content-Type": "application/json" 
-            }});
-        const data = await response.json();
-        if(data) {
-            setHistory(data.recipes || []);
+    const getCountries = async () => {
+        try {
+            const token = localStorage.getItem('authToken'); 
+            console.log("Setting countries...");
+            const response = await fetch(BASE_USER_COUNTRIES, {
+                method: "GET",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                  "Content-Type": "application/json"
+                }
+            });
+            const jsonResponse = await response.json();
+            
+            // Check if the response has the expected properties
+            const countriesCompleted = jsonResponse.countriesCompleted || 0;
+            const countriesCompletedIDs = jsonResponse.countriesCompletedIDs || [];
+            
+            console.log("Countries completed:", countriesCompleted);
+            console.log("Completed country IDs:", countriesCompletedIDs);
+            
+            setCountriesCount(countriesCompleted);
+            setCountries(countriesCompletedIDs);
+        } catch (error) {
+            console.error("Error fetching countries:", error);
+            // Set default values in case of error
+            setCountriesCount(0);
+            setCountries([]);
         }
     }
+    const getHistory = async () => {  
+        try {
+            const token = localStorage.getItem('authToken'); 
+            console.log("Fetching recipe history...");
+            
+            const response = await fetch(BASE_USER_RECIPES, {
+                method: "GET",  
+                headers: {
+                    "Authorization": `Bearer ${token}`, 
+                    "Content-Type": "application/json" 
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Recipe history received:", data);
+
+            // Make sure we have recipes before setting them
+            if (data && Array.isArray(data.recipes)) {
+                setHistory(data.recipes);
+            } else {
+                console.log("No recipes found in response:", data);
+                setHistory([]);
+            }
+        } catch (error) {
+            console.error("Error fetching recipe history:", error);
+            setHistory([]);
+        }
+    };
     useEffect(() => {
         window.scrollTo(0, 0);
         getHistory();
         getCountries();
 
     }, []);
-
-    const handleZoomIn = () => {
-        if (zoom < 4) {
-            setZoom(zoom + 0.5);
-        }
-    };
-
-    const handleZoomOut = () => {
-        if (zoom > 0.5) {
-            setZoom(zoom - 0.5);
-        }
-    };
 
     const handleAccountClick = () => {
         navigate('/account');
@@ -175,22 +199,18 @@ function FrontPage() {
                 </div>
                 <div className='list-items'>             
                     <ul className="nav-list">
-                        <li><a href="#courses">About</a></li>
-                        <li><button onClick={handlePastRecipesClick} className='nav-button'>Past Recipes</button></li>
-                        <li><a href="#jobs">Settings</a></li>
                         <li>
-                            <button 
-                                onClick={handleAccountClick} 
-                                className="nav-button"
-                            >
+                            <button onClick={handlePastRecipesClick} className='nav-button'>
+                                Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleAccountClick} className='nav-button'>
                                 Account
                             </button>
                         </li>
                         <li>
-                            <button 
-                                onClick={handleLogout} 
-                                className="nav-button logout-button"
-                            >
+                            <button onClick={handleLogout} className='nav-button logout-button'>
                                 Logout
                             </button>
                         </li>
@@ -201,21 +221,14 @@ function FrontPage() {
             <section className="section">
                 <div className="box-main">
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
-                        <div className="map-controls">
-                            <button onClick={handleZoomIn}>+</button>
-                            <button onClick={handleZoomOut}>-</button>
-                        </div>
-                        
                         <div>
-                        <Map>
-                        <VectorMap
-                            {...worldMap}
-                            style={{ width: "80%", height: "100%" }}
-                            checkedLayers={completedCountries}
-                            
-                            
-                        />
-                        </Map>
+                            <Map>
+                                <VectorMap
+                                    {...worldMap}
+                                    style={{ width: "80%", height: "100%" }}
+                                    checkedLayers={completedCountries}
+                                />
+                            </Map>
                         </div>
                     </div>
                 </div>
@@ -224,9 +237,7 @@ function FrontPage() {
                 </div>
             </section>
             <section className="section">
-                <div className="box-main">
-                    <PromptBox/>
-                </div>
+                <PromptBox/>
             </section>
             <section className="section">
                 <h1>History</h1>

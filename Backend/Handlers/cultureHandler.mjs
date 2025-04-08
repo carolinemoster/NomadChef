@@ -89,14 +89,28 @@ export const handler = async (event) => {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
 
-                const { origin } = parseBody(event);
+                const requestData = parseBody(event);
+                console.log('Received request data:', requestData);
                 
-                if (!origin) {
-                    return formatResponse(400, { error: 'Origin data is required' });
+                if (!requestData.recipeId) {
+                    return formatResponse(400, { error: 'Recipe ID is required' });
                 }
 
-                const culturalContext = await culturalContextService.generateCulturalContext(origin);
-                return formatResponse(200, { culturalContext });
+                try {
+                    console.log('Checking Spoonacular API Key:', process.env.SPOONACULAR_API_KEY ? 'Present' : 'Missing');
+                    console.log('Attempting to enrich recipe:', requestData.recipeId);
+                    const culturalContext = await culturalContextService.enrichRecipeWithCulturalContext(requestData.recipeId);
+                    console.log('Cultural context result:', culturalContext);
+                    return formatResponse(200, culturalContext);
+                } catch (error) {
+                    console.error('Detailed error in cultural context:', error);
+                    console.error('Error stack:', error.stack);
+                    return formatResponse(500, { 
+                        error: 'Failed to get cultural context',
+                        details: error.message,
+                        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                    });
+                }
             }
 
             default:
@@ -122,4 +136,50 @@ export const handler = async (event) => {
             message: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
+};
+
+export const getRecipeCulture = async (event) => {
+    try {
+        // Your existing code...
+        
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Or specify your frontend URL
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                origin: origin,
+                culturalContext: culturalContext
+            })
+        };
+    } catch (error) {
+        console.error('Error:', error);
+        return {
+            statusCode: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*', // Or specify your frontend URL
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ error: 'Failed to get cultural context' })
+        };
+    }
+};
+
+// Add this handler for OPTIONS requests
+export const handleOptions = async (event) => {
+    return {
+        statusCode: 200,
+        headers: {
+            'Access-Control-Allow-Origin': '*', // Or specify your frontend URL
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    };
 };

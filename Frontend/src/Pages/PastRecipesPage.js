@@ -98,6 +98,11 @@ function PastRecipesPage() {
         navigate('/account');
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('authToken');
+        navigate('/');
+    };
+
     const recipeClicked = (recipeID) => {
         navigate('/Recipe', {state: {recipeID}});
     };
@@ -185,11 +190,24 @@ function PastRecipesPage() {
                         fontSize: '14px',
                         marginBottom: '10px'
                     }}>
-                        Country of Origin: Not specified
+                        {currentRecipe.recipe.origin ? (
+                            <div>
+                                <strong>Origin:</strong> {[
+                                    currentRecipe.recipe.origin.locality,
+                                    currentRecipe.recipe.origin.region,
+                                    currentRecipe.recipe.origin.country
+                                ].filter(Boolean).join(', ')}
+                            </div>
+                        ) : (
+                            "Origin: Not specified"
+                        )}
                     </div>
                     <div className="recipe-details">
-                        <p>{currentRecipe.recipe?.summary?.replace(/<\/?[^>]+(>|$)/g, "") || 
-                            "No description available for this recipe."}</p>
+                        {currentRecipe.recipe.culturalContext ? (
+                            <p>{currentRecipe.recipe.culturalContext}</p>
+                        ) : (
+                            <p>No cultural context available for this recipe.</p>
+                        )}
                     </div>
                     <div className="page-number">
                         Recipe {currentPage + 1} of {filteredHistory.length}
@@ -215,15 +233,19 @@ function PastRecipesPage() {
                 </div>
                 <div className='list-items'>             
                     <ul className="nav-list">
-                        <li><a href="#courses">About</a></li>
-                        <li><button onClick={handlePastRecipesClick} className='nav-button'>Past Recipes</button></li>
-                        <li><a href="#jobs">Settings</a></li>
                         <li>
-                            <button 
-                                onClick={handleAccountClick} 
-                                className="nav-button"
-                            >
+                            <button onClick={handlePastRecipesClick} className='nav-button'>
+                                Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleAccountClick} className='nav-button'>
                                 Account
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleLogout} className='nav-button logout-button'>
+                                Logout
                             </button>
                         </li>
                     </ul>
