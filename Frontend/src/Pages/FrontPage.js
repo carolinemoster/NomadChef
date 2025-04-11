@@ -9,7 +9,9 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
+import SmallRecipeCard from '../Components/SmallRecipeCard/SmallRecipeCard';
 import ProgressBar from '@ramonak/react-progress-bar'
+import { Swiper, SwiperSlide } from 'swiper/react';
 const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
@@ -59,12 +61,31 @@ function FrontPage() {
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
+    const { getCode, getName } = require('country-list');
+    const [selectedCountryList, setSelectedCountryList] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState(null);
     const [completedCountries, setCountries] = useState([]);
     const [completedCountriesCount, setCountriesCount] = useState(0);
     const mapLayerProps = {
-        onClick: ({ target }) => setSelectedCountry(target.attributes.name.value),
+        onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
       };
+    const handleCountryClick = (countrySelect) => {
+        setSelectedCountry(countrySelect);
+        console.log(selectedCountryList)
+        console.log("First element:")
+        console.log(history[0])
+        if(countrySelect !== undefined) {
+            setSelectedCountryList(history.filter(r => r.recipe.origin && r.recipe.origin.country === countrySelect));
+        }
+    }
+    const selectedCountryListBoxes = selectedCountryList && selectedCountryList.length > 0 ? selectedCountryList.map((item,index) =>
+        <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
+    <SmallRecipeCard 
+        image={item.recipe?.image} 
+        name={item.recipe?.title}
+    /> 
+</div>
+) : <p></p>;
     const historylist = history && history.length > 0 ? history.map((item, index) => 
         <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
             <RecipeCard 
@@ -144,6 +165,20 @@ function FrontPage() {
         getCountries();
 
     }, []);
+    const [startIndex, setStartIndex] = useState(0);
+    const endIndex = startIndex + 3;
+
+    const showNext = () => {
+        if (endIndex < selectedCountryList.length) {
+        setStartIndex(startIndex + 3);
+        }
+    };
+
+    const showPrev = () => {
+        if (startIndex >= 3) {
+        setStartIndex(startIndex - 3);
+        }
+    };
 
     const handleAccountClick = () => {
         navigate('/account');
@@ -226,6 +261,7 @@ function FrontPage() {
                 <div className="box-main">
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
                         <div>
+                            
                             <Map>
                                 <VectorMap
                                     {...worldMap}
@@ -234,6 +270,18 @@ function FrontPage() {
                                     layerProps={mapLayerProps}
                                 />
                             </Map>
+                            
+                            
+                            <Swiper
+                                direction={'horizontal'}
+                                slidesPerView={3}
+                                spaceBetween={20}
+                                mousewheel={true}
+                                navigation={true}
+                            >
+                                {selectedCountryListBoxes}
+                            </Swiper>
+                            
                         </div>
                     </div>
                 </div>
