@@ -104,6 +104,46 @@ html, body, #root {
     padding: 20px;
 }
 
+.recipe-list-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fefefe;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  .recipe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+
+  .map-box {
+    display:flex; 
+    flex-direction: row;
+    max-width: 100%;
+  }
+  .recipe-list-nav-button {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .recipe-list-nav-button:hover:not(:disabled) {
+    color: #333;
+  }
+  
+  .recipe-list-nav-button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
 .product-box {
     background: #eaeaea;
     border-radius: 15px;

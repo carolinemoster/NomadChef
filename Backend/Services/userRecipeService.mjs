@@ -31,7 +31,7 @@ export const userRecipeService = {
             if (options.wouldCookAgain !== undefined) updateData.wouldCookAgain = options.wouldCookAgain;
             if (options.origin) updateData['recipe.origin'] = options.origin;
             if (options.culturalContext) updateData['recipe.culturalContext'] = options.culturalContext;
-
+            if (options.favorite !== undefined) updateData.favorite = options.favorite;
             await recipesCollection.updateOne(
                 { _id: existingRecipe._id },
                 { $set: updateData }
