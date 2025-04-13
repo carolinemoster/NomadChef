@@ -188,6 +188,7 @@ function RecipePage() {
     const [instructions, setInstructions] = useState([]);
     const [isClick, setClick] = useState(false);
     const [showSurvey, setShowSurvey] = useState(false);
+    const { getCode, getName } = require('country-list');
     const recipedata = {
         recipeId: RecipeID
     };
@@ -223,7 +224,7 @@ function RecipePage() {
       
       const setCountry = async (countryCode) => {
         const payload = {
-            code: countryCode
+            code: countryCode.toLowerCase()
         }
         const token = localStorage.getItem('authToken'); 
         await fetch(BASE_USER_COUNTRIES, {
@@ -237,6 +238,8 @@ function RecipePage() {
     };
     const favoriteClick = async () => {
         setClick(!isClick);
+        console.log("Saved?:")
+        console.log(isClick);
         const token = localStorage.getItem('authToken');
         await fetch(BASE_USER_RECIPES, {
             method: "POST",
@@ -244,7 +247,9 @@ function RecipePage() {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(recipedata)
+            body: JSON.stringify({...recipedata,
+                favorite: !isClick
+            })
         });
     };
     const stepClicked = (index) => {
@@ -277,7 +282,7 @@ function RecipePage() {
             if (userRecipesResponse.ok) {
                 const userRecipes = await userRecipesResponse.json();
                 const savedRecipe = userRecipes.recipes.find(r => r.recipeId === recipeID);
-                
+                setClick(savedRecipe.favorite);
                 if (savedRecipe?.recipe?.origin && savedRecipe?.recipe?.culturalContext) {
                     console.log('Found existing cultural information');
                     setCulturalContext(savedRecipe.recipe.culturalContext);
@@ -374,14 +379,15 @@ function RecipePage() {
                 body: JSON.stringify({
                     recipeId: RecipeID,
                     rating: parseInt(surveyData.rating),
-                    wouldCookAgain: surveyData.wouldCookAgain
+                    wouldCookAgain: surveyData.wouldCookAgain,
+                    favorite: isClick
                 })
             });
 
             if (!recipeUpdateResponse.ok) {
                 throw new Error('Recipe update failed');
             }
-
+            
             // Then handle the disliked ingredients update
             const userDataResponse = await fetch(`${API_BASE_URL}/auth/getUserData`, {
                 method: 'GET',
@@ -426,8 +432,8 @@ function RecipePage() {
             }
 
             // Update the country if available
-            if (recipe.cuisineCountry) {
-                await setCountry(recipe.cuisineCountry);
+            if (origin.country) {
+                await setCountry(getCode(origin.country));
             }
             
             navigate('/home');
@@ -521,7 +527,7 @@ function RecipePage() {
                         <div className="heart-button">
                             <Heart isclick={isClick} onClick={() => favoriteClick()} />
                         </div>
-                        <div className='save-button'>Save</div>
+                        <div className='save-button' onClick={() => favoriteClick()}>{isClick ? "Saved" : "Save"}</div>
                     </div>
                 </div>
 
