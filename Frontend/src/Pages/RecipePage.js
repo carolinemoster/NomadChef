@@ -223,18 +223,35 @@ function RecipePage() {
       };
       
       const setCountry = async (countryCode) => {
+        if (!countryCode) {
+            console.error("Invalid country code:", countryCode);
+            return;
+        }
+        
         const payload = {
             code: countryCode.toLowerCase()
+        };
+        
+        try {
+            const token = localStorage.getItem('authToken'); 
+            const response = await fetch(BASE_USER_COUNTRIES, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update country');
+            }
+            
+            const data = await response.json();
+            console.log("Country update successful:", data);
+        } catch (error) {
+            console.error("Error updating country:", error);
         }
-        const token = localStorage.getItem('authToken'); 
-        await fetch(BASE_USER_COUNTRIES, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
     };
     const favoriteClick = async () => {
         setClick(!isClick);
@@ -282,18 +299,23 @@ function RecipePage() {
             if (userRecipesResponse.ok) {
                 const userRecipes = await userRecipesResponse.json();
                 const savedRecipe = userRecipes.recipes.find(r => r.recipeId === recipeID);
-                setClick(savedRecipe.favorite);
-                if (savedRecipe?.recipe?.origin && savedRecipe?.recipe?.culturalContext) {
-                    console.log('Found existing cultural information');
-                    setCulturalContext(savedRecipe.recipe.culturalContext);
-                    setOrigin(savedRecipe.recipe.origin);
-                    setRecipe({
-                        ...data,
-                        origin: savedRecipe.recipe.origin,
-                        culturalContext: savedRecipe.recipe.culturalContext
-                    });
-                    setIsLoading(false);
-                    return;
+                
+                // Check if savedRecipe exists before accessing its properties
+                if (savedRecipe) {
+                    setClick(savedRecipe.favorite || false);
+                    
+                    if (savedRecipe.recipe?.origin && savedRecipe.recipe?.culturalContext) {
+                        console.log('Found existing cultural information');
+                        setCulturalContext(savedRecipe.recipe.culturalContext);
+                        setOrigin(savedRecipe.recipe.origin);
+                        setRecipe({
+                            ...data,
+                            origin: savedRecipe.recipe.origin,
+                            culturalContext: savedRecipe.recipe.culturalContext
+                        });
+                        setIsLoading(false);
+                        return;
+                    }
                 }
             }
 
@@ -432,13 +454,43 @@ function RecipePage() {
             }
 
             // Update the country if available
-            if (origin.country) {
-                await setCountry(getCode(origin.country));
+            if (origin && origin.country) {
+                console.log("Attempting to update country for:", origin.country);
+                const countryCode = getCode(origin.country);
+                
+                if (countryCode) {
+                    console.log("Valid country code found:", countryCode);
+                    await fetch(BASE_USER_COUNTRIES, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            code: countryCode.toLowerCase()
+                        })
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to update country');
+                        }
+                        return response.json();
+                    }).then(data => {
+                        console.log("Country update successful:", data);
+                    });
+                } else {
+                    console.warn("Could not find valid country code for:", origin.country);
+                }
+            } else {
+                console.log("No valid country information available for this recipe");
             }
+            
+            // After successful submission, trigger recommended recipes reload
+            localStorage.setItem('recipeCompleted', Date.now().toString());
             
             navigate('/home');
         } catch (error) {
             console.error('Error updating preferences:', error);
+            console.error('Error details:', error.message);
             navigate('/home');
         }
     };
