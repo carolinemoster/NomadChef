@@ -3,7 +3,6 @@ name: CI/CD for NomadChef backend services
 on:
   push:
     branches:
-      - recommendationService
       - main
   pull_request:
     branches: [ main ]
@@ -34,7 +33,7 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
-    
+
     #- name: Run tests
     #  run: npm test
     #  env:
@@ -99,6 +98,7 @@ jobs:
     #       --zip-file fileb://function.zip
     
     # - name: Deploy lambda function to recipe service
+
     #   run: |
     #     aws lambda update-function-code \
     #       --function-name ${{ secrets.RECIPE_SERVICE_ARN }} \
@@ -115,9 +115,3 @@ jobs:
     #     aws lambda update-function-code \
     #       --function-name ${{ secrets.CULTURE_SERVICE_ARN }} \
     #       --zip-file fileb://function.zip
-
-    - name: Deploy lambda function to recommendation service
-      run: |
-        aws lambda update-function-code \
-          --function-name ${{ secrets.RECOMMENDATION_SERVICE_ARN }} \
-          --zip-file fileb://function.zip

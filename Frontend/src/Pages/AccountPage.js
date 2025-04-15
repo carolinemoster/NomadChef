@@ -50,12 +50,16 @@ const AccountPage = () => {
         }
     }, [userData]);
 
-    const handleAccountClick = () => {
-        navigate('/account');
-    };
-
     const handleBrandClick = () => {
         navigate('/home');
+    };
+
+    const handlePastRecipesClick = () => {
+        navigate('/pastrecipes');
+    };
+
+    const handleAccountClick = () => {
+        navigate('/account');
     };
 
     const handleEdit = () => {
@@ -166,15 +170,18 @@ const AccountPage = () => {
                 </div>
                 <div className='list-items'>             
                     <ul className="nav-list">
-                        <li><a href="#courses">About</a></li>
-                        <li><a href="#tutorials">Past Recipes</a></li>
-                        <li><a href="#jobs">Settings</a></li>
-                        <li><a onClick={handleAccountClick} style={{cursor: 'pointer'}}>Account</a></li>
                         <li>
-                            <button 
-                                onClick={handleLogout} 
-                                className="nav-button logout-button"
-                            >
+                            <button onClick={handlePastRecipesClick} className='nav-button'>
+                                Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleAccountClick} className='nav-button'>
+                                Account
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleLogout} className='nav-button logout-button'>
                                 Logout
                             </button>
                         </li>

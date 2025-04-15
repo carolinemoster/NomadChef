@@ -107,6 +107,70 @@ export function verifyToken(token) {
         return null;
     }
 }
+export async function getUserCountries(userId) {
+    try {
+        const db = await getDb();
+        const usersCollection = db.collection('users');
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)), countriesCompleted: { $exists: false } },
+            { $set: { countriesCompleted: 0, countriesCompletedIDs: [] } }
+        );
+        const userCountries = await usersCollection.findOne({ _id: new ObjectId(String(userId)) }, { projection: { countriesCompletedIDs: 1, countriesCompleted: 1}});
+        if (!userCountries) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        return {
+            statusCode: 200,
+            body: userCountries
+        };
+
+    }
+    catch {
+        return {
+            statusCode: 404,
+            body: { error: 'Unable to fetch user countries' }
+        };
+    }
+} 
+export async function updateUserCountries(userId, countryCode) {
+    try {
+        const db = await getDb();
+        
+        // First verify user exists in users collection
+        const usersCollection = db.collection('users');
+        const user = await usersCollection.findOne({ _id: new ObjectId(String(userId)) });
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)), countriesCompleted: { $exists: false } },
+            { $set: { countriesCompleted: 0, countriesCompletedIDs: [] } }
+        );
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)) },
+            {
+                $addToSet: { countriesCompletedIDs: countryCode.code },
+                $inc: { countriesCompleted: 1 }
+            }
+        );
+        return {
+            statusCode: 200,
+            body: countryCode
+        }
+    }
+    catch {
+        return {
+            statusCode: 404,
+            body: { error: 'Unable to update user countries' }
+        };
+    }
+}
 
 export async function getUserData(id) {
     try {

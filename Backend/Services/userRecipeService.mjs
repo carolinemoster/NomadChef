@@ -21,19 +21,38 @@ export const userRecipeService = {
         });
 
         if (existingRecipe) {
-            throw new Error('Recipe already saved for this user');
+            // If recipe exists, update with new data
+            const updateData = {
+                updatedAt: new Date()
+            };
+
+            // Only update fields that are provided
+            if (options.rating !== undefined) updateData.personalRating = options.rating;
+            if (options.wouldCookAgain !== undefined) updateData.wouldCookAgain = options.wouldCookAgain;
+            if (options.origin) updateData['recipe.origin'] = options.origin;
+            if (options.culturalContext) updateData['recipe.culturalContext'] = options.culturalContext;
+            if (options.favorite !== undefined) updateData.favorite = options.favorite;
+            await recipesCollection.updateOne(
+                { _id: existingRecipe._id },
+                { $set: updateData }
+            );
+            
+            // Return updated recipe
+            return await recipesCollection.findOne({ _id: existingRecipe._id });
         }
 
         // Get recipe details from Spoonacular
         const recipeDetails = await recipeService.getRecipeById(recipeId);
         
-        // Prepare recipe document
+        // Prepare recipe document with cultural information if provided
         const savedRecipe = {
             userId: new ObjectId(userId),
             recipeId: recipeId,
             savedAt: new Date(),
+            updatedAt: new Date(),
             favorite: options.favorite || false,
-            personalRating: options.rating,
+            personalRating: options.rating || null,
+            wouldCookAgain: options.wouldCookAgain || null,
             notes: options.notes,
             tags: options.tags || [],
             recipe: {
@@ -42,7 +61,11 @@ export const userRecipeService = {
                 servings: recipeDetails.servings,
                 readyInMinutes: recipeDetails.readyInMinutes,
                 sourceName: recipeDetails.sourceName,
-                sourceUrl: recipeDetails.sourceUrl
+                sourceUrl: recipeDetails.sourceUrl,
+                summary: recipeDetails.summary,
+                // Include cultural information if provided, otherwise use existing or null
+                origin: options.origin || recipeDetails.origin || null,
+                culturalContext: options.culturalContext || recipeDetails.culturalContext || null
             }
         };
 

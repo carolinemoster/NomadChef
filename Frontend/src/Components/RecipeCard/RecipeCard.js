@@ -4,14 +4,15 @@ import './RecipeCard.css';
 const RecipeCard = ({ image, name, summary }) => {
     return (
         <div className="recipe-card">
-            <img 
-                src={image} 
-                alt={name} 
-                className="recipe-image"
-                onError={(e) => {
-                    e.target.src = 'path/to/fallback/image.jpg'; // Add a fallback image
-                }}
-            />
+            {image ? (
+                <img 
+                    src={image} 
+                    alt={name} 
+                    className="recipe-image"
+                />
+            ) : (
+                <div className="recipe-image-placeholder">No image available</div>
+            )}
             <div className="recipe-card-title">
                 {name}
             </div>
