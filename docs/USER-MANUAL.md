@@ -5,7 +5,7 @@ Navigate to https://d27etpfjb0io59.cloudfront.net
 
 ## GUI Docs
 #### Navigation Diagram
-![Navigation Diagram](/images/NomadChef-Pages.drawio.png)
+![Navigation Diagram](/docs/Images/NomadChef-Pages.drawio.png)
 #### Page Descriptions
 ##### **Sign In Page**
 ![Sign In Page](/docs/Images/Sign-in-page.png)<br>
