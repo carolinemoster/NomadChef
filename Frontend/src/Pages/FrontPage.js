@@ -31,25 +31,25 @@ function FrontPage() {
 
             path {
                 fill: rgb(255, 255, 255);
-            cursor: pointer;
-            outline: none;
+                cursor: pointer;
+                outline: none;
                 transition: all 0.3s ease;
 
-            &:hover {
-                fill: #2d8b4e;
-            }
+                &:hover {
+                    fill: #2d8b4e;
+                }
 
-            &:focus {
-                fill: #2d8b4e;
-            }
+                &:focus {
+                    fill: #2d8b4e;
+                }
 
-            &[aria-checked='true'] {
+                &[aria-checked='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
 
-            &[aria-current='true'] {
+                &[aria-current='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
             }
         }
         `;
@@ -572,16 +572,51 @@ function FrontPage() {
                 sessionStorage.setItem('recommendedRecipes', JSON.stringify(data.results));
                 setRecommendedRecipes(data.results);
             } else {
-                console.log("No recommended recipes found:", data);
-                setRecommendedRecipes([]);
+                console.log("No recipes found, trying without filters...");
+                // Try one more time without any filters
+                const fallbackResponse = await axios.get(requestUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    params: {
+                        number: 4,
+                        instructionsRequired: true
+                    }
+                });
+                
+                if (fallbackResponse.data && fallbackResponse.data.results) {
+                    console.log("Fallback found recipes:", fallbackResponse.data.results.length);
+                    setRecommendedRecipes(fallbackResponse.data.results);
+                }
             }
         } catch (error) {
-            console.error("Error fetching recommended recipes:", error);
-            setRecommendedRecipes([]);
+            console.error('Error fetching recommended recipes:', error);
+            if (error.response) {
+                console.error('Error response:', {
+                    status: error.response.status,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+            }
+        }
+    };
+    const checkUserPreferences = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(BASE_USER_PREFERENCES, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log("User preferences:", response.data?.preferences);
+        } catch (error) {
+            console.error('Error fetching user preferences:', error);
         }
     };
     useEffect(() => {
         window.scrollTo(0, 0);
+        checkUserPreferences();
         getHistory();
         getRecommendedRecipes();
     }, []);
