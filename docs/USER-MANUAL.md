@@ -25,7 +25,7 @@ Navigate to https://d27etpfjb0io59.cloudfront.net
 ##### **Front Page**
 ![Front Page](/docs/Images/frontpage.jpeg)<br>
 **Description**: Main page of NomadChef <br>
-**Use/Features**: Features Navbar at top of screen for site navigation with buttons for Past Recipes, Account preferences, and logout. Also features map for tracking countries cooked from, recommended recipes, and search bar for recipes. Recipes can be selected from the map, the search bar, past recipes, or recommended recipes<br>
+**Use/Features**: Features Navbar at top of screen for site navigation with buttons for Past Recipes, Account preferences, and logout. Also features map for tracking countries cooked from, progress bar for tracking percentage of world completed, recommended recipes, and search bar for recipes. Recipes can be selected from the map, the search bar, past recipes, or recommended recipes<br>
 **Navigation**: User will be brought here after signing in or creating account. Can navigate from here to recipe page, past recipes, or account preferences. Recipes can be selected to navigate to recipe page from recommended recipes slider, past recipes slider, search results, or recipes from map country selection<br>
 ##### **Past Recipes Page**
 ![Past Recipes](/docs/Images/pastrecipes.jpeg)<br>
