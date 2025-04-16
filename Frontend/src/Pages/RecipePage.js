@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Heart from "react-animated-heart"
 import { FaStar } from 'react-icons/fa';
+import axios from 'axios';
 
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
 const BASE_SPOON = "https://api.spoonacular.com/recipes/"
@@ -51,14 +52,15 @@ const stripMeasurements = (ingredientString) => {
 };
 
 const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
-    const [rating, setRating] = useState(0);
-    const [unwantedIngredients, setUnwantedIngredients] = useState([]);
-    const [wouldCookAgain, setWouldCookAgain] = useState('');
+    const [surveyData, setSurveyData] = useState({
+        rating: 0,
+        wouldCookAgain: '',
+        dislikedIngredients: []
+    });
 
     if (!isOpen) return null;
 
     const handleClose = (e) => {
-        // Only close if clicking the overlay (not the modal content)
         if (e.target.className === 'modal-overlay') {
             onClose();
         }
@@ -66,9 +68,9 @@ const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
 
     const handleSubmit = () => {
         onSubmit({
-            rating,
-            unwantedIngredients,
-            wouldCookAgain
+            rating: surveyData.rating,
+            dislikedIngredients: surveyData.dislikedIngredients,
+            wouldCookAgain: surveyData.wouldCookAgain
         });
     };
 
@@ -98,7 +100,7 @@ const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
                 <div className="survey-question">
                     <h3 style={{ textAlign: 'left' }}>How would you rate this recipe?</h3>
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                        <StarRating rating={rating} setRating={setRating} />
+                        <StarRating rating={surveyData.rating} setRating={(value) => setSurveyData(prev => ({ ...prev, rating: value }))} />
                     </div>
                 </div>
 
@@ -115,18 +117,29 @@ const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
                             <label key={`ingredient-${index}`} style={{ 
                                 display: 'flex', 
                                 alignItems: 'center', 
-                                gap: '8px',
-                                margin: '5px 0'
+                                gap: '12px',
+                                margin: '8px 0',
+                                fontSize: '15px'
                             }}>
                                 <input
                                     type="checkbox"
+                                    style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        cursor: 'pointer'
+                                    }}
                                     onChange={(e) => {
+                                        const strippedIngredient = stripMeasurements(ingredient.original);
                                         if (e.target.checked) {
-                                            setUnwantedIngredients([...unwantedIngredients, stripMeasurements(ingredient.original)]);
+                                            setSurveyData(prev => ({
+                                                ...prev,
+                                                dislikedIngredients: [...prev.dislikedIngredients, strippedIngredient]
+                                            }));
                                         } else {
-                                            setUnwantedIngredients(
-                                                unwantedIngredients.filter(i => i !== stripMeasurements(ingredient.original))
-                                            );
+                                            setSurveyData(prev => ({
+                                                ...prev,
+                                                dislikedIngredients: prev.dislikedIngredients.filter(i => i !== strippedIngredient)
+                                            }));
                                         }
                                     }}
                                 />
@@ -154,8 +167,8 @@ const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
                                     type="radio"
                                     name="cookAgain"
                                     value={option.toLowerCase()}
-                                    checked={wouldCookAgain === option.toLowerCase()}
-                                    onChange={(e) => setWouldCookAgain(e.target.value)}
+                                    checked={surveyData.wouldCookAgain === option.toLowerCase()}
+                                    onChange={(e) => setSurveyData(prev => ({ ...prev, wouldCookAgain: e.target.value }))}
                                 />
                                 {option}
                             </label>
@@ -390,108 +403,54 @@ function RecipePage() {
     const handleSurveySubmit = async (surveyData) => {
         try {
             const token = localStorage.getItem('authToken');
+            const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
 
-            // First save/update the recipe with rating and wouldCookAgain
-            const recipeUpdateResponse = await fetch(BASE_USER_RECIPES, {
-                method: "POST",
+            // First, get current user data
+            const userDataResponse = await axios.get(`${apiBaseUrl}/auth/getUserData`, {
                 headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    recipeId: RecipeID,
-                    rating: parseInt(surveyData.rating),
-                    wouldCookAgain: surveyData.wouldCookAgain,
-                    favorite: isClick
-                })
-            });
-
-            if (!recipeUpdateResponse.ok) {
-                throw new Error('Recipe update failed');
-            }
-            
-            // Then handle the disliked ingredients update
-            const userDataResponse = await fetch(`${API_BASE_URL}/auth/getUserData`, {
-                method: 'GET',
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
+                    'Authorization': `Bearer ${token}`
                 }
             });
 
-            if (!userDataResponse.ok) {
-                throw new Error('Failed to fetch user data');
-            }
+            // Get current preferences and disliked ingredients
+            const currentPreferences = userDataResponse.data.preferences || {};
+            const currentDislikedIngredients = currentPreferences.dislikedIngredients || [];
 
-            const userData = await userDataResponse.json();
-            const existingDisliked = userData.preferences?.dislikedIngredients || [];
-            
-            // Only proceed if there are unwanted ingredients to add
-            if (surveyData.unwantedIngredients && surveyData.unwantedIngredients.length > 0) {
-                // Filter out any duplicates and add new ingredients
-                const newDislikedIngredients = surveyData.unwantedIngredients.filter(
-                    ingredient => !existingDisliked.includes(ingredient)
-                );
-                const combinedDisliked = [...existingDisliked, ...newDislikedIngredients];
+            // Add new disliked ingredients to the existing list (avoid duplicates)
+            const newDislikedIngredients = [...new Set([
+                ...currentDislikedIngredients,
+                ...surveyData.dislikedIngredients // Make sure this matches your survey data structure
+            ])];
 
-                // Update user preferences
-                const userUpdateResponse = await fetch(`${API_BASE_URL}/auth/updateUserData`, {
-                    method: 'POST',
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        preferences: {
-                            dislikedIngredients: combinedDisliked
-                        }
-                    })
-                });
-
-                if (!userUpdateResponse.ok) {
-                    throw new Error('Failed to update user preferences');
+            // Update user preferences with the new combined list
+            await axios.post(`${apiBaseUrl}/auth/updateUserData`, {
+                preferences: {
+                    ...currentPreferences,
+                    dislikedIngredients: newDislikedIngredients
                 }
-            }
-
-            // Update the country if available
-            if (origin && origin.country) {
-                console.log("Attempting to update country for:", origin.country);
-                const countryCode = getCode(origin.country);
-                
-                if (countryCode) {
-                    console.log("Valid country code found:", countryCode);
-                    await fetch(BASE_USER_COUNTRIES, {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            code: countryCode.toLowerCase()
-                        })
-                    }).then(response => {
-                        if (!response.ok) {
-                            throw new Error('Failed to update country');
-                        }
-                        return response.json();
-                    }).then(data => {
-                        console.log("Country update successful:", data);
-                    });
-                } else {
-                    console.warn("Could not find valid country code for:", origin.country);
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-            } else {
-                console.log("No valid country information available for this recipe");
-            }
-            
-            // After successful submission, trigger recommended recipes reload
+            });
+
+            // Save recipe completion data
+            await axios.post(BASE_USER_RECIPES, {
+                recipeId: RecipeID,
+                rating: surveyData.rating,
+                wouldCookAgain: surveyData.wouldCookAgain,
+                notes: surveyData.notes
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // Trigger front page refresh
             localStorage.setItem('recipeCompleted', Date.now().toString());
-            
             navigate('/home');
         } catch (error) {
-            console.error('Error updating preferences:', error);
-            console.error('Error details:', error.message);
-            navigate('/home');
+            console.error('Error submitting survey:', error);
         }
     };
     const listingredients = (recipe.extendedIngredients) ? recipe.extendedIngredients.map((ingredient, index) =>
