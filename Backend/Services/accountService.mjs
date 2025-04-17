@@ -202,7 +202,74 @@ export async function getUserData(id) {
         };
     }
 }
-
+export async function getUserPoints(id) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)), points: { $exists: false } },
+            { $set: { points: 0, challengesCompleted: 0} }
+        );
+        const payload = {
+            points: user.points
+        }
+        return {
+            statusCode: 200,
+            body: payload
+        };
+    }
+    catch {
+        console.error("Error getting user points:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Getting user points failed' }
+        };
+    }
+}
+export async function addUserPoints(id, pointAmount) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)), points: { $exists: false } },
+            { $set: { points: 0, challengesCompleted: 0} }
+        );
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(userId)) },
+            {
+                $inc: {points: pointAmount},
+                $inc: { challengesCompleted: 1 }
+            }
+        );
+        return {
+            statusCode: 200,
+            body: userWithoutPassword
+        };
+    }
+    catch (error) {
+        console.error("Error updating user points:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'User Points failed' }
+        };
+    }
+}
 export async function updateUserData(id, updateData) {
     try {
         const db = await getDb();
