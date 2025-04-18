@@ -559,3 +559,20 @@ Map {
 .country-recipe-card:hover {
     transform: scale(1.02);
 }
+
+/* Simple map tooltip style - optimized for immediate display */
+.map-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0d4725;
+  border-left: 3px solid #0d4725;
+  /* Remove animation to make it appear instantly */
+  transition: none;
+}

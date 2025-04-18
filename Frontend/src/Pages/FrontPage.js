@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VectorMap } from '@south-paw/react-vector-maps';
 import worldMap from "../Components/Assets/world.json"
 import './FrontPage.css';
@@ -62,9 +62,30 @@ function FrontPage() {
     const [completedCountries, setCountries] = useState([]);
     const [completedCountriesCount, setCountriesCount] = useState(0);
     const [recommendedRecipes, setRecommendedRecipes] = useState([]);
+    const [hoveredCountry, setHoveredCountry] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const mapContainerRef = useRef(null);
+
+    const handleMouseMove = (e) => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
     const mapLayerProps = {
         onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
-      };
+        onMouseEnter: ({ target }) => {
+            const countryName = target.attributes.name.value;
+            setHoveredCountry(countryName);
+        },
+        onMouseLeave: () => {
+            setHoveredCountry(null);
+        },
+        onMouseMove: handleMouseMove,
+        style: {
+            cursor: 'pointer',
+            transition: 'fill 0.2s ease'
+        }
+    };
+
     const handleCountryClick = (countrySelect) => {
         setSelectedCountry(countrySelect);
         
@@ -412,6 +433,11 @@ function FrontPage() {
         console.log("completedCountries updated:", completedCountries);
     }, [completedCountries]);
 
+    // Handle when mouse leaves the entire map container
+    const handleMapMouseLeave = () => {
+        setHoveredCountry(null);
+    };
+
     return (
         <div className="front-page">
             <nav className="navbar background">
@@ -442,7 +468,12 @@ function FrontPage() {
 
             <section className="section">
                 <div className="map-and-recipes-container">
-                    <div className="map-container">
+                    <div 
+                        className="map-container" 
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMapMouseLeave}
+                        ref={mapContainerRef}
+                    >
                         <Map>
                             <VectorMap
                                 {...worldMap}
@@ -450,9 +481,21 @@ function FrontPage() {
                                 checkedLayers={completedCountries}
                                 layerProps={mapLayerProps}
                                 currentLayers={completedCountries}
-                                onLayerClick={({ target }) => handleCountryClick(target.attributes.name.value)}
                             />
                         </Map>
+                        
+                        {hoveredCountry && (
+                            <div 
+                                className="map-tooltip" 
+                                style={{ 
+                                    left: mousePosition.x + 10, 
+                                    top: mousePosition.y + 10 
+                                }}
+                            >
+                                {hoveredCountry}
+                            </div>
+                        )}
+                        
                         <div className="progress-container">
                             <CustomProgressBar />
                         </div>
