@@ -87,6 +87,13 @@ function FrontPage() {
     };
 
     const handleCountryClick = (countrySelect) => {
+        // Reset the selection if clicking the same country again
+        if (countrySelect === selectedCountry) {
+            setSelectedCountry(null);
+            setSelectedCountryList([]);
+            return;
+        }
+        
         setSelectedCountry(countrySelect);
         
         if(countrySelect !== undefined) {
@@ -137,6 +144,7 @@ function FrontPage() {
                 return false;
             });
 
+            console.log(`Found ${matchingRecipes.length} recipes for ${countrySelect}`);
             setSelectedCountryList(matchingRecipes);
         }
     };
@@ -438,6 +446,465 @@ function FrontPage() {
         setHoveredCountry(null);
     };
 
+    // Add this function to handle mouse leaving the SVG map specifically
+    const handleSvgMapMouseLeave = () => {
+        setHoveredCountry(null);
+    };
+
+    const getCountryRegion = (countryCode) => {
+        // More comprehensive region mapping
+        const regionMap = {
+            // North America
+            'us': 'North America', 'ca': 'North America', 'mx': 'North America',
+            'gt': 'North America', 'bz': 'North America', 'sv': 'North America',
+            'hn': 'North America', 'ni': 'North America', 'cr': 'North America',
+            'pa': 'North America', 'cu': 'North America', 'jm': 'North America',
+            'ht': 'North America', 'do': 'North America', 'pr': 'North America',
+            
+            // South America
+            'co': 'South America', 've': 'South America', 'gy': 'South America',
+            'sr': 'South America', 'gf': 'South America', 'br': 'South America',
+            'ec': 'South America', 'pe': 'South America', 'bo': 'South America',
+            'py': 'South America', 'cl': 'South America', 'ar': 'South America',
+            'uy': 'South America',
+            
+            // Europe
+            'is': 'Europe', 'no': 'Europe', 'se': 'Europe', 'fi': 'Europe',
+            'ee': 'Europe', 'lv': 'Europe', 'lt': 'Europe', 'by': 'Europe',
+            'pl': 'Europe', 'de': 'Europe', 'dk': 'Europe', 'gb': 'Europe',
+            'ie': 'Europe', 'nl': 'Europe', 'be': 'Europe', 'lu': 'Europe',
+            'fr': 'Europe', 'ch': 'Europe', 'at': 'Europe', 'cz': 'Europe',
+            'sk': 'Europe', 'hu': 'Europe', 'si': 'Europe', 'hr': 'Europe',
+            'ba': 'Europe', 'rs': 'Europe', 'me': 'Europe', 'al': 'Europe',
+            'mk': 'Europe', 'gr': 'Europe', 'bg': 'Europe', 'ro': 'Europe',
+            'md': 'Europe', 'ua': 'Europe', 'it': 'Europe', 'es': 'Europe',
+            'pt': 'Europe', 'ad': 'Europe', 'mc': 'Europe', 'sm': 'Europe',
+            'va': 'Europe', 'mt': 'Europe', 'cy': 'Europe',
+            
+            // Asia
+            'ru': 'Asia', 'kz': 'Asia', 'uz': 'Asia', 'tm': 'Asia',
+            'kg': 'Asia', 'tj': 'Asia', 'mn': 'Asia', 'cn': 'Asia',
+            'kp': 'Asia', 'kr': 'Asia', 'jp': 'Asia', 'tw': 'Asia',
+            'hk': 'Asia', 'mo': 'Asia', 'ph': 'Asia', 'vn': 'Asia',
+            'la': 'Asia', 'kh': 'Asia', 'th': 'Asia', 'mm': 'Asia',
+            'my': 'Asia', 'bn': 'Asia', 'sg': 'Asia', 'id': 'Asia',
+            'tl': 'Asia', 'np': 'Asia', 'bt': 'Asia', 'bd': 'Asia',
+            'in': 'Asia', 'pk': 'Asia', 'af': 'Asia', 'ir': 'Asia',
+            'iq': 'Asia', 'sy': 'Asia', 'tr': 'Asia', 'az': 'Asia',
+            'am': 'Asia', 'ge': 'Asia', 'lb': 'Asia', 'il': 'Asia',
+            'ps': 'Asia', 'jo': 'Asia', 'sa': 'Asia', 'ye': 'Asia',
+            'om': 'Asia', 'ae': 'Asia', 'qa': 'Asia', 'kw': 'Asia',
+            'bh': 'Asia',
+            
+            // Africa
+            'eg': 'Africa', 'ly': 'Africa', 'tn': 'Africa', 'dz': 'Africa',
+            'ma': 'Africa', 'mr': 'Africa', 'ml': 'Africa', 'ne': 'Africa',
+            'td': 'Africa', 'sd': 'Africa', 'er': 'Africa', 'dj': 'Africa',
+            'so': 'Africa', 'et': 'Africa', 'ss': 'Africa', 'ke': 'Africa',
+            'ug': 'Africa', 'tz': 'Africa', 'rw': 'Africa', 'bi': 'Africa',
+            'cd': 'Africa', 'cg': 'Africa', 'ga': 'Africa', 'gq': 'Africa',
+            'cm': 'Africa', 'cf': 'Africa', 'ng': 'Africa', 'bj': 'Africa',
+            'tg': 'Africa', 'gh': 'Africa', 'ci': 'Africa', 'lr': 'Africa',
+            'sl': 'Africa', 'gn': 'Africa', 'gw': 'Africa', 'sn': 'Africa',
+            'gm': 'Africa', 'cv': 'Africa', 'mz': 'Africa', 'zw': 'Africa',
+            'za': 'Africa', 'ls': 'Africa', 'sz': 'Africa', 'na': 'Africa',
+            'bw': 'Africa', 'zm': 'Africa', 'mw': 'Africa', 'ao': 'Africa',
+            'mg': 'Africa', 'mu': 'Africa', 'sc': 'Africa', 'km': 'Africa',
+            
+            // Oceania
+            'au': 'Oceania', 'nz': 'Oceania', 'pg': 'Oceania', 'sb': 'Oceania',
+            'vu': 'Oceania', 'nc': 'Oceania', 'fj': 'Oceania', 'ws': 'Oceania',
+            'to': 'Oceania', 'tv': 'Oceania', 'ki': 'Oceania', 'mh': 'Oceania',
+            'fm': 'Oceania', 'pw': 'Oceania', 'nr': 'Oceania'
+        };
+        
+        // Handle case sensitivity and common variations
+        const code = countryCode.toLowerCase();
+        
+        // Try direct lookup first
+        if (regionMap[code]) {
+            return regionMap[code];
+        }
+        
+        // Handle special cases or full country names
+        const specialCases = {
+            'united states': 'North America',
+            'usa': 'North America',
+            'united kingdom': 'Europe',
+            'great britain': 'Europe',
+            'china': 'Asia',
+            'india': 'Asia',
+            'australia': 'Oceania',
+            'brazil': 'South America',
+            'south africa': 'Africa',
+            'russia': 'Asia',
+            'japan': 'Asia'
+            // Add more as needed
+        };
+        
+        if (specialCases[code]) {
+            return specialCases[code];
+        }
+        
+        // If we can't determine the region, return unknown
+        return 'Unknown Region';
+    };
+
+    // Helper function to convert country name to ISO code for flag display
+    const getCountryIsoCode = (countryName) => {
+        if (!countryName) return '';
+        
+        // Convert to lowercase for case-insensitive matching
+        const name = countryName.toLowerCase();
+        
+        // Direct ISO code mapping (if the country is already in code format)
+        if (name.length === 2) {
+            return name;
+        }
+        
+        // Comprehensive country name to ISO code mappings
+        const countryCodeMap = {
+            // A
+            'afghanistan': 'af',
+            'albania': 'al',
+            'algeria': 'dz',
+            'andorra': 'ad',
+            'angola': 'ao',
+            'antigua and barbuda': 'ag',
+            'argentina': 'ar',
+            'armenia': 'am',
+            'australia': 'au',
+            'austria': 'at',
+            'azerbaijan': 'az',
+            
+            // B
+            'bahamas': 'bs',
+            'bahrain': 'bh',
+            'bangladesh': 'bd',
+            'barbados': 'bb',
+            'belarus': 'by',
+            'belgium': 'be',
+            'belize': 'bz',
+            'benin': 'bj',
+            'bhutan': 'bt',
+            'bolivia': 'bo',
+            'bosnia and herzegovina': 'ba',
+            'botswana': 'bw',
+            'brazil': 'br',
+            'brunei': 'bn',
+            'bulgaria': 'bg',
+            'burkina faso': 'bf',
+            'burundi': 'bi',
+            
+            // C
+            'cabo verde': 'cv',
+            'cape verde': 'cv',
+            'cambodia': 'kh',
+            'cameroon': 'cm',
+            'canada': 'ca',
+            'central african republic': 'cf',
+            'chad': 'td',
+            'chile': 'cl',
+            'china': 'cn',
+            'colombia': 'co',
+            'comoros': 'km',
+            'congo': 'cg',
+            'democratic republic of the congo': 'cd',
+            'dr congo': 'cd',
+            'costa rica': 'cr',
+            'cote d\'ivoire': 'ci',
+            'ivory coast': 'ci',
+            'croatia': 'hr',
+            'cuba': 'cu',
+            'cyprus': 'cy',
+            'czech republic': 'cz',
+            'czechia': 'cz',
+            
+            // D
+            'denmark': 'dk',
+            'djibouti': 'dj',
+            'dominica': 'dm',
+            'dominican republic': 'do',
+            
+            // E
+            'ecuador': 'ec',
+            'egypt': 'eg',
+            'el salvador': 'sv',
+            'equatorial guinea': 'gq',
+            'eritrea': 'er',
+            'estonia': 'ee',
+            'eswatini': 'sz',
+            'swaziland': 'sz',
+            'ethiopia': 'et',
+            
+            // F
+            'fiji': 'fj',
+            'finland': 'fi',
+            'france': 'fr',
+            
+            // G
+            'gabon': 'ga',
+            'gambia': 'gm',
+            'georgia': 'ge',
+            'germany': 'de',
+            'ghana': 'gh',
+            'greece': 'gr',
+            'grenada': 'gd',
+            'guatemala': 'gt',
+            'guinea': 'gn',
+            'guinea-bissau': 'gw',
+            'guyana': 'gy',
+            
+            // H
+            'haiti': 'ht',
+            'honduras': 'hn',
+            'hungary': 'hu',
+            
+            // I
+            'iceland': 'is',
+            'india': 'in',
+            'indonesia': 'id',
+            'iran': 'ir',
+            'iraq': 'iq',
+            'ireland': 'ie',
+            'israel': 'il',
+            'italy': 'it',
+            
+            // J
+            'jamaica': 'jm',
+            'japan': 'jp',
+            'jordan': 'jo',
+            
+            // K
+            'kazakhstan': 'kz',
+            'kenya': 'ke',
+            'kiribati': 'ki',
+            'korea': 'kr',
+            'south korea': 'kr',
+            'north korea': 'kp',
+            'kosovo': 'xk',
+            'kuwait': 'kw',
+            'kyrgyzstan': 'kg',
+            
+            // L
+            'laos': 'la',
+            'latvia': 'lv',
+            'lebanon': 'lb',
+            'lesotho': 'ls',
+            'liberia': 'lr',
+            'libya': 'ly',
+            'liechtenstein': 'li',
+            'lithuania': 'lt',
+            'luxembourg': 'lu',
+            
+            // M
+            'madagascar': 'mg',
+            'malawi': 'mw',
+            'malaysia': 'my',
+            'maldives': 'mv',
+            'mali': 'ml',
+            'malta': 'mt',
+            'marshall islands': 'mh',
+            'mauritania': 'mr',
+            'mauritius': 'mu',
+            'mexico': 'mx',
+            'micronesia': 'fm',
+            'moldova': 'md',
+            'monaco': 'mc',
+            'mongolia': 'mn',
+            'montenegro': 'me',
+            'morocco': 'ma',
+            'mozambique': 'mz',
+            'myanmar': 'mm',
+            'burma': 'mm',
+            
+            // N
+            'namibia': 'na',
+            'nauru': 'nr',
+            'nepal': 'np',
+            'netherlands': 'nl',
+            'holland': 'nl',
+            'new zealand': 'nz',
+            'nicaragua': 'ni',
+            'niger': 'ne',
+            'nigeria': 'ng',
+            'north macedonia': 'mk',
+            'macedonia': 'mk',
+            'norway': 'no',
+            
+            // O
+            'oman': 'om',
+            
+            // P
+            'pakistan': 'pk',
+            'palau': 'pw',
+            'palestine': 'ps',
+            'panama': 'pa',
+            'papua new guinea': 'pg',
+            'paraguay': 'py',
+            'peru': 'pe',
+            'philippines': 'ph',
+            'poland': 'pl',
+            'portugal': 'pt',
+            
+            // Q
+            'qatar': 'qa',
+            
+            // R
+            'romania': 'ro',
+            'russia': 'ru',
+            'rwanda': 'rw',
+            
+            // S
+            'saint kitts and nevis': 'kn',
+            'saint lucia': 'lc',
+            'saint vincent and the grenadines': 'vc',
+            'samoa': 'ws',
+            'san marino': 'sm',
+            'sao tome and principe': 'st',
+            'saudi arabia': 'sa',
+            'senegal': 'sn',
+            'serbia': 'rs',
+            'seychelles': 'sc',
+            'sierra leone': 'sl',
+            'singapore': 'sg',
+            'slovakia': 'sk',
+            'slovenia': 'si',
+            'solomon islands': 'sb',
+            'somalia': 'so',
+            'south africa': 'za',
+            'south sudan': 'ss',
+            'spain': 'es',
+            'sri lanka': 'lk',
+            'sudan': 'sd',
+            'suriname': 'sr',
+            'sweden': 'se',
+            'switzerland': 'ch',
+            'syria': 'sy',
+            
+            // T
+            'taiwan': 'tw',
+            'tajikistan': 'tj',
+            'tanzania': 'tz',
+            'thailand': 'th',
+            'timor-leste': 'tl',
+            'east timor': 'tl',
+            'togo': 'tg',
+            'tonga': 'to',
+            'trinidad and tobago': 'tt',
+            'tunisia': 'tn',
+            'turkey': 'tr',
+            'turkmenistan': 'tm',
+            'tuvalu': 'tv',
+            
+            // U
+            'uganda': 'ug',
+            'ukraine': 'ua',
+            'united arab emirates': 'ae',
+            'uae': 'ae',
+            'united kingdom': 'gb',
+            'uk': 'gb',
+            'great britain': 'gb',
+            'england': 'gb',
+            'united states': 'us',
+            'united states of america': 'us',
+            'usa': 'us',
+            'uruguay': 'uy',
+            'uzbekistan': 'uz',
+            
+            // V
+            'vanuatu': 'vu',
+            'vatican city': 'va',
+            'holy see': 'va',
+            'venezuela': 've',
+            'vietnam': 'vn',
+            
+            // Y
+            'yemen': 'ye',
+            
+            // Z
+            'zambia': 'zm',
+            'zimbabwe': 'zw',
+            
+            // Adding a few missing or commonly used variations
+            'america': 'us',
+            
+ 
+            'scotland': 'gb',
+            'wales': 'gb',
+            'northern ireland': 'gb',
+            
+   
+            'russian federation': 'ru',
+            
+
+            'peoples republic of china': 'cn',
+            'people\'s republic of china': 'cn',
+            
+
+            'viet nam': 'vn',
+            'vietnamese': 'vn',
+            
+            'republic of korea': 'kr',
+            'democratic people\'s republic of korea': 'kp',
+            
+            'united republic of tanzania': 'tz',
+            
+            // Add common adjective forms that might appear in recipe origins
+            'italian': 'it',
+            'french': 'fr',
+            'spanish': 'es',
+            'german': 'de',
+            'chinese': 'cn',
+            'japanese': 'jp',
+            'mexican': 'mx',
+            'indian': 'in',
+            'thai': 'th',
+            'greek': 'gr',
+            'turkish': 'tr',
+            'lebanese': 'lb',
+            'moroccan': 'ma',
+            'brazilian': 'br',
+            'peruvian': 'pe',
+            'ethiopian': 'et',
+            'korean': 'kr',
+            'filipino': 'ph',
+            'indonesian': 'id',
+            'malaysian': 'my',
+            'australian': 'au',
+            'canadian': 'ca',
+            'russian': 'ru',
+            'polish': 'pl',
+            'swedish': 'se',
+            'norwegian': 'no',
+            'danish': 'dk',
+            'finnish': 'fi',
+            'portuguese': 'pt',
+            'belgian': 'be',
+            'swiss': 'ch',
+            'austrian': 'at',
+            'hungarian': 'hu',
+            'czech': 'cz',
+            'egyptian': 'eg',
+            'south african': 'za',
+            'nigerian': 'ng',
+            'kenyan': 'ke',
+            'argentinian': 'ar',
+            'argentine': 'ar',
+            'colombian': 'co',
+            'chilean': 'cl',
+        };
+        
+        // Try to find the country code
+        if (countryCodeMap[name]) {
+            return countryCodeMap[name];
+        }
+        
+        // If we can't find a mapping, return the original (this might not work with flagcdn)
+        console.log(`No ISO code mapping found for: ${countryName}`);
+        return name;
+    };
+
     return (
         <div className="front-page">
             <nav className="navbar background">
@@ -479,8 +946,18 @@ function FrontPage() {
                                 {...worldMap}
                                 style={{ width: "100%", height: "100%" }}
                                 checkedLayers={completedCountries}
-                                layerProps={mapLayerProps}
+                                layerProps={{
+                                    ...mapLayerProps,
+                                    onMouseLeave: (e) => {
+                                        mapLayerProps.onMouseLeave(e);
+                                        // Check if we're leaving the SVG entirely
+                                        if (!e.relatedTarget || !e.relatedTarget.closest('svg')) {
+                                            setHoveredCountry(null);
+                                        }
+                                    }
+                                }}
                                 currentLayers={completedCountries}
+                                onMouseLeave={handleSvgMapMouseLeave}
                             />
                         </Map>
                         
@@ -496,27 +973,50 @@ function FrontPage() {
                             </div>
                         )}
                         
-                        <div className="progress-container">
+                        <div className="progress-container" onMouseEnter={() => setHoveredCountry(null)}>
                             <CustomProgressBar />
                         </div>
                     </div>
                     
                     {selectedCountry && selectedCountryList.length > 0 && (
                         <div className="country-recipes-panel">
-                            <h3>Recipes from {selectedCountry}</h3>
-                            {selectedCountryList.map((item, index) => (
-                                <div 
-                                    key={`recipe-${index}`} 
-                                    className="country-recipe-card"
-                                    onClick={() => recipeClicked(item.recipeId)}
-                                >
-                                    <SmallRecipeCard 
-                                        image={item.recipe?.image || 'No image available'} 
-                                        name={item.recipe?.title || 'Untitled Recipe'}
-                                        fallbackText="No image available"
-                                    /> 
+                            <div className="country-card">
+                                <h2>{selectedCountry}</h2>
+                                {console.log("Selected country:", selectedCountry)}
+                                <div className="country-info">
+                                    <div className="country-flag">
+                                        <img 
+                                            src={`https://flagcdn.com/w320/${getCountryIsoCode(selectedCountry)}.png`} 
+                                            alt={`${selectedCountry} flag`}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://via.placeholder.com/320x213?text=Flag+Not+Available';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="country-stats">
+                                        <p><strong>Recipes Completed:</strong> {selectedCountryList.length}</p>
+                                        <p><strong>Region:</strong> {getCountryRegion(selectedCountry)}</p>
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
+                            
+                            <h3>Recipes from {selectedCountry}</h3>
+                            <div className="country-recipes-list">
+                                {selectedCountryList.map((item, index) => (
+                                    <div 
+                                        key={`recipe-${index}`} 
+                                        className="country-recipe-card"
+                                        onClick={() => recipeClicked(item.recipeId)}
+                                    >
+                                        <SmallRecipeCard 
+                                            image={item.recipe?.image || 'No image available'} 
+                                            name={item.recipe?.title || 'Untitled Recipe'}
+                                            fallbackText="No image available"
+                                        /> 
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -526,7 +1026,7 @@ function FrontPage() {
                 <PromptBox/>
             </section>
             <section className="section">
-                <h1>Recommended Recipes</h1>
+                <h1 className='section-heading-here'>Recommended Recipes</h1>
                 <div className="slider">
                     <Carousel responsive={responsive}>
                         {recommendedList}
