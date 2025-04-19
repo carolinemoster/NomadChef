@@ -950,8 +950,14 @@ function FrontPage() {
                                     ...mapLayerProps,
                                     onMouseLeave: (e) => {
                                         mapLayerProps.onMouseLeave(e);
-                                        // Check if we're leaving the SVG entirely
-                                        if (!e.relatedTarget || !e.relatedTarget.closest('svg')) {
+                                        // Check if relatedTarget exists before using closest
+                                        if (e.relatedTarget && typeof e.relatedTarget.closest === 'function') {
+                                            // Check if we're leaving the SVG entirely
+                                            if (!e.relatedTarget.closest('svg')) {
+                                                setHoveredCountry(null);
+                                            }
+                                        } else {
+                                            // If relatedTarget is null or doesn't have closest method, just clear the hover
                                             setHoveredCountry(null);
                                         }
                                     }

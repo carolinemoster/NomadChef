@@ -471,6 +471,9 @@ html, body, #root {
     background: #196033;
 }
 
+.section-heading-here {
+    font-weight: 300;
+}
 /* Add these styles if they don't already exist */
 .section h1 {
     color: #0d4725;
