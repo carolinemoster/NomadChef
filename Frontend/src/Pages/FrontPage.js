@@ -17,6 +17,7 @@ const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.co
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
 const BASE_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes";
+const BASE_RECOMMEND_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recommendations/personalized";
 
 function FrontPage() {
     const Map = styled.div`
@@ -527,7 +528,7 @@ function FrontPage() {
     const getRecommendedRecipes = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch(`${BASE_RECIPES_URL}/search?number=4`, {
+            const response = await fetch(`${BASE_RECOMMEND_RECIPES_URL}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -536,7 +537,7 @@ function FrontPage() {
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
             }
 
             const data = await response.json();
