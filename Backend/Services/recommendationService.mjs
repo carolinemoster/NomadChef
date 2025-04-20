@@ -7,7 +7,7 @@ export const recommendationService = {
     try {
       // Default options with temperature (randomness factor)
       const {
-        limit = 10,
+        limit = 20,
         temperature = 0.3,  // 0 = strict recommendations, 1 = more variety
         excludeIds = []     // IDs of recipes to exclude (already seen)
       } = options;
