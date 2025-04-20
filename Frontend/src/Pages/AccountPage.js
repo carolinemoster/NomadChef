@@ -20,33 +20,53 @@ const AccountPage = () => {
         const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
 
         // Fetch user data from backend
-    const fetchUserData = async () => {
-        try {
-            console.log("Attempting to get token...");
+        const fetchUserData = async () => {
+            try {
                 const token = localStorage.getItem('authToken'); 
+                
+                if (!token) {
+                    // If no token, redirect to login
+                    navigate('/');
+                    return;
+                }
+                
                 const response = await axios.get(`${apiBaseUrl}/auth/getUserData`, {
-                headers: {
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
-            });
+                });
 
                 setUserData(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            setError('Failed to load user data.');
-            setLoading(false);
-        }
-    };
-
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError('Failed to load user data.');
+                setLoading(false);
+                
+                // If unauthorized, redirect to login
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('authToken');
+                    navigate('/');
+                }
+            }
+        };
 
         fetchUserData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (userData) {
-            setEditedData(userData);
+            setEditedData({
+                ...userData,
+                preferences: {
+                    ...userData.preferences || {},
+                    cookingSkill: userData.preferences?.cookingSkill || '',
+                    spiceLevel: userData.preferences?.spiceLevel || '',
+                    dislikedIngredients: userData.preferences?.dislikedIngredients || [],
+                }
+            });
         }
     }, [userData]);
 
@@ -94,8 +114,18 @@ const AccountPage = () => {
         setEditedData(prev => ({
             ...prev,
             preferences: {
-                ...prev.preferences || {}, // Initialize preferences if it doesn't exist
+                ...prev.preferences || {},
                 [field]: arrayValues
+            }
+        }));
+    };
+
+    const handleDislikedIngredientsChange = (ingredients) => {
+        setEditedData(prev => ({
+            ...prev,
+            preferences: {
+                ...prev.preferences,
+                dislikedIngredients: ingredients
             }
         }));
     };
@@ -347,14 +377,36 @@ const AccountPage = () => {
                             <div className="info-item">
                                 <label>Disliked Ingredients:</label>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedData.preferences?.dislikedIngredients?.join(", ") || ""}
-                                        onChange={(e) => handleArrayInputChange('dislikedIngredients', e.target.value)}
-                                        placeholder="Separate with commas"
-                                    />
+                                    <div className="ingredients-list">
+                                        {editedData.preferences?.dislikedIngredients?.map((ingredient, index) => (
+                                            <div key={index} className="ingredient-item">
+                                                <span>{ingredient}</span>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newIngredients = editedData.preferences.dislikedIngredients.filter((_, i) => i !== index);
+                                                        handleDislikedIngredientsChange(newIngredients);
+                                                    }}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <input
+                                            type="text"
+                                            placeholder="Add new ingredient"
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter' && e.target.value.trim()) {
+                                                    const newIngredients = [...(editedData.preferences?.dislikedIngredients || []), e.target.value.trim()];
+                                                    handleDislikedIngredientsChange(newIngredients);
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 ) : (
-                                    <span>{editedData.preferences?.dislikedIngredients?.join(", ") || "None specified"}</span>
+                                    <span>
+                                        {editedData.preferences?.dislikedIngredients?.join(', ') || 'None specified'}
+                                    </span>
                                 )}
                             </div>
                         </div>

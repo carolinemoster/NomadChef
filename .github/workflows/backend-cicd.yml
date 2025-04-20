@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - recipeEdits
   pull_request:
     branches: [ main ]
 
@@ -114,4 +115,10 @@ jobs:
     #   run: |
     #     aws lambda update-function-code \
     #       --function-name ${{ secrets.CULTURE_SERVICE_ARN }} \
+    #       --zip-file fileb://function.zip
+
+    # - name: Deploy lambda function to recommendation service
+    #   run: |
+    #     aws lambda update-function-code \
+    #       --function-name ${{ secrets.RECOMMENDATION_SERVICE_ARN }} \
     #       --zip-file fileb://function.zip
