@@ -20,28 +20,40 @@ const AccountPage = () => {
         const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
 
         // Fetch user data from backend
-    const fetchUserData = async () => {
-        try {
-            console.log("Attempting to get token...");
+        const fetchUserData = async () => {
+            try {
                 const token = localStorage.getItem('authToken'); 
+                
+                if (!token) {
+                    // If no token, redirect to login
+                    navigate('/');
+                    return;
+                }
+                
                 const response = await axios.get(`${apiBaseUrl}/auth/getUserData`, {
-                headers: {
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
-            });
+                });
 
                 setUserData(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            setError('Failed to load user data.');
-            setLoading(false);
-        }
-    };
-
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setError('Failed to load user data.');
+                setLoading(false);
+                
+                // If unauthorized, redirect to login
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('authToken');
+                    navigate('/');
+                }
+            }
+        };
 
         fetchUserData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -102,7 +114,7 @@ const AccountPage = () => {
         setEditedData(prev => ({
             ...prev,
             preferences: {
-                ...prev.preferences || {}, // Initialize preferences if it doesn't exist
+                ...prev.preferences || {},
                 [field]: arrayValues
             }
         }));

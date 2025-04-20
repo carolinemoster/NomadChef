@@ -544,7 +544,10 @@ function RecipePage() {
 
                 <div className="origin-line">
                     {isLoading ? (
-                        <div className="loading-spinner">Loading origin...</div>
+                        <div className="loading-container">
+                            <span className="loading-text">Loading origin...</span>
+                            <div className="loading-spinner"></div>
+                        </div>
                     ) : (
                         <p>
                             {origin ? (
@@ -566,7 +569,10 @@ function RecipePage() {
                     </div>
                     <div className="cultural-context-box">
                         {isLoading ? (
-                            <div className="loading-spinner">Loading cultural context...</div>
+                            <div className="loading-container">
+                                <span className="loading-text">Loading cultural context...</span>
+                                <div className="loading-spinner"></div>
+                            </div>
                         ) : (
                             <>
                                 {culturalContext ? (
