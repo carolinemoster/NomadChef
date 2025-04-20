@@ -517,3 +517,45 @@ html, body {
     flex-direction: column;
     width: 100%;
 }
+
+.login-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.login-loading-spinner {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #0d4725;
+    position: relative;
+    animation: login-spinner 0.8s linear infinite;
+    background: transparent;
+}
+
+@keyframes login-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.login-loading-text {
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    text-align: center;
+}
+
+  

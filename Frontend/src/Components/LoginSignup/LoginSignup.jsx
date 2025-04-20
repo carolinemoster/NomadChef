@@ -37,6 +37,7 @@ const LoginSignup = () => {
     // Add new state for validation errors
     const [loginErrors, setLoginErrors] = useState({});
     const [signupErrors, setSignupErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -107,23 +108,31 @@ const LoginSignup = () => {
             return;
         }
 
+        setIsLoading(true);
+        console.log("Sign in process started, loading:", true);
+
         try {
             const loginData = {
                 email,   
                 password
             };
 
+            console.log("Sending login request...");
             const response = await axios.post(`${apiBaseUrl}/auth/login`, loginData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
+            console.log("Login successful, storing token");
             const token = response.data.token;
             localStorage.setItem('authToken', token);
+            setIsLoading(false);
             navigate('/home');
         } catch (error) {
             console.error('Login error:', error);
+            setIsLoading(false);
+            
             if (error.response) {
                 switch (error.response.status) {
                     case 400:
@@ -160,6 +169,9 @@ const LoginSignup = () => {
             return;
         }
 
+        setIsLoading(true);
+        console.log("Create account process started, loading:", true);
+
         try {
             const userData = {
                 name,
@@ -174,11 +186,15 @@ const LoginSignup = () => {
                 }
             });
 
+            console.log("Signup successful, storing token");
             const token = response.data.token;
             localStorage.setItem('authToken', token);
+            setIsLoading(false);
             navigate('/home');
         } catch (error) {
             console.error('Signup error:', error);
+            setIsLoading(false);
+            
             if (error.response) {
                 switch (error.response.status) {
                     case 400:
@@ -211,7 +227,12 @@ const LoginSignup = () => {
                 <img src={wisk_icon} alt="" className="whisk" />
             </div>
             <div className="container">
-                {action === "Sign In" ? (
+                {isLoading ? (
+                    <div className="login-loading-container">
+                        <div className="login-loading-spinner"></div>
+                        <p className="login-loading-text">Please wait...</p>
+                    </div>
+                ) : action === "Sign In" ? (
                     <>
                         <div className="header">
                             <div className="text">{action}</div>
