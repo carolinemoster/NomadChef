@@ -28,14 +28,48 @@ const PromptBox = () => {
 }
 
   useEffect(() => {
-    //getUserParams();
-    }, []);
+    getUserParams();
+  }, []);
+
   const onSubmit = async (query) => {
-    //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-      const response = await fetch(`${BASE_URL}?query=${encodeURIComponent(query)}`);
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      // Prepare user preferences as query parameters
+      const params = new URLSearchParams();
+      
+      // Add the search query
+      params.append('query', query);
+      
+      // Add user preferences if available
+      if (userPreferences) {
+        // Add dietary restrictions
+        if (userPreferences.dietaryRestrictions) {
+          params.append('diet', userPreferences.dietaryRestrictions);
+        }
+
+        // Add disliked ingredients
+        if (userPreferences.dislikedIngredients) {
+          params.append('excludeIngredients', userPreferences.dislikedIngredients);
+        }
+      }
+      
+      // Make the API call with all parameters
+      const response = await fetch(`${BASE_URL}?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
       const data = await response.json();
-      setRecipes(data.results || []); // Fixed: store only `results` array
+      setRecipes(data.results || []);
+    } catch (error) {
+      console.error("Error searching recipes:", error);
+    }
   }
+
   const listrecipes = recipes.length > 0 ? recipes.map((recipe) =>
     <div className="recipe-box" onClick={() => recipeClicked(recipe.id)}>
       <div className="recipe-box-left">
