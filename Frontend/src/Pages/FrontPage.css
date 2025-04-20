@@ -175,7 +175,8 @@ html, body, #root {
 
 .progress-section h2 {
     color: #0d4725;
-    text-align: center;
+    text-align: left;
+    padding-left: 37px;
     margin-bottom: 15px;
     font-size: 1.8rem;
     font-family: 'Montserrat', sans-serif;

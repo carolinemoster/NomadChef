@@ -20,8 +20,8 @@ const BASE_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com
 
 function FrontPage() {
     const Map = styled.div`
-        width: 80% !important;
-        max-width: 1000px;
+        width: 90% !important;
+        max-width: 1200px;
         margin: 0 auto;
 
         svg {
