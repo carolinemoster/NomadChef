@@ -107,6 +107,7 @@ export function verifyToken(token) {
         return null;
     }
 }
+
 export async function getUserCountries(userId) {
     try {
         const db = await getDb();
