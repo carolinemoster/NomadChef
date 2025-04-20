@@ -39,34 +39,24 @@ export const recommendationService = {
         fillIngredients: true
       };
       
-      // Add any user diet preferences
-      if (userData?.preferences?.dietaryRestrictions?.length > 0) {
-        queryParams.diet = userData.preferences.dietaryRestrictions.join(',');
+      // Apply diet preference
+      if (adjustedPreferences.diet) {
+        queryParams.diet = adjustedPreferences.diet;
       }
       
-      // Add disliked ingredients
-      if (userData?.preferences?.dislikedIngredients?.length > 0) {
-        queryParams.excludeIngredients = userData.preferences.dislikedIngredients.join(',');
-      }
-      
-      // Add cuisine preferences if available
-      if (userData?.preferences?.cuisineInterests?.length > 0) {
-        queryParams.cuisine = userData.preferences.cuisineInterests.join(',');
-      }
-      
-      // Add analyzed preferences from recipe history
-      if (userRecipes?.length > 0) {
-        const analyzedPreferences = await recommendationService.analyzeUserPreferences(userRecipes, userId);
-        
-        // Add top cuisine if not already specified
-        if (!queryParams.cuisine && analyzedPreferences.cuisines?.length > 0) {
-          queryParams.cuisine = analyzedPreferences.cuisines.join(',');
+      // Apply dietary restrictions
+      if (adjustedPreferences.dietaryRestrictions?.length > 0) {
+        // If diet is already set, combine with dietary restrictions
+        if (queryParams.diet) {
+          queryParams.diet = [queryParams.diet, ...adjustedPreferences.dietaryRestrictions].join(',');
+        } else {
+          queryParams.diet = adjustedPreferences.dietaryRestrictions.join(',');
         }
-        
-        // Add diet if not already specified
-        if (!queryParams.diet && analyzedPreferences.diet) {
-          queryParams.diet = analyzedPreferences.diet;
-        }
+      }
+
+      // Exclude disliked ingredients
+      if (adjustedPreferences.dislikedIngredients?.length > 0) {
+        queryParams.excludeIngredients = adjustedPreferences.dislikedIngredients.join(',');
       }
       
       console.log(queryParams);
