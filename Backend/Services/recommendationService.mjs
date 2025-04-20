@@ -7,7 +7,7 @@ export const recommendationService = {
     try {
       // Default options with temperature (randomness factor)
       const {
-        limit = 10,
+        limit = 20,
         temperature = 0.3,  // 0 = strict recommendations, 1 = more variety
         excludeIds = []     // IDs of recipes to exclude (already seen)
       } = options;
@@ -25,26 +25,18 @@ export const recommendationService = {
       // If user has no saved recipes, return recommendations based on account preferences
       if (!userRecipes || userRecipes.length === 0) {
         if (userData?.preferences) {
-          return this.getRecommendationsFromUserPreferences(userData.preferences, limit, excludeIds);
+          return recommendationService.getRecommendationsFromUserPreferences(userData.preferences, limit, excludeIds);
         }
         return recipeService.getRecommendations({ number: limit });
       }
       
-      // Analyze user preferences from saved recipes, prioritizing rated ones
-      const preferences = await this.analyzeUserPreferences(userRecipes, userId);
-      
-      // Merge with user account preferences
-      const mergedPreferences = this.mergeWithUserAccountPreferences(preferences, userData?.preferences);
-      
-      // Apply temperature to preferences (introduce randomness)
-      const adjustedPreferences = this.applyTemperature(mergedPreferences, temperature);
       
       // Build query parameters for Spoonacular
       const queryParams = {
-        number: limit + Math.max(excludeIds.length, 10), // Dynamic buffer based on excluded recipes
+        number: limit + Math.max(excludeIds.length, 10),
         addRecipeInformation: true,
-        sort: 'popularity',  // Optional: sort by popularity
-        fillIngredients: true  // Optional: include ingredient information
+        sort: 'popularity',
+        fillIngredients: true
       };
       
       // Apply diet preference
@@ -67,6 +59,7 @@ export const recommendationService = {
         queryParams.excludeIngredients = adjustedPreferences.dislikedIngredients.join(',');
       }
       
+      console.log(queryParams);
       // Fetch recipes from Spoonacular
       const results = await recipeService.searchRecipes(queryParams);
       
@@ -81,7 +74,7 @@ export const recommendationService = {
       let rankedResults = filteredResults;
       
       // Shuffle results slightly based on temperature to add randomness
-      const shuffledResults = this.shuffleWithTemperature(rankedResults, temperature);
+      const shuffledResults = recommendationService.shuffleWithTemperature(rankedResults, temperature);
       
       return {
         results: shuffledResults.slice(0, limit),
@@ -290,11 +283,6 @@ export const recommendationService = {
       fillIngredients: true
     };
     
-    // Apply loved ingredients if available
-    if (userPreferences.lovedIngredients?.length > 0) {
-      queryParams.includeIngredients = userPreferences.lovedIngredients.join(',');
-    }
-    
     // Apply dietary restrictions if available
     if (userPreferences.dietaryRestrictions?.length > 0) {
       queryParams.diet = userPreferences.dietaryRestrictions.join(',');
@@ -303,11 +291,6 @@ export const recommendationService = {
     // Apply disliked ingredients if available
     if (userPreferences.dislikedIngredients?.length > 0) {
       queryParams.excludeIngredients = userPreferences.dislikedIngredients.join(',');
-    }
-    
-    // Apply cooking skill level
-    if (userPreferences.cookingSkill) {
-      queryParams.maxReadyTime = this.getMaxReadyTimeForSkill(userPreferences.cookingSkill);
     }
     
     // Fetch recipes from Spoonacular
