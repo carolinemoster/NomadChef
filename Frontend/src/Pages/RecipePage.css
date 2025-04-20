@@ -609,23 +609,27 @@ html, body, #root {
     color: #196033;
 }
 
-.loading-spinner {
+.loading-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 5px;
     color: #0d4725;
 }
 
-.loading-spinner::after {
-    content: '';
-    width: 20px;
-    height: 20px;
-    margin-left: 10px;
-    border: 2px solid #0d4725;
-    border-top: 2px solid transparent;
+.loading-text {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.loading-spinner {
+    width: 6px !important;
+    height: 6px !important;
+    border: 1.5px solid #0d4725;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    flex-shrink: 0;
 }
 
 @keyframes spin {
