@@ -58,7 +58,15 @@ const AccountPage = () => {
 
     useEffect(() => {
         if (userData) {
-            setEditedData(userData);
+            setEditedData({
+                ...userData,
+                preferences: {
+                    ...userData.preferences || {},
+                    cookingSkill: userData.preferences?.cookingSkill || '',
+                    spiceLevel: userData.preferences?.spiceLevel || '',
+                    dislikedIngredients: userData.preferences?.dislikedIngredients || [],
+                }
+            });
         }
     }, [userData]);
 
@@ -108,6 +116,16 @@ const AccountPage = () => {
             preferences: {
                 ...prev.preferences || {},
                 [field]: arrayValues
+            }
+        }));
+    };
+
+    const handleDislikedIngredientsChange = (ingredients) => {
+        setEditedData(prev => ({
+            ...prev,
+            preferences: {
+                ...prev.preferences,
+                dislikedIngredients: ingredients
             }
         }));
     };
@@ -359,14 +377,36 @@ const AccountPage = () => {
                             <div className="info-item">
                                 <label>Disliked Ingredients:</label>
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedData.preferences?.dislikedIngredients?.join(", ") || ""}
-                                        onChange={(e) => handleArrayInputChange('dislikedIngredients', e.target.value)}
-                                        placeholder="Separate with commas"
-                                    />
+                                    <div className="ingredients-list">
+                                        {editedData.preferences?.dislikedIngredients?.map((ingredient, index) => (
+                                            <div key={index} className="ingredient-item">
+                                                <span>{ingredient}</span>
+                                                <button 
+                                                    onClick={() => {
+                                                        const newIngredients = editedData.preferences.dislikedIngredients.filter((_, i) => i !== index);
+                                                        handleDislikedIngredientsChange(newIngredients);
+                                                    }}
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <input
+                                            type="text"
+                                            placeholder="Add new ingredient"
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter' && e.target.value.trim()) {
+                                                    const newIngredients = [...(editedData.preferences?.dislikedIngredients || []), e.target.value.trim()];
+                                                    handleDislikedIngredientsChange(newIngredients);
+                                                    e.target.value = '';
+                                                }
+                                            }}
+                                        />
+                                    </div>
                                 ) : (
-                                    <span>{editedData.preferences?.dislikedIngredients?.join(", ") || "None specified"}</span>
+                                    <span>
+                                        {editedData.preferences?.dislikedIngredients?.join(', ') || 'None specified'}
+                                    </span>
                                 )}
                             </div>
                         </div>

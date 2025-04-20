@@ -240,6 +240,34 @@ h2 {
     color: #b71c1c;
 }
 
+
+.ingredients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ingredient-item button {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ingredients-list input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 10px;
+
 .loading-container {
     display: flex;
     flex-direction: column;

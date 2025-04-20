@@ -31,28 +31,28 @@ function FrontPage() {
 
             path {
                 fill: rgb(255, 255, 255);
-                cursor: pointer;
-                outline: none;
+            cursor: pointer;
+            outline: none;
                 transition: all 0.3s ease;
 
-                &:hover {
-                    fill: #2d8b4e;
-                }
+            &:hover {
+                fill: #2d8b4e;
+            }
 
-                &:focus {
-                    fill: #2d8b4e;
-                }
+            &:focus {
+                fill: #2d8b4e;
+            }
 
-                &[aria-checked='true'] {
+            &[aria-checked='true'] {
                     fill: #2d8b4e !important;
-                }
+            }
 
-                &[aria-current='true'] {
+            &[aria-current='true'] {
                     fill: #2d8b4e !important;
-                }
+            }
             }
         }
-    `;
+        `;
     const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
@@ -113,20 +113,246 @@ function FrontPage() {
                 
                 // Check common variations
                 const variations = {
-                    'vn': ['vietnam', 'vietnamese'],
-                    'us': ['united states', 'usa', 'united states of america'],
-                    'gb': ['united kingdom', 'great britain'],
-                    'it': ['italy', 'italian'],
-                    'fr': ['france', 'french'],
-                    'es': ['spain', 'spanish'],
-                    'de': ['germany', 'german'],
+                    // A
+                    'af': ['afghanistan', 'afghan'],
+                    'al': ['albania', 'albanian'],
+                    'dz': ['algeria', 'algerian'],
+                    'ad': ['andorra', 'andorran'],
+                    'ao': ['angola', 'angolan'],
+                    'ag': ['antigua and barbuda', 'antiguan'],
+                    'ar': ['argentina', 'argentinian'],
+                    'am': ['armenia', 'armenian'],
+                    'au': ['australia', 'australian'],
+                    'at': ['austria', 'austrian'],
+                    'az': ['azerbaijan', 'azerbaijani'],
+
+                    // B
+                    'bs': ['bahamas', 'bahamian'],
+                    'bh': ['bahrain', 'bahraini'],
+                    'bd': ['bangladesh', 'bangladeshi'],
+                    'bb': ['barbados', 'barbadian'],
+                    'by': ['belarus', 'belarusian'],
+                    'be': ['belgium', 'belgian'],
+                    'bz': ['belize', 'belizean'],
+                    'bj': ['benin', 'beninese'],
+                    'bt': ['bhutan', 'bhutanese'],
+                    'bo': ['bolivia', 'bolivian'],
+                    'ba': ['bosnia and herzegovina', 'bosnian'],
+                    'bw': ['botswana', 'botswanan'],
+                    'br': ['brazil', 'brazilian'],
+                    'bn': ['brunei', 'bruneian'],
+                    'bg': ['bulgaria', 'bulgarian'],
+                    'bf': ['burkina faso', 'burkinabe'],
+                    'bi': ['burundi', 'burundian'],
+
+                    // C
+                    'cv': ['cabo verde', 'cape verdean'],
+                    'kh': ['cambodia', 'cambodian'],
+                    'cm': ['cameroon', 'cameroonian'],
+                    'ca': ['canada', 'canadian'],
+                    'cf': ['central african republic', 'central african'],
+                    'td': ['chad', 'chadian'],
+                    'cl': ['chile', 'chilean'],
                     'cn': ['china', 'chinese'],
-                    'jp': ['japan', 'japanese'],
-                    'mx': ['mexico', 'mexican'],
-                    'in': ['india', 'indian'],
-                    'th': ['thailand', 'thai'],
+                    'co': ['colombia', 'colombian'],
+                    'km': ['comoros', 'comorian'],
+                    'cg': ['congo', 'congolese'],
+                    'cr': ['costa rica', 'costa rican'],
+                    'hr': ['croatia', 'croatian'],
+                    'cu': ['cuba', 'cuban'],
+                    'cy': ['cyprus', 'cypriot'],
+                    'cz': ['czech republic', 'czech'],
+
+                    // D
+                    'dk': ['denmark', 'danish'],
+                    'dj': ['djibouti', 'djiboutian'],
+                    'dm': ['dominica', 'dominican'],
+                    'do': ['dominican republic', 'dominican'],
+
+                    // E
+                    'ec': ['ecuador', 'ecuadorian'],
+                    'eg': ['egypt', 'egyptian'],
+                    'sv': ['el salvador', 'salvadoran'],
+                    'gq': ['equatorial guinea', 'equatoguinean'],
+                    'er': ['eritrea', 'eritrean'],
+                    'ee': ['estonia', 'estonian'],
+                    'sz': ['eswatini', 'swazi'],
+                    'et': ['ethiopia', 'ethiopian'],
+
+                    // F
+                    'fj': ['fiji', 'fijian'],
+                    'fi': ['finland', 'finnish'],
+                    'fr': ['france', 'french'],
+
+                    // G
+                    'ga': ['gabon', 'gabonese'],
+                    'gm': ['gambia', 'gambian'],
+                    'ge': ['georgia', 'georgian'],
+                    'de': ['germany', 'german'],
+                    'gh': ['ghana', 'ghanaian'],
                     'gr': ['greece', 'greek'],
-                    'tr': ['turkey', 'turkish']
+                    'gd': ['grenada', 'grenadian'],
+                    'gt': ['guatemala', 'guatemalan'],
+                    'gn': ['guinea', 'guinean'],
+                    'gw': ['guinea-bissau', 'bissau-guinean'],
+                    'gy': ['guyana', 'guyanese'],
+
+                    // H
+                    'ht': ['haiti', 'haitian'],
+                    'hn': ['honduras', 'honduran'],
+                    'hu': ['hungary', 'hungarian'],
+
+                    // I
+                    'is': ['iceland', 'icelandic'],
+                    'in': ['india', 'indian'],
+                    'id': ['indonesia', 'indonesian'],
+                    'ir': ['iran', 'iranian', 'persian'],
+                    'iq': ['iraq', 'iraqi'],
+                    'ie': ['ireland', 'irish'],
+                    'il': ['israel', 'israeli'],
+                    'it': ['italy', 'italian'],
+
+                    // J
+                    'jm': ['jamaica', 'jamaican'],
+                    'jp': ['japan', 'japanese'],
+                    'jo': ['jordan', 'jordanian'],
+
+                    // K
+                    'kz': ['kazakhstan', 'kazakh'],
+                    'ke': ['kenya', 'kenyan'],
+                    'ki': ['kiribati', 'i-kiribati'],
+                    'kp': ['north korea', 'korean', 'korean'],
+                    'kr': ['south korea', 'korean', 'korean'],
+                    'kw': ['kuwait', 'kuwaiti'],
+                    'kg': ['kyrgyzstan', 'kyrgyz'],
+
+                    // L
+                    'la': ['laos', 'lao', 'laotian'],
+                    'lv': ['latvia', 'latvian'],
+                    'lb': ['lebanon', 'lebanese'],
+                    'ls': ['lesotho', 'basotho'],
+                    'lr': ['liberia', 'liberian'],
+                    'ly': ['libya', 'libyan'],
+                    'li': ['liechtenstein', 'liechtensteiner'],
+                    'lt': ['lithuania', 'lithuanian'],
+                    'lu': ['luxembourg', 'luxembourgish'],
+
+                    // M
+                    'mg': ['madagascar', 'malagasy'],
+                    'mw': ['malawi', 'malawian'],
+                    'my': ['malaysia', 'malaysian'],
+                    'mv': ['maldives', 'maldivian'],
+                    'ml': ['mali', 'malian'],
+                    'mt': ['malta', 'maltese'],
+                    'mh': ['marshall islands', 'marshallese'],
+                    'mr': ['mauritania', 'mauritanian'],
+                    'mu': ['mauritius', 'mauritian'],
+                    'mx': ['mexico', 'mexican'],
+                    'fm': ['micronesia', 'micronesian'],
+                    'md': ['moldova', 'moldovan'],
+                    'mc': ['monaco', 'monacan'],
+                    'mn': ['mongolia', 'mongolian'],
+                    'me': ['montenegro', 'montenegrin'],
+                    'ma': ['morocco', 'moroccan'],
+                    'mz': ['mozambique', 'mozambican'],
+                    'mm': ['myanmar', 'burmese'],
+
+                    // N
+                    'na': ['namibia', 'namibian'],
+                    'nr': ['nauru', 'nauruan'],
+                    'np': ['nepal', 'nepalese', 'nepali'],
+                    'nl': ['netherlands', 'dutch'],
+                    'nz': ['new zealand', 'new zealander', 'kiwi'],
+                    'ni': ['nicaragua', 'nicaraguan'],
+                    'ne': ['niger', 'nigerien'],
+                    'ng': ['nigeria', 'nigerian'],
+                    'mk': ['north macedonia', 'macedonian'],
+                    'no': ['norway', 'norwegian'],
+
+                    // O
+                    'om': ['oman', 'omani'],
+
+                    // P
+                    'pk': ['pakistan', 'pakistani'],
+                    'pw': ['palau', 'palauan'],
+                    'pa': ['panama', 'panamanian'],
+                    'pg': ['papua new guinea', 'papua new guinean'],
+                    'py': ['paraguay', 'paraguayan'],
+                    'pe': ['peru', 'peruvian'],
+                    'ph': ['philippines', 'filipino', 'philippine'],
+                    'pl': ['poland', 'polish'],
+                    'pt': ['portugal', 'portuguese'],
+
+                    // Q
+                    'qa': ['qatar', 'qatari'],
+
+                    // R
+                    'ro': ['romania', 'romanian'],
+                    'ru': ['russia', 'russian'],
+                    'rw': ['rwanda', 'rwandan'],
+
+                    // S
+                    'kn': ['saint kitts and nevis', 'kittitian', 'nevisian'],
+                    'lc': ['saint lucia', 'saint lucian'],
+                    'vc': ['saint vincent and the grenadines', 'vincentian'],
+                    'ws': ['samoa', 'samoan'],
+                    'sm': ['san marino', 'sammarinese'],
+                    'st': ['sao tome and principe', 'sao tomean'],
+                    'sa': ['saudi arabia', 'saudi', 'saudi arabian'],
+                    'sn': ['senegal', 'senegalese'],
+                    'rs': ['serbia', 'serbian'],
+                    'sc': ['seychelles', 'seychellois'],
+                    'sl': ['sierra leone', 'sierra leonean'],
+                    'sg': ['singapore', 'singaporean'],
+                    'sk': ['slovakia', 'slovak'],
+                    'si': ['slovenia', 'slovenian'],
+                    'sb': ['solomon islands', 'solomon islander'],
+                    'so': ['somalia', 'somali'],
+                    'za': ['south africa', 'south african'],
+                    'ss': ['south sudan', 'south sudanese'],
+                    'es': ['spain', 'spanish'],
+                    'lk': ['sri lanka', 'sri lankan'],
+                    'sd': ['sudan', 'sudanese'],
+                    'sr': ['suriname', 'surinamese'],
+                    'se': ['sweden', 'swedish'],
+                    'ch': ['switzerland', 'swiss'],
+                    'sy': ['syria', 'syrian'],
+
+                    // T
+                    'tw': ['taiwan', 'taiwanese'],
+                    'tj': ['tajikistan', 'tajik'],
+                    'tz': ['tanzania', 'tanzanian'],
+                    'th': ['thailand', 'thai'],
+                    'tl': ['timor-leste', 'east timorese'],
+                    'tg': ['togo', 'togolese'],
+                    'to': ['tonga', 'tongan'],
+                    'tt': ['trinidad and tobago', 'trinidadian', 'tobagonian'],
+                    'tn': ['tunisia', 'tunisian'],
+                    'tr': ['turkey', 'turkish'],
+                    'tm': ['turkmenistan', 'turkmen'],
+                    'tv': ['tuvalu', 'tuvaluan'],
+
+                    // U
+                    'ug': ['uganda', 'ugandan'],
+                    'ua': ['ukraine', 'ukrainian'],
+                    'ae': ['united arab emirates', 'emirati'],
+                    'gb': ['united kingdom', 'british', 'great britain'],
+                    'us': ['united states', 'usa', 'united states of america', 'american'],
+                    'uy': ['uruguay', 'uruguayan'],
+                    'uz': ['uzbekistan', 'uzbek'],
+
+                    // V
+                    'vu': ['vanuatu', 'ni-vanuatu'],
+                    'va': ['vatican city', 'vatican'],
+                    've': ['venezuela', 'venezuelan'],
+                    'vn': ['vietnam', 'vietnamese'],
+
+                    // Y
+                    'ye': ['yemen', 'yemeni'],
+
+                    // Z
+                    'zm': ['zambia', 'zambian'],
+                    'zw': ['zimbabwe', 'zimbabwean']
                 };
                 
                 // Check if the recipe country matches any variation of the selected country
@@ -170,13 +396,13 @@ function FrontPage() {
       }
     const getCountries = async () => {
         try {
-            const token = localStorage.getItem('authToken'); 
+        const token = localStorage.getItem('authToken'); 
             console.log("Fetching countries data...");
-            const response = await fetch(BASE_USER_COUNTRIES, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
+        const response = await fetch(BASE_USER_COUNTRIES, {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
                 }
             });
 
@@ -184,7 +410,7 @@ function FrontPage() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const jsonResponse = await response.json();
+        const jsonResponse = await response.json();
             console.log("Full countries response:", jsonResponse);
             
             // Get the country codes and filter out null/undefined values
@@ -222,14 +448,14 @@ function FrontPage() {
     };
     const getHistory = async () => {  
         try {
-            const token = localStorage.getItem('authToken'); 
+        const token = localStorage.getItem('authToken'); 
             console.log("Fetching recipe history...");
             
-            const response = await fetch(BASE_USER_RECIPES, {
-                method: "GET",  
-                headers: {
-                    "Authorization": `Bearer ${token}`, 
-                    "Content-Type": "application/json" 
+        const response = await fetch(BASE_USER_RECIPES, {
+            method: "GET",  
+            headers: {
+              "Authorization": `Bearer ${token}`, 
+              "Content-Type": "application/json" 
                 }
             });
 
@@ -237,7 +463,7 @@ function FrontPage() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+        const data = await response.json();
             console.log("Recipe history received:", data);
 
             // Make sure we have recipes before setting them
@@ -269,6 +495,7 @@ function FrontPage() {
                                 'vietnam': 'vn',
                                 'greece': 'gr',
                                 'turkey': 'tr',
+                                'morocco': 'ma',
                                 // Add more mappings as needed
                             };
                             
@@ -426,6 +653,8 @@ function FrontPage() {
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'recipeCompleted') {
+                // Refresh all the data
+                getHistory();
                 getRecommendedRecipes();
             }
         };
@@ -942,8 +1171,8 @@ function FrontPage() {
                         ref={mapContainerRef}
                     >
                         <Map>
-                            <VectorMap
-                                {...worldMap}
+                        <VectorMap
+                            {...worldMap}
                                 style={{ width: "100%", height: "100%" }}
                                 checkedLayers={completedCountries}
                                 layerProps={{
@@ -1029,7 +1258,7 @@ function FrontPage() {
             </section>
 
             <section className="section">
-                <PromptBox/>
+                    <PromptBox/>
             </section>
             <section className="section">
                 <h1 className='section-heading-here'>Recommended Recipes</h1>

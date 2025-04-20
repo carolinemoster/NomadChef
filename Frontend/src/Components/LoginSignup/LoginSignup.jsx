@@ -173,23 +173,45 @@ const LoginSignup = () => {
         console.log("Create account process started, loading:", true);
 
         try {
-            const userData = {
+            // First create the user account
+            const signupResponse = await axios.post(`${apiBaseUrl}/auth/signup`, {
                 name,
                 email,
-                password,
-                preferences: {}
-            };
-
-            const response = await axios.post(`${apiBaseUrl}/auth/signup`, userData, {
+                password
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
-            console.log("Signup successful, storing token");
-            const token = response.data.token;
+            const token = signupResponse.data.token;
             localStorage.setItem('authToken', token);
-            setIsLoading(false);
+
+            // Then update the user preferences using the updateUserData endpoint
+            const preferences = {
+                dietaryRestrictions: [
+                    ...dietaryRestrictions,
+                    ...(otherRestriction && dietaryRestrictions.includes('other') ? [otherRestriction] : [])
+                ],
+                cookingSkill: cookingSkill,
+                spiceLevel: spiceLevel,
+                cuisineInterests: cuisineInterestsList,
+                lovedIngredients: lovedIngredients,
+                dislikedIngredients: dislikedIngredients
+            };
+
+            await axios.post(`${apiBaseUrl}/auth/updateUserData`, {
+                name,
+                email,
+                preferences: preferences
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            // Navigate to home page after both operations are complete
             navigate('/home');
         } catch (error) {
             console.error('Signup error:', error);
