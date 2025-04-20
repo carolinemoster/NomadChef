@@ -30,6 +30,7 @@ export const recommendationService = {
         return recipeService.getRecommendations({ number: limit });
       }
       
+      const adjustedPreferences = await recommendationService.analyzeUserPreferences(userRecipes, userId);
       
       // Build query parameters for Spoonacular
       const queryParams = {
