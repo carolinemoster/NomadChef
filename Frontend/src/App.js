@@ -7,6 +7,7 @@ import FrontPage from './Pages/FrontPage';
 import RecipePage from './Pages/RecipePage';
 import AccountPage from './Pages/AccountPage';
 import PastRecipesPage from './Pages/PastRecipesPage';
+import ChallengesPage from './Pages/ChallengesPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/Recipe" element={<RecipePage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path='/pastrecipes' element={<PastRecipesPage />} />
+          <Route path='/challenges' element={<ChallengesPage />} />
         </Routes>
       </Router>
     </div>

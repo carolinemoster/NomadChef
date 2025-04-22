@@ -207,7 +207,11 @@ export async function getUserPoints(id) {
     try {
         const db = await getDb();
         const collection = db.collection('users');
-        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(id)), points: { $exists: false } },
+            { $set: { points: 0, challengesCompleted: 0} }
+        );
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) },  { projection: { points: 1, challengesCompleted: 1}});
         console.log("User found: ", user);
         if (!user) {
             return {
@@ -215,16 +219,9 @@ export async function getUserPoints(id) {
                 body: { error: 'User not found' }
             };
         }
-        await usersCollection.updateOne(
-            { _id: new ObjectId(String(userId)), points: { $exists: false } },
-            { $set: { points: 0, challengesCompleted: 0} }
-        );
-        const payload = {
-            points: user.points
-        }
         return {
             statusCode: 200,
-            body: payload
+            body: user
         };
     }
     catch {
@@ -248,19 +245,21 @@ export async function addUserPoints(id, pointAmount) {
             };
         }
         await usersCollection.updateOne(
-            { _id: new ObjectId(String(userId)), points: { $exists: false } },
+            { _id: new ObjectId(String(id)), points: { $exists: false } },
             { $set: { points: 0, challengesCompleted: 0} }
         );
         await usersCollection.updateOne(
-            { _id: new ObjectId(String(userId)) },
+            { _id: new ObjectId(String(id)) },
             {
-                $inc: {points: pointAmount},
-                $inc: { challengesCompleted: 1 }
+                $inc: {
+                    points: parseInt(pointAmount.points),
+                    challengesCompleted: 1 
+                }
             }
         );
         return {
             statusCode: 200,
-            body: userWithoutPassword
+            body: pointAmount
         };
     }
     catch (error) {

@@ -219,6 +219,10 @@ function RecipePage() {
     const handleAccountClick = () => {
         navigate('/account');
     };
+    const handleChallengesClick = () => {
+        navigate('/challenges');
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         navigate('/');
@@ -290,6 +294,30 @@ function RecipePage() {
           );
     };
     
+    const addPoints = async (pointsAmount) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE_URL}/auth/addUserPoints`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    points: pointsAmount
+                })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update user points');
+            }
+            const data = await response.json();
+            console.log("points update successful:", data);
+        }
+        catch {
+            console.log("Error updating points");
+        }
+    };
+
     const getRecipe = async (recipeID) => {
         let data = null;
         setIsLoading(true);
@@ -395,6 +423,7 @@ function RecipePage() {
         setInstructions(data2);
     }
     const finishClick = () => {
+        addPoints(50);
         setShowSurvey(true);
     }
     const closeSurvey = () => {
@@ -404,7 +433,7 @@ function RecipePage() {
         try {
             const token = localStorage.getItem('authToken');
             const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
-
+            
             // First, get current user data
             const userDataResponse = await axios.get(`${apiBaseUrl}/auth/getUserData`, {
                 headers: {
@@ -515,6 +544,11 @@ function RecipePage() {
                         <li>
                             <button onClick={handlePastRecipesClick} className='nav-button'>
                                 Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleChallengesClick} className='nav-button'>
+                                Challenges
                             </button>
                         </li>
                         <li>

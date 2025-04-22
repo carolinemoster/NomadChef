@@ -586,6 +586,11 @@ function FrontPage() {
         navigate('/home');
     };
 
+    const handleChallengesClick = () => {
+        navigate('/challenges');
+    };
+
+
     const handleLogout = () => {
         // Clear the auth token
         localStorage.removeItem('authToken');
@@ -1147,6 +1152,11 @@ function FrontPage() {
                         <li>
                             <button onClick={handlePastRecipesClick} className='nav-button'>
                                 Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleChallengesClick} className='nav-button'>
+                                Challenges
                             </button>
                         </li>
                         <li>
