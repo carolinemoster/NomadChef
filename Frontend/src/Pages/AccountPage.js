@@ -257,17 +257,6 @@ const AccountPage = () => {
 
             <div className="account-container">
                 <h1>Account Information</h1>
-                <ProgressBar 
-                    bgColor='#0d4725' 
-                    width='100%' 
-                    className='progress-bar' 
-                    completed={points.toString()}
-                    labelColor='#ffffff'
-                    maxCompleted={1000}
-                    height='12px'
-                    labelSize='10px'
-                    baseBgColor='#e0e0de'
-                />
                 {!isEditing && (
                     <button className="edit-button" onClick={handleEdit}>
                         Edit Profile

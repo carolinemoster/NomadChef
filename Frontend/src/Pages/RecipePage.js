@@ -423,7 +423,7 @@ function RecipePage() {
         setInstructions(data2);
     }
     const finishClick = () => {
-        addPoints(50);
+        addPoints(1350);
         setShowSurvey(true);
     }
     const closeSurvey = () => {

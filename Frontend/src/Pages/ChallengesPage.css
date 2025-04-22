@@ -23,6 +23,11 @@ html, body, #root {
     height: auto;
 }
 
+.progress-bar {
+    margin-top: 2px;
+}
+
+
 .brand {
     position: absolute;
     top: 15px;
