@@ -1,6 +1,6 @@
 .recipe-card {
-    width: 280px;
-    height: 400px;
+    width: 220px;
+    height: 380px;
     background: white;
     color: #0d4725;
     display: flex;
@@ -99,17 +99,11 @@
       width: 240px;
       height: 340px;
     }
-  
-    .recipe-image-container {
-      height: 150px;
-    }
-  
-    .recipe-card-title {
-      font-size: 1.1rem;
-    }
-  
-    .recipe-image-placeholder {
-      height: 150px;
-    }
   }
-  
+
+  @media (max-width: 480px) {
+    .recipe-card {
+        width: 100px;
+        height: 160px;
+      }  
+}
