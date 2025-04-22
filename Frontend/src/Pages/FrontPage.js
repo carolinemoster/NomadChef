@@ -526,6 +526,14 @@ function FrontPage() {
         }
     };
     const getRecommendedRecipes = async () => {
+        // Check if we already have cached recommendations in this session
+        const cachedRecommendations = sessionStorage.getItem('recommendedRecipes');
+        if (cachedRecommendations) {
+            console.log("Using cached recommended recipes");
+            setRecommendedRecipes(JSON.parse(cachedRecommendations));
+            return;
+        }
+
         try {
             const token = localStorage.getItem('authToken');
             const response = await fetch(`${BASE_RECOMMEND_RECIPES_URL}`, {
@@ -544,6 +552,8 @@ function FrontPage() {
             console.log("Recommended recipes received:", data);
 
             if (data && Array.isArray(data.results)) {
+                // Cache the recommendations in sessionStorage
+                sessionStorage.setItem('recommendedRecipes', JSON.stringify(data.results));
                 setRecommendedRecipes(data.results);
             } else {
                 console.log("No recommended recipes found:", data);
@@ -659,9 +669,8 @@ function FrontPage() {
     useEffect(() => {
         const handleStorageChange = (e) => {
             if (e.key === 'recipeCompleted') {
-                // Refresh all the data
+                // Only refresh recipe history, not recommended recipes
                 getHistory();
-                getRecommendedRecipes();
             }
         };
 
