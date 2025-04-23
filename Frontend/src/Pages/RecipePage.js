@@ -199,6 +199,7 @@ function RecipePage() {
     const RecipeID = location.state?.recipeID;
     const [recipe, setRecipe] = useState([]);
     const [instructions, setInstructions] = useState([]);
+    const [newRecipe, setNewRecipe] = useState(true);
     const [isClick, setClick] = useState(false);
     const [showSurvey, setShowSurvey] = useState(false);
     const { getCode, getName } = require('country-list');
@@ -344,7 +345,7 @@ function RecipePage() {
                 // Check if savedRecipe exists before accessing its properties
                 if (savedRecipe) {
                     setClick(savedRecipe.favorite || false);
-                    
+                    setNewRecipe(false);
                     if (savedRecipe.recipe?.origin && savedRecipe.recipe?.culturalContext) {
                         console.log('Found existing cultural information');
                         setCulturalContext(savedRecipe.recipe.culturalContext);
@@ -416,6 +417,94 @@ function RecipePage() {
         }
         setIsLoading(false);
     }
+
+    const updateSingleChallenge = async (challenge) => {
+        try {
+            console.log(challenge._id);
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE_URL}/auth/updateUserChallenge`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: challenge._id
+                })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update user points');
+            }
+            const data = await response.json();
+            console.log("challenge update successful:", data);
+
+            if(data.isCompleted) {
+                switch(parseInt(challenge.type)) {
+                    case(1): addPoints(300);
+                    break;
+                    case(2): addPoints(400);
+                    break;
+                    case(3): addPoints(100);
+                    break;
+                }
+            }
+        }
+        catch {
+            console.log("Error updating points");
+        }
+    };
+
+
+    const updateChallenges = async () => {
+        console.log(newRecipe);
+        try {
+            const token = localStorage.getItem('authToken'); 
+            const response = await fetch(`${API_BASE_URL}/auth/getUserChallenges`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+            if(data.challenges.length == 0) { //If no challenges then don't progress
+                return;
+            }
+            for (const challenge of data.challenges) {
+                if(challenge.completed == true) { //If challenge is already completed then move on
+                    continue;
+                }
+                //Update Challenges based on type
+                switch(parseInt(challenge.type)) {
+                    case(1): if((challenge.condition).toLowerCase() == (getCode(origin.country)).toLowerCase()) {
+                        console.log(challenge.id);
+                        updateSingleChallenge(challenge);
+                        break;
+                    }
+                    case(2): if((challenge.condition).toLowerCase() == (origin.region).toLowerCase()) {
+                        updateSingleChallenge(challenge);
+                        break;
+                    }
+                    case(3): if(newRecipe) {
+                        updateSingleChallenge(challenge);
+                        break;
+                    }
+                    default:
+                        break;
+                } 
+
+            }
+            return;
+        }
+        catch {
+            console.log("Error getting user challenges");
+        }
+    }
     const getInstructions = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
         const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&stepBreakdown=true`);
@@ -423,7 +512,6 @@ function RecipePage() {
         setInstructions(data2);
     }
     const finishClick = () => {
-        addPoints(1350);
         setShowSurvey(true);
     }
     const closeSurvey = () => {
@@ -477,6 +565,8 @@ function RecipePage() {
 
             // Trigger front page refresh
             localStorage.setItem('recipeCompleted', Date.now().toString());
+            addPoints(50);
+            updateChallenges();
             navigate('/home');
         } catch (error) {
             console.error('Error submitting survey:', error);

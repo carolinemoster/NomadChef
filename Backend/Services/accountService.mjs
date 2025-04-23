@@ -377,3 +377,41 @@ export async function addUserChallenges(userId, challenges) {
         };
     }
 }
+export async function updateUserChallenge(challengeId) {
+    try {
+        const db = await getDb();
+        
+        // Verify user exists in users collection
+        
+        const challengesCollection = db.collection('users_challenges');
+        const challenge = await challengesCollection.findOne({ _id: new ObjectId(challengeId) });
+        if (!challenge) {
+        throw new Error("Challenge not found");
+        }
+
+
+        // Insert challenges into the collection
+        const newAmountCompleted = challenge.amountCompleted + 1;
+        const isCompleted = newAmountCompleted >= challenge.amountRemaining;
+
+    
+        const result = await challengesCollection.updateOne(
+        { _id: new ObjectId(challengeId) },
+        {
+            $set: { completed: isCompleted },
+            $inc: { amountCompleted: 1 }
+        }
+        );
+
+        return {
+            statusCode: 200,
+            body: { isCompleted: isCompleted}
+        };
+    }
+    catch {
+        return {
+            statusCode: 400,
+            body: {error: "Failed to add user challenges"}
+        };
+    }
+}

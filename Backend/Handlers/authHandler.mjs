@@ -230,6 +230,22 @@ export const handler = async (event) => {
                 const result = await addUserChallenges(decoded.id, updateChallenges.challenges);
                 return formatResponse(result.statusCode, result.body);
             }
+            case '/auth/updateUserChallenge': {
+                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+            
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+            
+                const updateChallenge = parseBody(event);
+                const result = await updateUserChallenge(updateChallenge.id);
+                return formatResponse(result.statusCode, result.body);
+            }
             case '/auth/addUserPoints': {
                 if (event.httpMethod !== 'POST') {  // Change PUT to POST
                     return formatResponse(405, { error: 'Method not allowed' });
