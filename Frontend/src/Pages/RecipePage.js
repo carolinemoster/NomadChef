@@ -207,7 +207,12 @@ function RecipePage() {
     };
     const [culturalContext, setCulturalContext] = useState(null);
     const [origin, setOrigin] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    
+    // Separate loading states for different data types
+    const [isLoadingRecipe, setIsLoadingRecipe] = useState(true);
+    const [isLoadingCultural, setIsLoadingCultural] = useState(true);
+    const [isLoadingInstructions, setIsLoadingInstructions] = useState(true);
+    
     const [showFullContext, setShowFullContext] = useState(false);
     const MAX_CONTEXT_LENGTH = 600;
     const handleBrandClick = () => {
@@ -225,17 +230,17 @@ function RecipePage() {
     };
     useEffect(() => {
         if (RecipeID) {
+            // Fetch recipe details and instructions in parallel
             getRecipe(RecipeID);
             getInstructions(RecipeID);
-            //getInstructions(RecipeID);
         }
     }, [RecipeID]); // Runs when RecipeID changes
+    
     const handleClick = () => {
         getInstructions(RecipeID);
-        
-      };
-      
-      const setCountry = async (countryCode) => {
+    };
+    
+    const setCountry = async (countryCode) => {
         if (!countryCode) {
             console.error("Invalid country code:", countryCode);
             return;
@@ -291,15 +296,30 @@ function RecipePage() {
     };
     
     const getRecipe = async (recipeID) => {
-        let data = null;
-        setIsLoading(true);
+        setIsLoadingRecipe(true);
         try {
             // First get basic recipe details
             console.log('Fetching recipe details from:', `${BASE_URL}detail?id=${recipeID}`);
             const response = await fetch(`${BASE_URL}detail?id=${recipeID}`);
-            data = await response.json();
+            const data = await response.json();
             console.log('Recipe data received:', data);
-
+            
+            // Set basic recipe data immediately so it renders
+            setRecipe(data);
+            setIsLoadingRecipe(false);
+            
+            // Then fetch cultural info in the background
+            fetchCulturalInfo(recipeID, data);
+            
+        } catch (error) {
+            console.error('Error in getRecipe:', error);
+            setIsLoadingRecipe(false);
+        }
+    }
+    
+    const fetchCulturalInfo = async (recipeID, recipeData) => {
+        setIsLoadingCultural(true);
+        try {
             // Check if this recipe is already saved with cultural info
             const token = localStorage.getItem('authToken');
             const userRecipesResponse = await fetch(`${API_BASE_URL}/user-recipe`, {
@@ -321,12 +341,12 @@ function RecipePage() {
                         console.log('Found existing cultural information');
                         setCulturalContext(savedRecipe.recipe.culturalContext);
                         setOrigin(savedRecipe.recipe.origin);
-                        setRecipe({
-                            ...data,
+                        setRecipe(prev => ({
+                            ...prev,
                             origin: savedRecipe.recipe.origin,
                             culturalContext: savedRecipe.recipe.culturalContext
-                        });
-                        setIsLoading(false);
+                        }));
+                        setIsLoadingCultural(false);
                         return;
                     }
                 }
@@ -355,11 +375,11 @@ function RecipePage() {
                 // Update local state
                 setCulturalContext(culturalInfo.culturalContext);
                 setOrigin(culturalInfo.origin);
-                setRecipe({
-                    ...data,
+                setRecipe(prev => ({
+                    ...prev,
                     origin: culturalInfo.origin,
                     culturalContext: culturalInfo.culturalContext
-                });
+                }));
                 
                 // Save the cultural information
                 fetch(`${API_BASE_URL}/user-recipe`, {
@@ -380,23 +400,26 @@ function RecipePage() {
                 const errorText = await culturalResponse.text();
                 console.log('Cultural response not OK. Status:', culturalResponse.status);
                 console.log('Error text:', errorText);
-                setRecipe(data);
             }
         } catch (error) {
-            console.error('Error in getRecipe:', error);
-            if (data) {
-                setRecipe(data);
-            }
+            console.error('Error fetching cultural info:', error);
         }
-        setIsLoading(false);
+        setIsLoadingCultural(false);
     }
+    
     const getInstructions = async (recipeID) => {
-        //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-        const flush = '27630916589947baa9da132202bff648'
-        const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${flush}&stepBreakdown=true`);
-        const data2 = await response2.json();
-        setInstructions(data2);
+        setIsLoadingInstructions(true);
+        try {
+            const flush = '27630916589947baa9da132202bff648'
+            const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${flush}&stepBreakdown=true`);
+            const data2 = await response2.json();
+            setInstructions(data2);
+        } catch (error) {
+            console.error('Error fetching instructions:', error);
+        }
+        setIsLoadingInstructions(false);
     }
+    
     const finishClick = () => {
         setShowSurvey(true);
     }
@@ -546,7 +569,7 @@ function RecipePage() {
                 </div>
 
                 <div className="origin-line">
-                    {isLoading ? (
+                    {isLoadingCultural ? (
                         <div className="loading-container">
                             <span className="loading-text">Loading origin...</span>
                             <div className="loading-spinner"></div>
@@ -568,10 +591,17 @@ function RecipePage() {
 
                 <div className="box-main">
                     <div className="firstHalf" style={{ overflow: 'visible' }}>
-                        <img src={recipe.image} alt={recipe.title || "Recipe image"} />
+                        {isLoadingRecipe ? (
+                            <div className="loading-container">
+                                <span className="loading-text">Loading image...</span>
+                                <div className="loading-spinner"></div>
+                            </div>
+                        ) : (
+                            <img src={recipe.image} alt={recipe.title || "Recipe image"} />
+                        )}
                     </div>
                     <div className="cultural-context-box">
-                        {isLoading ? (
+                        {isLoadingCultural ? (
                             <div className="loading-container">
                                 <span className="loading-text">Loading cultural context...</span>
                                 <div className="loading-spinner"></div>
@@ -603,15 +633,29 @@ function RecipePage() {
                 </div>
                 <h2>Ingredients</h2>
                 <div className='box-main'>
-                    <ul>
-                        {listingredients}
-                    </ul>
+                    {isLoadingRecipe ? (
+                        <div className="loading-container">
+                            <span className="loading-text">Loading ingredients...</span>
+                            <div className="loading-spinner"></div>
+                        </div>
+                    ) : (
+                        <ul>
+                            {listingredients}
+                        </ul>
+                    )}
                 </div>
                 <h2>Instructions</h2>
                 <div className='box-main'>
-                    <ul className='steps-ul'>
-                        {listinstructions}
-                    </ul>
+                    {isLoadingInstructions ? (
+                        <div className="loading-container">
+                            <span className="loading-text">Loading instructions...</span>
+                            <div className="loading-spinner"></div>
+                        </div>
+                    ) : (
+                        <ul className='steps-ul'>
+                            {listinstructions}
+                        </ul>
+                    )}
                 </div>
                 <div className='box-main'>
                     <div className='finish-recipe' onClick={finishClick}>
