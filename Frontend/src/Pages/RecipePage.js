@@ -351,9 +351,18 @@ function RecipePage() {
             if (culturalResponse.ok) {
                 const culturalInfo = await culturalResponse.json();
                 console.log('Cultural info received:', culturalInfo);
+
+                // Update local state
+                setCulturalContext(culturalInfo.culturalContext);
+                setOrigin(culturalInfo.origin);
+                setRecipe({
+                    ...data,
+                    origin: culturalInfo.origin,
+                    culturalContext: culturalInfo.culturalContext
+                });
                 
                 // Save the cultural information
-                await fetch(`${API_BASE_URL}/user-recipe`, {
+                fetch(`${API_BASE_URL}/user-recipe`, {
                     method: 'POST',
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -364,15 +373,8 @@ function RecipePage() {
                         origin: culturalInfo.origin,
                         culturalContext: culturalInfo.culturalContext
                     })
-                });
-
-                // Update local state
-                setCulturalContext(culturalInfo.culturalContext);
-                setOrigin(culturalInfo.origin);
-                setRecipe({
-                    ...data,
-                    origin: culturalInfo.origin,
-                    culturalContext: culturalInfo.culturalContext
+                }).catch(error => {
+                    console.error('Error saving cultural info:', error);
                 });
             } else {
                 const errorText = await culturalResponse.text();
@@ -390,7 +392,8 @@ function RecipePage() {
     }
     const getInstructions = async (recipeID) => {
         //fetch(`${BASE_URL}?apiKey=${API_KEY}&query=${encodeURIComponent(query)}`).then((response) => response.json()).then((data) => setRecipes(data))
-        const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${process.env.REACT_APP_SPOONACULAR_KEY}&stepBreakdown=true`);
+        const flush = '27630916589947baa9da132202bff648'
+        const response2 = await fetch(`${BASE_SPOON}${recipeID}/analyzedInstructions?apiKey=${flush}&stepBreakdown=true`);
         const data2 = await response2.json();
         setInstructions(data2);
     }

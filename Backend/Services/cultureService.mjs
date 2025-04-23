@@ -63,7 +63,7 @@ export const culturalContextService = {
       console.log('Sending to OpenAI (for origin):', recipeText);
   
       const response = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -86,7 +86,6 @@ export const culturalContextService = {
       });
   
       const message = response.choices[0]?.message?.content;
-      console.log("Raw response from OpenAI:", message);
   
       let result = JSON.parse(message);
       if (!result.country) {
@@ -115,7 +114,7 @@ export const culturalContextService = {
           .join(", ");
       
       const response = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
