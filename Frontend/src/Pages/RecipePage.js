@@ -832,7 +832,7 @@ function RecipePage() {
                     </div>
                 </div>
                 <h2>Ingredients</h2>
-                <div className="section-divider"></div>
+                <div className="origin-line"></div>
                 <div className='box-main ingredients-container'>
                     {isLoadingRecipe ? (
                         <div className="loading-container">
@@ -846,7 +846,7 @@ function RecipePage() {
                     )}
                 </div>
                 <h2>Instructions</h2>
-                <div className="section-divider"></div>
+                <div className="origin-line"></div>
                 <div className='box-main'>
                     {isLoadingInstructions ? (
                         <div className="loading-container">
