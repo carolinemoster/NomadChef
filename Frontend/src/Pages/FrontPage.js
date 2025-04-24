@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VectorMap } from '@south-paw/react-vector-maps';
 import worldMap from "../Components/Assets/world.json"
 import './FrontPage.css';
@@ -22,7 +22,7 @@ const BASE_RECOMMEND_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.ama
 function FrontPage() {
     const Map = styled.div`
         width: 90% !important;
-        max-width: 1400px;
+        max-width: 1200px;
         margin: 0 auto;
 
         svg {
@@ -66,68 +66,26 @@ function FrontPage() {
     const [hoveredCountry, setHoveredCountry] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const mapContainerRef = useRef(null);
-    const tooltipRef = useRef(null);
 
-    useEffect(() => {
-        // Create a tooltip element
-        const tooltip = document.createElement('div');
-        tooltip.className = 'map-tooltip';
-        tooltip.style.position = 'fixed';
-        tooltip.style.display = 'none';
-        tooltip.style.zIndex = '1000';
-        tooltip.style.background = 'white';
-        tooltip.style.padding = '5px 10px';
-        tooltip.style.border = '1px solid #ccc';
-        tooltip.style.borderRadius = '4px';
-        tooltip.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-        document.body.appendChild(tooltip);
-        tooltipRef.current = tooltip;
-        
-        // Clean up on unmount
-        return () => {
-            document.body.removeChild(tooltip);
-        };
-    }, []);
+    const handleMouseMove = (e) => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+    };
 
-    const handleMouseMove = useCallback((e) => {
-        if (tooltipRef.current && tooltipRef.current.style.display !== 'none') {
-            tooltipRef.current.style.left = `${e.clientX + 15}px`;
-            tooltipRef.current.style.top = `${e.clientY + 15}px`;
-        }
-    }, []);
-
-    const handleCountryHover = useCallback(({ target }) => {
-        const countryName = target.attributes.name.value;
-        if (tooltipRef.current) {
-            tooltipRef.current.textContent = countryName;
-            tooltipRef.current.style.display = 'block';
-        }
-    }, []);
-
-    const handleMapMouseLeave = useCallback(() => {
-        if (tooltipRef.current) {
-            tooltipRef.current.style.display = 'none';
-        }
-    }, []);
-
-    // Define mapLayerProps
     const mapLayerProps = {
         onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
-        onMouseEnter: handleCountryHover,
-        onMouseLeave: handleMapMouseLeave,
+        onMouseEnter: ({ target }) => {
+            const countryName = target.attributes.name.value;
+            setHoveredCountry(countryName);
+        },
+        onMouseLeave: () => {
+            setHoveredCountry(null);
+        },
         onMouseMove: handleMouseMove,
         style: {
             cursor: 'pointer',
             transition: 'fill 0.2s ease'
         }
     };
-
-    // Define handleSvgMapMouseLeave
-    const handleSvgMapMouseLeave = useCallback(() => {
-        if (tooltipRef.current) {
-            tooltipRef.current.style.display = 'none';
-        }
-    }, []);
 
     const handleCountryClick = (countrySelect) => {
         // Reset the selection if clicking the same country again
@@ -594,6 +552,8 @@ function FrontPage() {
             console.log("Recommended recipes received:", data);
 
             if (data && Array.isArray(data.results)) {
+                // Cache the recommendations in sessionStorage
+                sessionStorage.setItem('recommendedRecipes', JSON.stringify(data.results));
                 setRecommendedRecipes(data.results);
             } else {
                 console.log("No recommended recipes found:", data);
@@ -719,6 +679,16 @@ function FrontPage() {
     useEffect(() => {
         console.log("completedCountries updated:", completedCountries);
     }, [completedCountries]);
+
+    // Handle when mouse leaves the entire map container
+    const handleMapMouseLeave = () => {
+        setHoveredCountry(null);
+    };
+
+    // Add this function to handle mouse leaving the SVG map specifically
+    const handleSvgMapMouseLeave = () => {
+        setHoveredCountry(null);
+    };
 
     const getCountryRegion = (countryCode) => {
         // More comprehensive region mapping
@@ -1235,6 +1205,18 @@ function FrontPage() {
                                 onMouseLeave={handleSvgMapMouseLeave}
                             />
                         </Map>
+                        
+                        {hoveredCountry && (
+                            <div 
+                                className="map-tooltip" 
+                                style={{ 
+                                    left: mousePosition.x + 10, 
+                                    top: mousePosition.y + 10 
+                                }}
+                            >
+                                {hoveredCountry}
+                            </div>
+                        )}
                         
                         <div className="progress-container" onMouseEnter={() => setHoveredCountry(null)}>
                             <CustomProgressBar />

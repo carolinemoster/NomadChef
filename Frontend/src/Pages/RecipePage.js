@@ -5,7 +5,7 @@ import wisk_icon from '../Components/Assets/wisk.png';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Heart from "react-animated-heart"
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaClock, FaUsers, FaDollarSign } from 'react-icons/fa';
 import axios from 'axios';
 
 const BASE_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes/"
@@ -196,6 +196,14 @@ const decodeHtml = (html) => {
   const txt = document.createElement('textarea');
   txt.innerHTML = html;
   return txt.value;
+};
+
+// Add this helper function at the top of your file, outside the RecipePage component
+const formatPrice = (price) => {
+    return (price / 100).toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    });
 };
 
 function RecipePage() {
@@ -601,7 +609,7 @@ function RecipePage() {
                                         <div className="step-content">
                                             <p>{decodeHtml(instruction.step)}</p>
                                             
-                                            {possibleImages.length > 0 && (
+                                            {possibleImages.length > 0 ? (
                                                 <div className="step-images-wrapper" style={{ position: 'relative' }}>
                                                     {possibleImages.map((image, idx) => (
                                                         <div 
@@ -652,6 +660,8 @@ function RecipePage() {
                                                         </div>
                                                     ))}
                                                 </div>
+                                            ) : (
+                                                <div className="step-image-placeholder"></div>
                                             )}
                                         </div>
                                     </div>
@@ -722,6 +732,42 @@ function RecipePage() {
                     </div>
                 </div>
 
+                {!isLoadingRecipe && recipe && (
+                    <div className="recipe-metrics">
+                        <div className="metrics-container">
+                            <div className="metric-item">
+                                <div className="metric-icon">
+                                    <FaDollarSign className="icon" />
+                                </div>
+                                <div className="metric-content">
+                                    <span className="metric-value">{recipe.pricePerServing ? formatPrice(recipe.pricePerServing) : 'N/A'}</span>
+                                    <span className="metric-label">per serving</span>
+                                </div>
+                            </div>
+
+                            <div className="metric-item">
+                                <div className="metric-icon">
+                                    <FaUsers className="icon" />
+                                </div>
+                                <div className="metric-content">
+                                    <span className="metric-value">{recipe.servings || 'N/A'}</span>
+                                    <span className="metric-label">servings</span>
+                                </div>
+                            </div>
+
+                            <div className="metric-item">
+                                <div className="metric-icon">
+                                    <FaClock className="icon" />
+                                </div>
+                                <div className="metric-content">
+                                    <span className="metric-value">{recipe.readyInMinutes || 'N/A'}</span>
+                                    <span className="metric-label">minutes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="origin-line">
                     {isLoadingCultural ? (
                         <div className="loading-container">
@@ -786,6 +832,7 @@ function RecipePage() {
                     </div>
                 </div>
                 <h2>Ingredients</h2>
+                <div className="section-divider"></div>
                 <div className='box-main ingredients-container'>
                     {isLoadingRecipe ? (
                         <div className="loading-container">
@@ -799,6 +846,7 @@ function RecipePage() {
                     )}
                 </div>
                 <h2>Instructions</h2>
+                <div className="section-divider"></div>
                 <div className='box-main'>
                     {isLoadingInstructions ? (
                         <div className="loading-container">
