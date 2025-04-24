@@ -77,11 +77,12 @@ export const recipeService = {
         addRecipeInformation = true,
         addRecipeNutrition = false,
         sort = 'popularity',
-        sortDirection = 'desc'
+        sortDirection = 'desc',
+        instructionsRequired = true
     } = {}) {
         try {
             const params = {
-                query, cuisine, diet, intolerances, includeIngredients, excludeIngredients, type, maxReadyTime, number, offset, addRecipeInformation, addRecipeNutrition, sort, sortDirection
+                query, cuisine, diet, intolerances, includeIngredients, excludeIngredients, type, maxReadyTime, number, offset, addRecipeInformation, addRecipeNutrition, sort, sortDirection, instructionsRequired
             };
             validateParams(params);
             const queryString = buildQueryString(params);

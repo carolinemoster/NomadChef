@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './RecipePage.css';
 import "react-multi-carousel/lib/styles.css";
 import wisk_icon from '../Components/Assets/wisk.png';
@@ -192,6 +191,13 @@ const SurveyModal = ({ isOpen, onClose, recipe, onSubmit }) => {
     );
 };
 
+// Add this function to decode HTML entities
+const decodeHtml = (html) => {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+};
+
 function RecipePage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -228,12 +234,26 @@ function RecipePage() {
         localStorage.removeItem('authToken');
         navigate('/');
     };
+    const recipeRequestRef = useRef(false);
+    const culturalRequestRef = useRef(false);
+    
     useEffect(() => {
         if (RecipeID) {
-            // Fetch recipe details and instructions in parallel
+            // Reset request flags when RecipeID changes
+            recipeRequestRef.current = false;
+            culturalRequestRef.current = false;
+            
+            // Fetch recipe details and instructions
             getRecipe(RecipeID);
             getInstructions(RecipeID);
         }
+        
+        // Clean up function
+        return () => {
+            // Reset the refs when component unmounts
+            recipeRequestRef.current = false;
+            culturalRequestRef.current = false;
+        };
     }, [RecipeID]); // Runs when RecipeID changes
     
     const handleClick = () => {
@@ -287,15 +307,25 @@ function RecipePage() {
             })
         });
     };
-    const stepClicked = (index) => {
+    const stepClicked = (setIndex, stepNumber) => {
+        const stepId = `${setIndex}-${stepNumber}`;
         setClickedSteps((prev) =>
-            prev.includes(index)
-              ? prev.filter((i) => i !== index) // Remove if already clicked (toggle off)
-              : [...prev, index] // Add if not clicked
-          );
+            prev.includes(stepId)
+                ? prev.filter((id) => id !== stepId)
+                : [...prev, stepId]
+        );
     };
     
     const getRecipe = async (recipeID) => {
+        // If we've already started this request, don't do it again
+        if (recipeRequestRef.current) {
+            console.log('Recipe request already in progress, skipping duplicate call');
+            return;
+        }
+        
+        // Mark that we've started the request
+        recipeRequestRef.current = true;
+        
         setIsLoadingRecipe(true);
         try {
             // First get basic recipe details
@@ -318,7 +348,16 @@ function RecipePage() {
     }
     
     const fetchCulturalInfo = async (recipeID, recipeData) => {
+        // Prevent duplicate calls using ref
+        if (culturalRequestRef.current) {
+            console.log('Cultural info fetch already in progress, skipping');
+            return;
+        }
+        
+        // Mark that we've started the cultural request
+        culturalRequestRef.current = true;
         setIsLoadingCultural(true);
+        
         try {
             // Check if this recipe is already saved with cultural info
             const token = localStorage.getItem('authToken');
@@ -333,22 +372,17 @@ function RecipePage() {
                 const userRecipes = await userRecipesResponse.json();
                 const savedRecipe = userRecipes.recipes.find(r => r.recipeId === recipeID);
                 
-                // Check if savedRecipe exists before accessing its properties
-                if (savedRecipe) {
-                    setClick(savedRecipe.favorite || false);
-                    
-                    if (savedRecipe.recipe?.origin && savedRecipe.recipe?.culturalContext) {
-                        console.log('Found existing cultural information');
-                        setCulturalContext(savedRecipe.recipe.culturalContext);
-                        setOrigin(savedRecipe.recipe.origin);
-                        setRecipe(prev => ({
-                            ...prev,
-                            origin: savedRecipe.recipe.origin,
-                            culturalContext: savedRecipe.recipe.culturalContext
-                        }));
-                        setIsLoadingCultural(false);
-                        return;
-                    }
+                if (savedRecipe && savedRecipe.recipe?.origin && savedRecipe.recipe?.culturalContext) {
+                    console.log('Found existing cultural information');
+                    setCulturalContext(savedRecipe.recipe.culturalContext);
+                    setOrigin(savedRecipe.recipe.origin);
+                    setRecipe(prev => ({
+                        ...prev,
+                        origin: savedRecipe.recipe.origin,
+                        culturalContext: savedRecipe.recipe.culturalContext
+                    }));
+                    setIsLoadingCultural(false);
+                    return;
                 }
             }
 
@@ -480,10 +514,20 @@ function RecipePage() {
         }
     };
     const listingredients = (recipe.extendedIngredients) ? recipe.extendedIngredients.map((ingredient, index) =>
-        <li key={`ingredient-${index}`}>
-            {ingredient.original}
+        <li key={`ingredient-${index}`} className="ingredient-item">
+            <div className="ingredient-content">
+                {ingredient.image && (
+                    <img 
+                        src={`https://spoonacular.com/cdn/ingredients_100x100/${ingredient.image}`}
+                        alt={ingredient.name}
+                        className="ingredient-image"
+                        onError={(e) => e.target.style.display = 'none'}
+                    />
+                )}
+                <span className="ingredient-text">{ingredient.original}</span>
+            </div>
         </li>
-    ) : <div></div>;
+    ) : <div>No ingredients available</div>;
     const finishbutton = (instructions && instructions[0] && instructions[0].steps) ? 
         (clickedSteps.includes(instructions[0].steps.length-1) ? 
             <div className='finish-recipe' onClick={finishClick}> 
@@ -491,25 +535,135 @@ function RecipePage() {
             </div> 
             : <div></div>
         ) : <div></div>;
-    const listinstructions = (instructions && instructions[0] && instructions[0].steps) ? 
-        instructions[0].steps.map((instruction) =>
-            <li key={instruction.number}>
-                <div className={`step-box ${clickedSteps.includes(instruction.number-1) ? 'completed' : ''}`}>
-                    <div className='step-box-left'>
-                        <input
-                            type="checkbox"
-                            className="step-checkbox"
-                            checked={clickedSteps.includes(instruction.number-1)}
-                            onChange={() => stepClicked(instruction.number-1)}
-                        />
-                    </div>
-                    <div className='step-box-right'>
-                        <p>{instruction.step}</p>
-                    </div>
-                </div>
-            </li>
-        ) : <p>No Instructions</p>
-        
+    const renderInstructions = () => {
+        if (!instructions || instructions.length === 0) {
+            return <p>No Instructions</p>;
+        }
+
+        return instructions.map((instructionSet, setIndex) => (
+            <div key={`instruction-set-${setIndex}`} className="instruction-set">
+                {instructionSet.name && (
+                    <h3 className="instruction-set-name">{instructionSet.name}</h3>
+                )}
+                <ul className="steps-ul">
+                    {instructionSet.steps.map((instruction) => {
+                        // Collect all possible images from both equipment and ingredients
+                        const possibleImages = [];
+                        
+                        // Add equipment images
+                        if (instruction.equipment && instruction.equipment.length > 0) {
+                            instruction.equipment.forEach(item => {
+                                if (item.image) {
+                                    // Fix the double URL issue
+                                    const imageUrl = item.image.startsWith('http') 
+                                        ? item.image 
+                                        : `https://spoonacular.com/cdn/equipment_100x100/${item.image}`;
+                                    
+                                    possibleImages.push({
+                                        url: imageUrl,
+                                        name: item.name,
+                                        type: 'equipment'
+                                    });
+                                }
+                            });
+                        }
+                        
+                        // Add ingredient images with the same URL fix
+                        if (instruction.ingredients && instruction.ingredients.length > 0) {
+                            instruction.ingredients.forEach(item => {
+                                if (item.image) {
+                                    // Fix the double URL issue
+                                    const imageUrl = item.image.startsWith('http') 
+                                        ? item.image 
+                                        : `https://spoonacular.com/cdn/ingredients_100x100/${item.image}`;
+                                    
+                                    possibleImages.push({
+                                        url: imageUrl,
+                                        name: item.name,
+                                        type: 'ingredient'
+                                    });
+                                }
+                            });
+                        }
+                        
+                        return (
+                            <li key={`${setIndex}-step-${instruction.number}`}>
+                                <div className={`step-box ${clickedSteps.includes(`${setIndex}-${instruction.number-1}`) ? 'completed' : ''}`}>
+                                    <div className='step-box-left'>
+                                        <input
+                                            type="checkbox"
+                                            className="step-checkbox"
+                                            checked={clickedSteps.includes(`${setIndex}-${instruction.number-1}`)}
+                                            onChange={() => stepClicked(setIndex, instruction.number-1)}
+                                        />
+                                    </div>
+                                    <div className='step-box-right'>
+                                        <div className="step-content">
+                                            <p>{decodeHtml(instruction.step)}</p>
+                                            
+                                            {possibleImages.length > 0 && (
+                                                <div className="step-images-wrapper" style={{ position: 'relative' }}>
+                                                    {possibleImages.map((image, idx) => (
+                                                        <div 
+                                                            key={`image-${idx}`} 
+                                                            className="step-image-container" 
+                                                            style={{ 
+                                                                display: idx === 0 ? 'block' : 'none',
+                                                                position: 'relative'  // Ensure proper stacking
+                                                            }}
+                                                            data-image-index={idx}
+                                                            data-total-images={possibleImages.length}
+                                                        >
+                                                            <img 
+                                                                src={image.url} 
+                                                                alt={image.name} 
+                                                                title={image.name}
+                                                                className="step-image"
+                                                                onError={(e) => {
+                                                                    // Immediately hide the broken image itself
+                                                                    e.target.style.display = 'none';
+                                                                    
+                                                                    console.error(`Failed to load image for ${image.name}:`, image.url);
+                                                                    
+                                                                    // Hide this image container
+                                                                    const container = e.target.parentNode;
+                                                                    container.style.display = 'none';
+                                                                    
+                                                                    // Show the next image if available
+                                                                    const currentIndex = parseInt(container.dataset.imageIndex);
+                                                                    const totalImages = parseInt(container.dataset.totalImages);
+                                                                    
+                                                                    if (currentIndex < totalImages - 1) {
+                                                                        // Hide ALL other image containers first
+                                                                        const wrapper = container.parentNode;
+                                                                        const allContainers = wrapper.querySelectorAll('.step-image-container');
+                                                                        allContainers.forEach(c => {
+                                                                            c.style.display = 'none';
+                                                                        });
+                                                                        
+                                                                        // Then show only the next one
+                                                                        const nextContainer = wrapper.querySelector(`[data-image-index="${currentIndex + 1}"]`);
+                                                                        if (nextContainer) {
+                                                                            nextContainer.style.display = 'block';
+                                                                        }
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        ));
+    };
+    
     const responsive = {
         superLargeDesktop: {
             breakpoint: { max: 4000, min: 3000 },
@@ -562,7 +716,7 @@ function RecipePage() {
                     <h1>{recipe.title}</h1>
                     <div className="action-buttons">
                         <div className="heart-button">
-                            <Heart isclick={isClick} onClick={() => favoriteClick()} />
+                            <Heart isClick={isClick} onClick={() => favoriteClick()} />
                         </div>
                         <div className='save-button' onClick={() => favoriteClick()}>{isClick ? "Saved" : "Save"}</div>
                     </div>
@@ -632,14 +786,14 @@ function RecipePage() {
                     </div>
                 </div>
                 <h2>Ingredients</h2>
-                <div className='box-main'>
+                <div className='box-main ingredients-container'>
                     {isLoadingRecipe ? (
                         <div className="loading-container">
                             <span className="loading-text">Loading ingredients...</span>
                             <div className="loading-spinner"></div>
                         </div>
                     ) : (
-                        <ul>
+                        <ul className="ingredients-list">
                             {listingredients}
                         </ul>
                     )}
@@ -652,9 +806,7 @@ function RecipePage() {
                             <div className="loading-spinner"></div>
                         </div>
                     ) : (
-                        <ul className='steps-ul'>
-                            {listinstructions}
-                        </ul>
+                        renderInstructions()
                     )}
                 </div>
                 <div className='box-main'>

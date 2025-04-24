@@ -310,6 +310,50 @@ export const recommendationService = {
       totalResults: filteredResults.length
     };
   },
+  
+  // New method to get random recipes
+  async getRandomRecipes(userId, limit = 20, excludeIds = []) {
+    try {
+      const db = await getDb();
+      const userPreferences = await db.collection('users')
+        .findOne({ _id: new ObjectId(userId) });
+
+        
+      const queryParams = {
+        number: limit + 10,
+        addRecipeInformation: true,
+        fillIngredients: true,
+        instructionsRequired: true,
+        sort: 'random'  // Use random sort to get random recipes
+      };
+
+      // Apply dietary restrictions if available
+      if (userPreferences?.preferences?.dietaryRestrictions?.length > 0) {
+        queryParams.diet = userPreferences.preferences.dietaryRestrictions.join(',');
+      }
+      
+      // Apply disliked ingredients if available
+      if (userPreferences?.preferences?.dislikedIngredients?.length > 0) {
+        queryParams.excludeIngredients = userPreferences.preferences.dislikedIngredients.join(',');
+      }
+      
+      // Fetch random recipes from Spoonacular
+      const results = await recipeService.searchRecipes(queryParams);
+      
+      // Filter out excluded recipes
+      const filteredResults = results.results.filter(recipe => 
+        !excludeIds.includes(recipe.id.toString())
+      );
+      
+      return {
+        results: filteredResults.slice(0, limit),
+        totalResults: filteredResults.length
+      };
+    } catch (error) {
+      console.error('Error getting random recipes:', error);
+      throw error;
+    }
+  }
 };
 
 export default recommendationService;
