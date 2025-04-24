@@ -135,7 +135,7 @@ export async function getUserCountries(userId) {
             body: { error: 'Unable to fetch user countries' }
         };
     }
-} 
+}
 export async function updateUserCountries(userId, countryCode) {
     try {
         const db = await getDb();
@@ -203,7 +203,73 @@ export async function getUserData(id) {
         };
     }
 }
-
+export async function getUserPoints(id) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(id)), points: { $exists: false } },
+            { $set: { points: 0, challengesCompleted: 0} }
+        );
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) },  { projection: { points: 1, challengesCompleted: 1}});
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        return {
+            statusCode: 200,
+            body: user
+        };
+    }
+    catch {
+        console.error("Error getting user points:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Getting user points failed' }
+        };
+    }
+}
+export async function addUserPoints(id, pointAmount) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        const user = await collection.findOne({ _id: new ObjectId(String(id)) });
+        console.log("User found: ", user);
+        if (!user) {
+            return {
+                statusCode: 404,
+                body: { error: 'User not found' }
+            };
+        }
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(id)), points: { $exists: false } },
+            { $set: { points: 0, challengesCompleted: 0} }
+        );
+        await usersCollection.updateOne(
+            { _id: new ObjectId(String(id)) },
+            {
+                $inc: {
+                    points: parseInt(pointAmount.points),
+                    challengesCompleted: 1 
+                }
+            }
+        );
+        return {
+            statusCode: 200,
+            body: pointAmount
+        };
+    }
+    catch (error) {
+        console.error("Error updating user points:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'User Points failed' }
+        };
+    }
+}
 export async function updateUserData(id, updateData) {
     try {
         const db = await getDb();
@@ -238,6 +304,114 @@ export async function updateUserData(id, updateData) {
         return {
             statusCode: 500,
             body: { error: 'Internal server error' }
+        };
+    }
+}
+
+export async function getUserChallenges(userId) {
+    try {
+        const db = await getDb();
+        
+        // Verify user exists in users collection
+        const usersCollection = db.collection('users');
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        const challengesCollection = db.collection('users_challenges');
+        const query = { userId: new ObjectId(userId) };
+        // Get recipes
+        const challenges = await challengesCollection
+            .find(query)
+            .toArray();
+            
+        return {
+            statusCode: 200,
+            body: {challenges: challenges}
+        };
+    }
+    catch {
+        return {
+            statusCode: 400,
+            body: {error: "Failed to get user challenges"}
+        };
+    }
+}
+export async function addUserChallenges(userId, challenges) {
+    try {
+        const db = await getDb();
+        
+        // Verify user exists in users collection
+        const usersCollection = db.collection('users');
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        
+        const challengesCollection = db.collection('users_challenges');
+
+            
+        const formattedChallenges = challenges.map(challenge => ({
+            userId: new ObjectId(userId),
+            text: challenge.text,
+            condition: challenge.condition,
+            amountRemaining: challenge.amountRemaining,
+            amountCompleted: challenge.amountCompleted,
+            completed: Boolean(challenge.completed),
+            type: parseInt(challenge.type)
+        }));
+
+        // Insert challenges into the collection
+        const result = await challengesCollection.insertMany(formattedChallenges);
+
+        return {
+            statusCode: 200,
+            body: { insertedCount: result.insertedCount, insertedIds: result.insertedIds }
+        };
+    }
+    catch {
+        return {
+            statusCode: 400,
+            body: {error: "Failed to add user challenges"}
+        };
+    }
+}
+export async function updateUserChallenge(challengeId) {
+    try {
+        const db = await getDb();
+        
+        // Verify user exists in users collection
+        
+        const challengesCollection = db.collection('users_challenges');
+        const challenge = await challengesCollection.findOne({ _id: new ObjectId(challengeId) });
+        if (!challenge) {
+        throw new Error("Challenge not found");
+        }
+
+
+        // Insert challenges into the collection
+        const newAmountCompleted = challenge.amountCompleted + 1;
+        const isCompleted = newAmountCompleted >= challenge.amountRemaining;
+
+    
+        const result = await challengesCollection.updateOne(
+        { _id: new ObjectId(challengeId) },
+        {
+            $set: { completed: isCompleted },
+            $inc: { amountCompleted: 1 }
+        }
+        );
+
+        return {
+            statusCode: 200,
+            body: { isCompleted: isCompleted}
+        };
+    }
+    catch {
+        return {
+            statusCode: 400,
+            body: {error: "Failed to add user challenges"}
         };
     }
 }

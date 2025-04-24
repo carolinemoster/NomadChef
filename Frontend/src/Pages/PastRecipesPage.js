@@ -97,6 +97,9 @@ function PastRecipesPage() {
     const handleAccountClick = () => {
         navigate('/account');
     };
+    const handleChallengesClick = () => {
+        navigate('/challenges');
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
@@ -236,6 +239,11 @@ function PastRecipesPage() {
                         <li>
                             <button onClick={handlePastRecipesClick} className='nav-button'>
                                 Past Recipes
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handleChallengesClick} className='nav-button'>
+                                Challenges
                             </button>
                         </li>
                         <li>
