@@ -1,6 +1,6 @@
 .challenge-card {
-    width: 80%;
-    height: 200px;
+    width: 100%;
+    height: 100px;
     background: white;
     color: #0d4725;
     display: flex;
@@ -21,7 +21,7 @@
   }
 
   .challenge-card-content {
-    padding: 20px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -34,7 +34,7 @@
     width: 70%;
     color: #0d4725;
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     margin: 0;
     line-height: 1.3;
     text-align: center;

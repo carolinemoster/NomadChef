@@ -446,6 +446,8 @@ function RecipePage() {
                     break;
                     case(3): addPoints(100);
                     break;
+                    case(4): addPoints(400);
+                    break;
                 }
             }
         }
@@ -475,8 +477,11 @@ function RecipePage() {
             if(data.challenges.length == 0) { //If no challenges then don't progress
                 return;
             }
+            console.log("Challenge array recieved");
             for (const challenge of data.challenges) {
+
                 if(challenge.completed == true) { //If challenge is already completed then move on
+                    console.log("Completed challenge");
                     continue;
                 }
                 //Update Challenges based on type
@@ -491,6 +496,11 @@ function RecipePage() {
                         break;
                     }
                     case(3): if(newRecipe) {
+                        updateSingleChallenge(challenge);
+                        console.log("New recipe challenge hit");
+                        break;
+                    }
+                    case(4): if(!newRecipe) {
                         updateSingleChallenge(challenge);
                         break;
                     }

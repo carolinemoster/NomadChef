@@ -28,8 +28,10 @@ function ChallengesPage() {
         return shuffled.slice(0, number);
     };
 
-    const initializeUserChallenges = async () => {
-        const newChallenges = getRandomChallenges(3);
+
+
+    const newUserChallenges = async (amount) => {
+        const newChallenges = getRandomChallenges(amount);
         try {
             const token = localStorage.getItem('authToken');
             const response = await fetch(`${BASE_AUTH_URL}/addUserChallenges`, {
@@ -46,7 +48,7 @@ function ChallengesPage() {
                 throw new Error('Failed to update user points');
             }
             const data = await response.json();
-            if(data.insertedCount == 3) {
+            if(data.insertedCount == amount) {
                 console.log("challenges initialized successfully: ", data);
             }
         }
@@ -72,15 +74,21 @@ function ChallengesPage() {
             }
     
             const data = await response.json();
-            if(data.challenges.length == 0) {
-                initializeUserChallenges();
+            
+            if(data.challenges.length == 0) { //if challenges have not been initialized yet
+                newUserChallenges(3);
                 if(!challenges) {
                     throw new Error('Error initializing challenges');
                 }
                 return;
             }
             else {
-                setUserChallenges(data.challenges)
+                const incompleteChallenges = data.challenges.filter(challenge => !challenge.completed); //get array of incompleted/current challenges
+
+                if (incompleteChallenges.length < 3) {
+                    newUserChallenges((3-incompleteChallenges.length)) //add new challenges if completed
+                }
+                setUserChallenges(data.challenges) //set the challenges
                 return;
             }
 
@@ -90,14 +98,27 @@ function ChallengesPage() {
         }
     }
 
-    const ChallengesList = challenges.map((challenge, index) => (
+    const currentChallengesList = challenges.filter(challenge => !(challenge.completed)).map((challenge, index) => (
         <ChallengeCard
           key={index}
           text={challenge.text}
           needed={challenge.amountNeeded}
           completed={challenge.amountCompleted}
+          type={challenge.type}
         />
       ))
+
+    const completedChallengesList = challenges
+    .filter(challenge => challenge.completed)
+    .map((challenge, index) => (
+        <ChallengeCard
+        key={index}
+        text={challenge.text}
+        needed={challenge.amountNeeded}
+        completed={challenge.amountCompleted}
+        type={challenge.type}
+        />
+    ));
 
     const setPointsRank = async () => {
         try {
@@ -232,7 +253,13 @@ function ChallengesPage() {
                 <div>
                     <h1>Challenges</h1>
                 </div>
-                <ul>{ChallengesList}</ul>
+                <ul>{currentChallengesList}</ul>
+            </section>
+            <section className="section">
+                <div>
+                    <h1>Completed Challenges</h1>
+                </div>
+                <ul>{completedChallengesList}</ul>
             </section>
             <footer className="footer">
                 <p className="text-footer">

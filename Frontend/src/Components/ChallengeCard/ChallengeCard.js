@@ -2,12 +2,18 @@ import "./ChallengeCard.css"
 import React from 'react';
 import ProgressBar from '@ramonak/react-progress-bar';
 
-const ChallengeCard = ({text , completed, needed}) => {
+const ChallengeCard = ({text , completed, needed, type}) => {
     return (
         <div className="challenge-card">
             <div className="challenge-card-content">
                 <div className="challenge-card-text">{text}</div>
-                <div className="challenge-card-progress">{completed}/{needed}</div>
+                {(completed != needed) ? <div className="challenge-card-progress">{completed}/{needed}</div> : <div className="challenge-card-progress">Completed</div>}
+                <div className="challenge-card-progress">
+                    {type === 1 && "300 traveler points"}
+                    {type === 2 && "400 traveler points"}
+                    {type === 3 && "100 traveler points"}
+                    {type === 4 && "400 traveler points"}
+                </div>
             </div>
             <div>
                 <ProgressBar 
