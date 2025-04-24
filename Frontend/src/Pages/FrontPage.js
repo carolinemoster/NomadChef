@@ -17,6 +17,7 @@ const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/d
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
 const BASE_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes";
 const BASE_RECOMMEND_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recommendations/personalized";
+const BASE_USER_PREFERENCES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserData";
 
 function FrontPage() {
     const Map = styled.div`
@@ -574,7 +575,7 @@ function FrontPage() {
             } else {
                 console.log("No recipes found, trying without filters...");
                 // Try one more time without any filters
-                const fallbackResponse = await axios.get(requestUrl, {
+                const fallbackResponse = await axios.get(`${BASE_RECIPES_URL}/search`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
