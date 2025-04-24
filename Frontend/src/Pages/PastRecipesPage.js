@@ -34,8 +34,12 @@ function PastRecipesPage() {
             console.log('Full recipe history data:', data);
             console.log('First recipe example:', data.recipes?.[0]);
             if(data) {
-                setHistory(data.recipes || []);
-                setFilteredHistory(data.recipes || []);
+                // Filter for completed recipes (those with rating or wouldCookAgain)
+                const completedRecipes = data.recipes.filter(recipe => 
+                    recipe.rating || recipe.personalRating || recipe.wouldCookAgain
+                );
+                setHistory(completedRecipes || []);
+                setFilteredHistory(completedRecipes || []);
             }
         } catch (error) {
             console.error('Error fetching recipes:', error);

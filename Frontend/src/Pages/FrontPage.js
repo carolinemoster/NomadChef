@@ -31,28 +31,28 @@ function FrontPage() {
 
             path {
                 fill: rgb(255, 255, 255);
-            cursor: pointer;
-            outline: none;
+                cursor: pointer;
+                outline: none;
                 transition: all 0.3s ease;
 
-            &:hover {
-                fill: #2d8b4e;
-            }
+                &:hover {
+                    fill: #2d8b4e;
+                }
 
-            &:focus {
-                fill: #2d8b4e;
-            }
+                &:focus {
+                    fill: #2d8b4e;
+                }
 
-            &[aria-checked='true'] {
+                &[aria-checked='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
 
-            &[aria-current='true'] {
+                &[aria-current='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
             }
         }
-        `;
+    `;
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const { getCode, getName } = require('country-list');
@@ -465,31 +465,30 @@ function FrontPage() {
     };
     const getHistory = async () => {  
         try {
-        const token = localStorage.getItem('authToken'); 
-            console.log("Fetching recipe history...");
-            
-        const response = await fetch(BASE_USER_RECIPES, {
-            method: "GET",  
-            headers: {
-              "Authorization": `Bearer ${token}`, 
-              "Content-Type": "application/json" 
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            const token = localStorage.getItem('authToken'); 
+            if (!token) {
+                navigate('/');
+                return;
             }
-
-        const data = await response.json();
-            console.log("Recipe history received:", data);
-
-            // Make sure we have recipes before setting them
-            if (data && Array.isArray(data.recipes)) {
-                setHistory(data.recipes);
+            const response = await fetch(BASE_USER_RECIPES, {
+                method: "GET",  
+                headers: {
+                  "Authorization": `Bearer ${token}`, 
+                  "Content-Type": "application/json" 
+                }});
+            const data = await response.json();
+            console.log('Full recipe history data:', data);
+            console.log('First recipe example:', data.recipes?.[0]);
+            if(data) {
+                // Filter for completed recipes (those with rating or wouldCookAgain)
+                const completedRecipes = data.recipes.filter(recipe => 
+                    recipe.rating || recipe.personalRating || recipe.wouldCookAgain
+                );
+                setHistory(completedRecipes || []);
                 
-                // Extract and format country codes from recipe history
+                // Extract and format country codes from completed recipes only
                 const completedCountryCodes = [...new Set(
-                    data.recipes
+                    completedRecipes
                         .filter(recipe => recipe.recipe.origin && recipe.recipe.origin.country)
                         .map(recipe => {
                             const country = recipe.recipe.origin.country.toLowerCase();
