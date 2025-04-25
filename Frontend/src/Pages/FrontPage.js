@@ -11,8 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 import SmallRecipeCard from '../Components/SmallRecipeCard/SmallRecipeCard';
 import ProgressBar from '@ramonak/react-progress-bar'
-import { Swiper, SwiperSlide } from 'swiper/react';
-const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
+
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
@@ -21,7 +20,7 @@ const BASE_RECOMMEND_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.ama
 
 function FrontPage() {
     const Map = styled.div`
-        width: 90% !important;
+        width: 100% !important;
         max-width: 1200px;
         margin: 0 auto;
 
@@ -54,7 +53,6 @@ function FrontPage() {
             }
         }
         `;
-    const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [history, setHistory] = useState([]);
     const { getCode, getName } = require('country-list');
@@ -63,22 +61,48 @@ function FrontPage() {
     const [completedCountries, setCountries] = useState([]);
     const [completedCountriesCount, setCountriesCount] = useState(0);
     const [recommendedRecipes, setRecommendedRecipes] = useState([]);
-    const [hoveredCountry, setHoveredCountry] = useState(null);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [tooltipRef, setTooltipRef] = useState(null);
     const mapContainerRef = useRef(null);
 
+    useEffect(() => {
+        // Create tooltip element if it doesn't exist
+        if (!tooltipRef) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'map-tooltip';
+            document.body.appendChild(tooltip);
+            setTooltipRef(tooltip);
+        }
+        
+        // Clean up when component unmounts
+        return () => {
+            if (tooltipRef) {
+                document.body.removeChild(tooltipRef);
+            }
+        };
+    }, []);
+
     const handleMouseMove = (e) => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
+        if (tooltipRef) {
+            tooltipRef.style.left = `${e.clientX}px`;
+            tooltipRef.style.top = `${e.clientY}px`;
+        }
     };
 
     const mapLayerProps = {
         onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
         onMouseEnter: ({ target }) => {
             const countryName = target.attributes.name.value;
-            setHoveredCountry(countryName);
+            // Update tooltip content and make it visible
+            if (tooltipRef) {
+                tooltipRef.textContent = countryName;
+                tooltipRef.style.display = 'block';
+            }
         },
         onMouseLeave: () => {
-            setHoveredCountry(null);
+            // Hide tooltip
+            if (tooltipRef) {
+                tooltipRef.style.display = 'none';
+            }
         },
         onMouseMove: handleMouseMove,
         style: {
@@ -375,14 +399,6 @@ function FrontPage() {
             setSelectedCountryList(matchingRecipes);
         }
     };
-    const selectedCountryListBoxes = selectedCountryList && selectedCountryList.length > 0 ? selectedCountryList.map((item,index) =>
-        <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
-    <SmallRecipeCard 
-        image={item.recipe?.image} 
-        name={item.recipe?.title}
-    /> 
-</div>
-) : <p></p>;
     const historylist = history && history.length > 0 ? history.map((item, index) => 
         <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
             <RecipeCard 
@@ -569,20 +585,6 @@ function FrontPage() {
         getHistory();
         getRecommendedRecipes();
     }, []);
-    const [startIndex, setStartIndex] = useState(0);
-    const endIndex = startIndex + 3;
-
-    const showNext = () => {
-        if (endIndex < selectedCountryList.length) {
-        setStartIndex(startIndex + 3);
-        }
-    };
-
-    const showPrev = () => {
-        if (startIndex >= 3) {
-        setStartIndex(startIndex - 3);
-        }
-    };
 
     const handleAccountClick = () => {
         navigate('/account');
@@ -687,12 +689,16 @@ function FrontPage() {
 
     // Handle when mouse leaves the entire map container
     const handleMapMouseLeave = () => {
-        setHoveredCountry(null);
+        if (tooltipRef) {
+            tooltipRef.style.display = 'none';
+        }
     };
 
     // Add this function to handle mouse leaving the SVG map specifically
     const handleSvgMapMouseLeave = () => {
-        setHoveredCountry(null);
+        if (tooltipRef) {
+            tooltipRef.style.display = 'none';
+        }
     };
 
     const getCountryRegion = (countryCode) => {
@@ -1191,44 +1197,17 @@ function FrontPage() {
                         ref={mapContainerRef}
                     >
                         <Map>
-                        <VectorMap
-                            {...worldMap}
+                            <VectorMap
+                                {...worldMap}
                                 style={{ width: "100%", height: "100%" }}
                                 checkedLayers={completedCountries}
-                                layerProps={{
-                                    ...mapLayerProps,
-                                    onMouseLeave: (e) => {
-                                        mapLayerProps.onMouseLeave(e);
-                                        // Check if relatedTarget exists before using closest
-                                        if (e.relatedTarget && typeof e.relatedTarget.closest === 'function') {
-                                            // Check if we're leaving the SVG entirely
-                                            if (!e.relatedTarget.closest('svg')) {
-                                                setHoveredCountry(null);
-                                            }
-                                        } else {
-                                            // If relatedTarget is null or doesn't have closest method, just clear the hover
-                                            setHoveredCountry(null);
-                                        }
-                                    }
-                                }}
+                                layerProps={mapLayerProps}
                                 currentLayers={completedCountries}
-                                onMouseLeave={handleSvgMapMouseLeave}
+                                onMouseLeave={handleMapMouseLeave}
                             />
                         </Map>
                         
-                        {hoveredCountry && (
-                            <div 
-                                className="map-tooltip" 
-                                style={{ 
-                                    left: mousePosition.x + 10, 
-                                    top: mousePosition.y + 10 
-                                }}
-                            >
-                                {hoveredCountry}
-                            </div>
-                        )}
-                        
-                        <div className="progress-container" onMouseEnter={() => setHoveredCountry(null)}>
+                        <div className="progress-container" onMouseEnter={handleMapMouseLeave}>
                             <CustomProgressBar />
                         </div>
                     </div>

@@ -495,7 +495,7 @@ html, body, #root {
 
 .map-container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -535,12 +535,12 @@ Map {
 
 .map-container {
     flex: 2;
-    max-width: 800px;
+    width: 80%;
 }
 
 .country-recipes-panel {
     flex: 1;
-    max-width: 300px;
+    max-width: 30%;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
     padding: 20px;
@@ -566,21 +566,22 @@ Map {
     transform: scale(1.02);
 }
 
-/* Simple map tooltip style - optimized for immediate display */
+/* Map tooltip styling - optimized for direct DOM manipulation */
 .map-tooltip {
   position: fixed;
-  z-index: 1000;
+  z-index: 1100;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 4px;
-  padding: 5px 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   pointer-events: none;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #0d4725;
-  border-left: 2px solid #0d4725;
-  /* Remove animation to make it appear instantly */
-  transition: none;
+  border-left: 3px solid #0d4725;
+  min-width: 80px;
+  text-align: center;
+  display: none; /* Hidden by default, will be shown via JS */
 }
 
 .country-card {
