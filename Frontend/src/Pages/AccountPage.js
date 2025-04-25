@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './AccountPage.css';
 import wisk_icon from '../Components/Assets/wisk.png';
 import { useNavigate } from 'react-router-dom';
+import ProgressBar from '@ramonak/react-progress-bar';
 import axios from 'axios';
 
 const AccountPage = () => {
@@ -12,10 +13,11 @@ const AccountPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
+    const [points, setUserPoints] = useState(0);
+    const BASE_AUTH_URL = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth';
 
     useEffect(() => {
         window.scrollTo(0, 0);
-
         // Use the API URL directly here
         const apiBaseUrl = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev';
 
@@ -51,7 +53,7 @@ const AccountPage = () => {
                 }
             }
         };
-
+        getUserPoints();
         fetchUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -82,6 +84,10 @@ const AccountPage = () => {
         navigate('/account');
     };
 
+    const handleChallengesClick = () => {
+        navigate('/challenges');
+    };
+
     const handleEdit = () => {
         setIsEditing(true);
     };
@@ -89,6 +95,30 @@ const AccountPage = () => {
     const handleCancel = () => {
         setEditedData(userData);
         setIsEditing(false);
+    };
+
+    const getUserPoints = async () => {
+        try {
+            const token = localStorage.getItem('authToken'); 
+            const response = await fetch(`${BASE_AUTH_URL}/getUserPoints`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            setUserPoints(data.points);
+        }
+        catch(error) {
+            console.log(error);
+            return;
+        }
     };
 
     const handleInputChange = (field, value) => {
@@ -206,10 +236,16 @@ const AccountPage = () => {
                             </button>
                         </li>
                         <li>
+                            <button onClick={handleChallengesClick} className='nav-button'>
+                                Challenges
+                            </button>
+                        </li>
+                        <li>
                             <button onClick={handleAccountClick} className='nav-button'>
                                 Account
                             </button>
                         </li>
+                        
                         <li>
                             <button onClick={handleLogout} className='nav-button logout-button'>
                                 Logout

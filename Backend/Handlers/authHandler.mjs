@@ -1,4 +1,4 @@
-import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries } from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges} from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -167,6 +167,100 @@ export const handler = async (event) => {
                 }
 
                 return formatResponse(userCountries.statusCode, userCountries.body);
+            }
+            case '/auth/getUserPoints': {
+                if (event.httpMethod !== 'GET') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                // Declare decoded outside of try block
+                let decoded;
+                console.log("Decoded token before try block:", decoded);
+                try {
+                    decoded = verifyToken(event);
+                    console.log("Decoded token after try block:", decoded);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+
+                // Now decoded is available here
+                const userPoints = await getUserPoints(decoded.id);
+                if (!userPoints) {
+                    return formatResponse(404, { error: 'User not found' });
+                }
+
+                return formatResponse(userPoints.statusCode, userPoints.body);
+            }
+            case '/auth/getUserChallenges': {
+                if (event.httpMethod !== 'GET') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                // Declare decoded outside of try block
+                let decoded;
+                console.log("Decoded token before try block:", decoded);
+                try {
+                    decoded = verifyToken(event);
+                    console.log("Decoded token after try block:", decoded);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+
+                // Now decoded is available here
+                const userChallenges = await getUserChallenges(decoded.id);
+                if (!userChallenges) {
+                    return formatResponse(404, { error: 'User not found' });
+                }
+
+                return formatResponse(userChallenges.statusCode, userChallenges.body);
+            }
+            case '/auth/addUserChallenges': {
+                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+            
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+            
+                const updateChallenges = parseBody(event);
+                const result = await addUserChallenges(decoded.id, updateChallenges.challenges);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/updateUserChallenge': {
+                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+            
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+            
+                const updateChallenge = parseBody(event);
+                const result = await updateUserChallenge(updateChallenge.id);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/addUserPoints': {
+                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+            
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+            
+                const updatePoints = parseBody(event);
+                const result = await addUserPoints(decoded.id, updatePoints);
+                return formatResponse(result.statusCode, result.body);
             }
             case '/auth/updateUserCountries': {
                 if (event.httpMethod !== 'POST') {  // Change PUT to POST
