@@ -548,6 +548,7 @@ Map {
     height: fit-content;
     max-height: 600px;
     overflow-y: auto;
+    position: relative;
 }
 
 .country-recipes-panel h3 {
@@ -644,4 +645,22 @@ Map {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
     margin-top: 15px;
+}
+
+.close-country-recipes {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.close-country-recipes:hover {
+    color: #333;
 }

@@ -400,6 +400,12 @@ function FrontPage() {
             setSelectedCountryList(matchingRecipes);
         }
     };
+
+    const handleCloseCountryRecipes = () => {
+        setSelectedCountry(null);
+        setSelectedCountryList([]);
+    };
+
     const historylist = history && history.length > 0 ? history.map((item, index) => 
         <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
             <RecipeCard 
@@ -1250,6 +1256,9 @@ function FrontPage() {
                     
                     {selectedCountry && selectedCountryList.length > 0 && (
                         <div className="country-recipes-panel">
+                            <button className="close-country-recipes" onClick={handleCloseCountryRecipes}>
+                                ×
+                            </button>
                             <div className="country-card">
                                 <h2>{selectedCountry}</h2>
                                 {console.log("Selected country:", selectedCountry)}

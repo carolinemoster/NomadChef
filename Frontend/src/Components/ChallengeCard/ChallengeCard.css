@@ -1,52 +1,129 @@
 .challenge-card {
     width: 100%;
-    height: 100px;
-    background: white;
-    color: #0d4725;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-radius: 15px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    margin: 15px;
+    height: 100%;
+    perspective: 1000px;
     cursor: pointer;
-    border: 1px solid rgba(13, 71, 37, 0.1);
     position: relative;
-  }
-  
-  .challenge-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(13, 71, 37, 0.25);
-  }
+}
 
-  .challenge-card-content {
-    padding: 10px;
+.challenge-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.challenge-card.flipped .challenge-card-inner {
+    transform: rotateY(180deg);
+}
+
+.challenge-card-front,
+.challenge-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(13, 71, 37, 0.1);
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-  }
-  
-  .challenge-card-text {
-    width: 70%;
+    justify-content: center;
+}
+
+.challenge-card-front {
+    background: white;
+}
+
+.challenge-card-back {
+    transform: rotateY(180deg);
+    background: #0d4725;
+    color: white;
+}
+
+.challenge-icon {
+    margin-bottom: 20px;
+}
+
+.challenge-card-front .challenge-icon {
     color: #0d4725;
+}
+
+.challenge-card-back .challenge-icon {
+    color: white;
+}
+
+/* Japan icon styling */
+.japan-icon {
+    position: relative;
+}
+
+.japan-icon::after {
+    content: "🇯🇵";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+}
+
+/* Mexico icon styling */
+.mexico-icon {
+    position: relative;
+}
+
+.mexico-icon::after {
+    content: "🇲🇽";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+}
+
+.challenge-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.challenge-title {
+    font-size: 1.1rem;
     font-weight: 600;
+    color: #0d4725;
+}
+
+.challenge-progress {
+    width: 100%;
+}
+
+.challenge-points {
+    font-size: 0.9rem;
+    color: #0d4725;
+    font-weight: 500;
+}
+
+.recipe-count {
     font-size: 1.5rem;
-    margin: 0;
-    line-height: 1.3;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-  }
-  .challenge-card-progress {
-    width: 30%;
-    color: #0d4725;
     font-weight: 600;
-    font-size: 1.25rem;
-    margin: 0;
-    line-height: 1.3;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-  }
+    color: white;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .challenge-card {
+        height: 180px;
+    }
+
+    .challenge-title {
+        font-size: 1rem;
+    }
+
+    .recipe-count {
+        font-size: 1.2rem;
+    }
+}
