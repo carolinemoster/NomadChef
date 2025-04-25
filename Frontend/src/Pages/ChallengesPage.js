@@ -7,6 +7,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import ProgressBar from '@ramonak/react-progress-bar';
 import challengesSet from '../Components/Challenges/challenges'
 import ChallengeCard from '../Components/ChallengeCard/ChallengeCard';
+import Leaderboard from '../Components/Leaderboard/Leaderboard';
 
 const BASE_AUTH_URL = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth';
 
@@ -18,6 +19,13 @@ function ChallengesPage() {
     const [nextrank, setNextUserRank] = useState("Well Traveled");
     const [challenges, setUserChallenges] = useState([]);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [topUsers, setTopUsers] = useState([
+        { username: 'ChefMaster', points: 4500 },
+        { username: 'FoodExplorer', points: 3800 },
+        { username: 'CulinaryNomad', points: 3200 },
+        { username: 'SpiceAdventurer', points: 2900 },
+        { username: 'TasteTraveler', points: 2500 }
+    ]);
 
     const handleMouseMove = (e) => {
         setMousePosition({ x: e.clientX, y: e.clientY });
@@ -27,8 +35,6 @@ function ChallengesPage() {
         const shuffled = [...challengesSet].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, number);
     };
-
-
 
     const newUserChallenges = async (amount) => {
         const newChallenges = getRandomChallenges(amount);
@@ -100,25 +106,27 @@ function ChallengesPage() {
 
     const currentChallengesList = challenges.filter(challenge => !(challenge.completed)).map((challenge, index) => (
         <ChallengeCard
-          key={index}
-          text={challenge.text}
-          needed={challenge.amountNeeded}
-          completed={challenge.amountCompleted}
-          type={challenge.type}
-        />
-      ))
-
-    const completedChallengesList = challenges
-    .filter(challenge => challenge.completed)
-    .map((challenge, index) => (
-        <ChallengeCard
-        key={index}
-        text={challenge.text}
-        needed={challenge.amountNeeded}
-        completed={challenge.amountCompleted}
-        type={challenge.type}
+            key={index}
+            text={challenge.text}
+            needed={challenge.amountNeeded}
+            completed={challenge.amountCompleted}
+            type={challenge.type}
+            condition={challenge.condition}
         />
     ));
+
+    const completedChallengesList = challenges
+        .filter(challenge => challenge.completed)
+        .map((challenge, index) => (
+            <ChallengeCard
+                key={index}
+                text={challenge.text}
+                needed={challenge.amountNeeded}
+                completed={challenge.amountCompleted}
+                type={challenge.type}
+                condition={challenge.condition}
+            />
+        ));
 
     const setPointsRank = async () => {
         try {
@@ -164,14 +172,11 @@ function ChallengesPage() {
         }
     };
     
-
     useEffect(() => {
         window.scrollTo(0, 0);
         setPointsRank();
         getUserChallenges();
     }, []);
-
-
 
     const handleAccountClick = () => {
         navigate('/account');
@@ -195,8 +200,6 @@ function ChallengesPage() {
         // Navigate to login page
         navigate('/');
     };
-    // Add this function to handle mouse leaving the SVG map specifically
-        
 
     return (
         <div className="challenges-page">
@@ -232,35 +235,63 @@ function ChallengesPage() {
             </nav>
 
             <section className="section">
-                <div>
-                    <h1>Rank: {rank}</h1>
-                    <ProgressBar 
-                    bgColor='#0d4725' 
-                    width='100%' 
-                    className='progress-bar' 
-                    completed={(points%1000).toString()}
-                    maxCompleted={1000}
-                    labelColor='#ffffff'
-                    height='15px'
-                    labelSize='10px'
-                    baseBgColor='#e0e0de'
-                    />
-                    {(rank !== "Master of Flavors") ? <h3>Next Rank: {nextrank}</h3> : <h3></h3>}
-                    {(rank !== "Master of Flavors") ? <h3>{points%1000}/1000 points</h3> : <h3></h3>}
+                <Leaderboard 
+                    topUsers={topUsers} 
+                    userRank={rank} 
+                    userPoints={points}
+                    userPosition={15} // This would be calculated based on actual user position
+                />
+            </section>
+
+            <section className="section">
+                <div className="rank-section">
+                    <h2>Your Rank</h2>
+                    <div className="rank-info">
+                        <div className="rank-details">
+                            <span className="rank-title">{rank}</span>
+                            <span className="rank-points">{points} points</span>
+                        </div>
+                        <div className="rank-progress">
+                            <ProgressBar 
+                                bgColor='#0d4725' 
+                                width='100%' 
+                                completed={(points%1000).toString()}
+                                maxCompleted={1000}
+                                labelColor='#ffffff'
+                                height='15px'
+                                labelSize='10px'
+                                baseBgColor='#e0e0de'
+                            />
+                            {(rank !== "Master of Flavors") && (
+                                <div className="next-rank">
+                                    <span className="next-rank-label">Next Rank:</span>
+                                    <span className="next-rank-value">{nextrank}</span>
+                                    <span className="progress-label">{(points%1000)}/1000 points</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </section>
+
             <section className="section">
                 <div>
-                    <h1>Challenges</h1>
+                    <h1>Current Challenges</h1>
                 </div>
-                <ul>{currentChallengesList}</ul>
+                <div className="challenges-grid">
+                    {currentChallengesList}
+                </div>
             </section>
+
             <section className="section">
                 <div>
                     <h1>Completed Challenges</h1>
                 </div>
-                <ul>{completedChallengesList}</ul>
+                <div className="challenges-grid">
+                    {completedChallengesList}
+                </div>
             </section>
+
             <footer className="footer">
                 <p className="text-footer">
                     Copyright ©-All rights are reserved

@@ -11,12 +11,14 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 import SmallRecipeCard from '../Components/SmallRecipeCard/SmallRecipeCard';
 import ProgressBar from '@ramonak/react-progress-bar'
+import axios from 'axios';
 
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
 const BASE_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes";
 const BASE_RECOMMEND_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recommendations/personalized";
+const BASE_USER_PREFERENCES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserData";
 
 function FrontPage() {
     const Map = styled.div`
@@ -31,25 +33,25 @@ function FrontPage() {
 
             path {
                 fill: rgb(255, 255, 255);
-            cursor: pointer;
-            outline: none;
+                cursor: pointer;
+                outline: none;
                 transition: all 0.3s ease;
 
-            &:hover {
-                fill: #2d8b4e;
-            }
+                &:hover {
+                    fill: #2d8b4e;
+                }
 
-            &:focus {
-                fill: #2d8b4e;
-            }
+                &:focus {
+                    fill: #2d8b4e;
+                }
 
-            &[aria-checked='true'] {
+                &[aria-checked='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
 
-            &[aria-current='true'] {
+                &[aria-current='true'] {
                     fill: #2d8b4e !important;
-            }
+                }
             }
         }
         `;
@@ -399,6 +401,12 @@ function FrontPage() {
             setSelectedCountryList(matchingRecipes);
         }
     };
+
+    const handleCloseCountryRecipes = () => {
+        setSelectedCountry(null);
+        setSelectedCountryList([]);
+    };
+
     const historylist = history && history.length > 0 ? history.map((item, index) => 
         <div key={`recipe-${index}`} onClick={() => recipeClicked(item.recipeId)}>
             <RecipeCard 
@@ -572,16 +580,51 @@ function FrontPage() {
                 sessionStorage.setItem('recommendedRecipes', JSON.stringify(data.results));
                 setRecommendedRecipes(data.results);
             } else {
-                console.log("No recommended recipes found:", data);
-                setRecommendedRecipes([]);
+                console.log("No recipes found, trying without filters...");
+                // Try one more time without any filters
+                const fallbackResponse = await axios.get(`${BASE_RECIPES_URL}/search`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    params: {
+                        number: 4,
+                        instructionsRequired: true
+                    }
+                });
+                
+                if (fallbackResponse.data && fallbackResponse.data.results) {
+                    console.log("Fallback found recipes:", fallbackResponse.data.results.length);
+                    setRecommendedRecipes(fallbackResponse.data.results);
+                }
             }
         } catch (error) {
-            console.error("Error fetching recommended recipes:", error);
-            setRecommendedRecipes([]);
+            console.error('Error fetching recommended recipes:', error);
+            if (error.response) {
+                console.error('Error response:', {
+                    status: error.response.status,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+            }
+        }
+    };
+    const checkUserPreferences = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(BASE_USER_PREFERENCES, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log("User preferences:", response.data?.preferences);
+        } catch (error) {
+            console.error('Error fetching user preferences:', error);
         }
     };
     useEffect(() => {
         window.scrollTo(0, 0);
+        checkUserPreferences();
         getHistory();
         getRecommendedRecipes();
     }, []);
@@ -1214,6 +1257,9 @@ function FrontPage() {
                     
                     {selectedCountry && selectedCountryList.length > 0 && (
                         <div className="country-recipes-panel">
+                            <button className="close-country-recipes" onClick={handleCloseCountryRecipes}>
+                                ×
+                            </button>
                             <div className="country-card">
                                 <h2>{selectedCountry}</h2>
                                 {console.log("Selected country:", selectedCountry)}
