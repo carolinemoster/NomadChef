@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../Components/RecipeCard/RecipeCard';
 import SmallRecipeCard from '../Components/SmallRecipeCard/SmallRecipeCard';
 import ProgressBar from '@ramonak/react-progress-bar'
+import axios from 'axios';
 
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
