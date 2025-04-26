@@ -1,0 +1,159 @@
+.leaderboard-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.leaderboard-title {
+    color: #0d4725;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 700;
+    position: relative;
+}
+
+.leaderboard-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(to right, transparent, #0d4725, transparent);
+}
+
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    background: rgba(13, 71, 37, 0.05);
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.leaderboard-item:hover {
+    transform: translateX(5px);
+}
+
+.leaderboard-rank {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0d4725;
+    min-width: 40px;
+    text-align: center;
+}
+
+.leaderboard-username {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0d4725;
+    min-width: 150px;
+}
+
+.leaderboard-bar-container {
+    flex: 1;
+    position: relative;
+    height: 30px;
+    background: rgba(13, 71, 37, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.leaderboard-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #0d4725, #196033);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+}
+
+.leaderboard-points {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.user-rank-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(13, 71, 37, 0.1);
+}
+
+.user-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: rgba(13, 71, 37, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.rank-label {
+    font-size: 1.1rem;
+    color: #0d4725;
+    font-weight: 600;
+}
+
+.rank-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0d4725;
+    background: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(13, 71, 37, 0.1);
+}
+
+.points-value {
+    font-size: 1.1rem;
+    color: #0d4725;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .leaderboard-container {
+        padding: 20px;
+    }
+
+    .leaderboard-title {
+        font-size: 1.5rem;
+    }
+
+    .leaderboard-item {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .leaderboard-username {
+        min-width: 100px;
+        font-size: 1rem;
+    }
+
+    .leaderboard-bar-container {
+        height: 25px;
+    }
+
+    .user-rank {
+        flex-direction: column;
+        gap: 10px;
+    }
+} 

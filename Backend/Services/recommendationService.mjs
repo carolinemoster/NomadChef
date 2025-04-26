@@ -5,20 +5,14 @@ import { recipeService } from './recipeService.mjs';
 export const recommendationService = {
   async getPersonalizedRecommendations(userId, options = {}) {
     try {
-      // Default options with temperature (randomness factor)
       const {
         limit = 20,
         temperature = 0.3,  // 0 = strict recommendations, 1 = more variety
         excludeIds = []     // IDs of recipes to exclude (already seen)
       } = options;
-      
-      // Get user's saved recipes to analyze preferences
+
+      // Get user data and preferences
       const db = await getDb();
-      const userRecipes = await db.collection('users_recipes')
-        .find({ userId: new ObjectId(userId) })
-        .toArray();
-        
-      // Get user account data for additional preferences
       const userData = await db.collection('users')
         .findOne({ _id: new ObjectId(userId) });
       
@@ -63,11 +57,9 @@ export const recommendationService = {
       console.log(queryParams);
       // Fetch recipes from Spoonacular
       const results = await recipeService.searchRecipes(queryParams);
-      
-      // Filter out recipes the user has already saved
-      const savedRecipeIds = userRecipes.map(recipe => recipe.recipeId.toString());
-      const filteredResults = results.results.filter(recipe => 
-        !savedRecipeIds.includes(recipe.id.toString()) && 
+
+      // Filter out completed recipes
+      let filteredResults = results.results.filter(recipe => 
         !excludeIds.includes(recipe.id.toString())
       );
       
@@ -78,7 +70,7 @@ export const recommendationService = {
       const shuffledResults = recommendationService.shuffleWithTemperature(rankedResults, temperature);
       
       return {
-        results: shuffledResults.slice(0, limit),
+        results: filteredResults.slice(0, limit),
         totalResults: filteredResults.length
       };
     } catch (error) {
