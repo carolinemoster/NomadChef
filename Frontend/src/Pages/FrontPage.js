@@ -711,7 +711,7 @@ function FrontPage() {
                 name={recipe.title}
             />
         </div>
-    ) : <p>Loading recommended recipes...</p>;
+    ) : <div style={{ textAlign: 'center', width: '100%'}}><p>Loading recommended recipes...</p></div>;
 
     useEffect(() => {
         const handleStorageChange = (e) => {

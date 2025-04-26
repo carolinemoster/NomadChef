@@ -12,7 +12,6 @@ import Leaderboard from '../Components/Leaderboard/Leaderboard';
 const BASE_AUTH_URL = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth';
 
 function ChallengesPage() {
-    const [zoom, setZoom] = useState(1);
     const navigate = useNavigate();
     const [points, setUserPoints] = useState(0);
     const [rank, setUserRank] = useState("Beginner");
