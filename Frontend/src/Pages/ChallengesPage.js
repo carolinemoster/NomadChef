@@ -125,6 +125,11 @@ function ChallengesPage() {
     const setPointsRank = async () => {
         try {
             const token = localStorage.getItem('authToken'); 
+            if (!token) {
+                console.log("No auth token found");
+                return;
+            }
+            
             const response = await fetch(`${BASE_AUTH_URL}/getUserPoints`, {
                 method: "GET",
                 headers: {
@@ -132,11 +137,16 @@ function ChallengesPage() {
                     "Content-Type": "application/json"
                 }
             });
-    
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
+                console.error(`Error fetching user points: ${response.status} ${response.statusText}`);
+                // Set default values to prevent UI breaking
+                setUserPoints(0);
+                setUserRank("Beginner");
+                setNextUserRank("Well Traveled");
+                return;
             }
-    
+
             const data = await response.json();
             setUserPoints(data.points);
             if(parseInt(data.points) >= 1000 && parseInt(data.points) < 2000) {
@@ -161,7 +171,11 @@ function ChallengesPage() {
             
         }
         catch(error) {
-            console.log(error);
+            console.error("Error in setPointsRank:", error);
+            // Set default values to prevent UI breaking
+            setUserPoints(0);
+            setUserRank("Beginner");
+            setNextUserRank("Well Traveled");
             return;
         }
     };
