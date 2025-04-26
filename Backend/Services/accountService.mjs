@@ -357,7 +357,7 @@ export async function addUserChallenges(userId, challenges) {
             userId: new ObjectId(userId),
             text: challenge.text,
             condition: challenge.condition,
-            amountRemaining: challenge.amountRemaining,
+            amountNeeded: challenge.amountNeeded,
             amountCompleted: challenge.amountCompleted,
             completed: Boolean(challenge.completed),
             type: parseInt(challenge.type)
@@ -382,18 +382,17 @@ export async function updateUserChallenge(challengeId) {
     try {
         const db = await getDb();
         
-        // Verify user exists in users collection
-        
+        // Verify challenge exists
         const challengesCollection = db.collection('users_challenges');
         const challenge = await challengesCollection.findOne({ _id: new ObjectId(challengeId) });
         if (!challenge) {
-        throw new Error("Challenge not found");
+            throw new Error("Challenge not found");
         }
 
 
         // Insert challenges into the collection
         const newAmountCompleted = challenge.amountCompleted + 1;
-        const isCompleted = newAmountCompleted >= challenge.amountRemaining;
+        const isCompleted = newAmountCompleted >= challenge.amountNeeded;
 
     
         const result = await challengesCollection.updateOne(
@@ -442,6 +441,77 @@ export async function getLeaderboard(limit = 5) {
         return {
             statusCode: 500,
             body: { error: 'Failed to retrieve leaderboard' }
+        };
+    }
+}
+
+export async function redeemChallenge(userId, challengeId) {
+    try {
+        const db = await getDb();
+        const challengesCollection = db.collection('users_challenges');
+        
+        // Get the challenge
+        const challenge = await challengesCollection.findOne({ 
+            _id: new ObjectId(challengeId),
+            userId: new ObjectId(userId)
+        });
+
+        if (!challenge) {
+            return {
+                statusCode: 404,
+                body: { error: 'Challenge not found' }
+            };
+        }
+
+        if (challenge.redeemed) {
+            return {
+                statusCode: 400,
+                body: { error: 'Challenge already redeemed' }
+            };
+        }
+
+        if (!challenge.completed) {
+            return {
+                statusCode: 400,
+                body: { error: 'Challenge not completed' }
+            };
+        }
+
+        // Calculate points based on challenge type
+        let points = 0;
+        switch(challenge.type) {
+            case 1: points = 300; break;
+            case 2: points = 400; break;
+            case 3: points = 100; break;
+            case 4: points = 400; break;
+            default: points = 300;
+        }
+
+        // Update challenge as redeemed
+        await challengesCollection.updateOne(
+            { _id: new ObjectId(challengeId) },
+            { $set: { redeemed: true } }
+        );
+
+        // Add points to user
+        const usersCollection = db.collection('users');
+        await usersCollection.updateOne(
+            { _id: new ObjectId(userId) },
+            { $inc: { points: points } }
+        );
+
+        return {
+            statusCode: 200,
+            body: { 
+                success: true,
+                points: points
+            }
+        };
+    } catch (error) {
+        console.error("Error redeeming challenge:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Failed to redeem challenge' }
         };
     }
 }

@@ -1,7 +1,7 @@
 import "./ChallengeCard.css"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProgressBar from '@ramonak/react-progress-bar';
-import { FaGlobeAsia, FaGlobeEurope, FaGlobeAmericas, FaGlobeAfrica, FaGlobe, FaUtensils, FaBookmark } from 'react-icons/fa';
+import { FaGlobeAsia, FaGlobeEurope, FaGlobeAmericas, FaGlobeAfrica, FaGlobe, FaUtensils, FaBookmark, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
 
 const getChallengeIcon = (condition) => {
     switch(condition) {
@@ -34,39 +34,67 @@ const getChallengeIcon = (condition) => {
     }
 };
 
-const ChallengeCard = ({text, completed, needed, type, condition}) => {
+const ChallengeCard = ({text, completed, needed, type, condition, isPlaceholder, onPlaceholderClick}) => {
     const [isFlipped, setIsFlipped] = useState(false);
+    const [isFading, setIsFading] = useState(false);
     const points = type === 1 ? "300" : type === 2 ? "400" : type === 3 ? "100" : "400";
     const icon = getChallengeIcon(condition);
+    const isCompleted = completed >= needed;
 
     const handleClick = () => {
+        if (isPlaceholder) {
+            setIsFading(true);
+            setTimeout(() => {
+                if (onPlaceholderClick) {
+                    onPlaceholderClick();
+                }
+            }, 500); // Match this with CSS transition duration
+            return;
+        }
         setIsFlipped(!isFlipped);
     };
 
     return (
-        <div className={`challenge-card ${isFlipped ? 'flipped' : ''}`} onClick={handleClick}>
+        <div 
+            className={`challenge-card ${isFlipped ? 'flipped' : ''} ${isCompleted ? 'completed' : ''} ${isPlaceholder ? 'placeholder' : ''} ${isFading ? 'fading' : ''}`} 
+            onClick={handleClick}
+        >
             <div className="challenge-card-inner">
                 <div className="challenge-card-front">
                     <div className="challenge-icon">
                         {icon}
                     </div>
                     <div className="challenge-content">
-                        <h3 className="challenge-title">{text}</h3>
-                        <div className="challenge-progress">
-                            <ProgressBar 
-                                bgColor='#0d4725' 
-                                width='100%' 
-                                completed={completed.toString()}
-                                maxCompleted={needed}
-                                labelColor='#ffffff'
-                                height='8px'
-                                labelSize='3px'
-                                baseBgColor='#e0e0de'
-                            />
-                            <div className="challenge-points">
-                                {points} traveler points
-                            </div>
-                        </div>
+                        {isPlaceholder ? (
+                            <>
+                                <h3 className="challenge-title">Challenge Completed!</h3>
+                                <div className="placeholder-text">
+                                    Click to get a new challenge
+                                </div>
+                                <div className="placeholder-icon">
+                                    <FaArrowRight />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <h3 className="challenge-title">{text}</h3>
+                                <div className="challenge-progress">
+                                    <ProgressBar 
+                                        bgColor='#0d4725' 
+                                        width='100%' 
+                                        completed={completed.toString()}
+                                        maxCompleted={needed}
+                                        labelColor='#ffffff'
+                                        height='8px'
+                                        labelSize='3px'
+                                        baseBgColor='#e0e0de'
+                                    />
+                                    <div className="challenge-points">
+                                        {points} traveler points
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="challenge-card-back">
@@ -76,6 +104,11 @@ const ChallengeCard = ({text, completed, needed, type, condition}) => {
                     <div className="recipe-count">
                         {completed}/{needed} recipes
                     </div>
+                    {isCompleted && !isPlaceholder && (
+                        <div className="completed-badge">
+                            <FaCheckCircle /> Challenge Completed!
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

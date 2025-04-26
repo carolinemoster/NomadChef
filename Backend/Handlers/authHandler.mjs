@@ -1,4 +1,4 @@
-import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, getLeaderboard} from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, getLeaderboard, redeemChallenge} from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -215,7 +215,7 @@ export const handler = async (event) => {
                 return formatResponse(userChallenges.statusCode, userChallenges.body);
             }
             case '/auth/addUserChallenges': {
-                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                if (event.httpMethod !== 'POST') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
             
@@ -228,6 +228,22 @@ export const handler = async (event) => {
             
                 const updateChallenges = parseBody(event);
                 const result = await addUserChallenges(decoded.id, updateChallenges.challenges);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/redeemChallenge': {
+                if (event.httpMethod !== 'POST') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+
+                const { challengeId } = parseBody(event);
+                const result = await redeemChallenge(decoded.id, challengeId);
                 return formatResponse(result.statusCode, result.body);
             }
             case '/auth/updateUserChallenge': {

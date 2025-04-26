@@ -13,20 +13,128 @@ const BASE_AUTH_URL = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/de
 
 function ChallengesPage() {
     const navigate = useNavigate();
-    const [points, setUserPoints] = useState(0);
-    const [rank, setUserRank] = useState("Beginner");
-    const [nextrank, setNextUserRank] = useState("Well Traveled");
-    const [challenges, setUserChallenges] = useState([]);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [userChallenges, setUserChallenges] = useState([]);
+    const [placeholders, setPlaceholders] = useState([]);
+    const [userPoints, setUserPoints] = useState(0);
+    const [userRank, setUserRank] = useState("Beginner");
+    const [nextUserRank, setNextUserRank] = useState("Well Traveled");
     const [topUsers, setTopUsers] = useState([]);
     const [userPosition, setUserPosition] = useState(0);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
     const handleMouseMove = (e) => {
         setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
     const getRandomChallenges = (number) => {
-        const shuffled = [...challengesSet].sort(() => 0.5 - Math.random());
+        const allChallenges = [
+            {
+                text: "Cook 5 dishes from India",
+                condition: "in",
+                amountNeeded: 5,
+                amountCompleted: 0,
+                completed: false,
+                type: 1
+            },
+            {
+                text: "Cook 10 dishes from Asia",
+                condition: "asia",
+                amountNeeded: 10,
+                amountCompleted: 0,
+                completed: false,
+                type: 2
+            },
+            {
+                text: "Cook a new dish",
+                condition: "new",
+                amountNeeded: 1,
+                amountCompleted: 0,
+                completed: false,
+                type: 3
+            },
+            {
+                text: "Cook 8 dishes from Europe",
+                condition: "europe",
+                amountNeeded: 8,
+                amountCompleted: 0,
+                completed: false,
+                type: 2
+            },
+            {
+                text: "Cook 5 dishes from Africa",
+                condition: "africa",
+                amountNeeded: 5,
+                amountCompleted: 0,
+                completed: false,
+                type: 2
+            },
+            {
+                text: "Cook 7 dishes from South America",
+                condition: "south-america",
+                amountNeeded: 7,
+                amountCompleted: 0,
+                completed: false,
+                type: 2
+            },
+            {
+                text: "Cook 4 dishes from Oceania",
+                condition: "oceania",
+                amountNeeded: 4,
+                amountCompleted: 0,
+                completed: false,
+                type: 2
+            },
+            {
+                text: "Cook 3 dishes from Japan",
+                condition: "jp",
+                amountNeeded: 3,
+                amountCompleted: 0,
+                completed: false,
+                type: 1
+            },
+            {
+                text: "Cook 4 dishes from Mexico",
+                condition: "mx",
+                amountNeeded: 4,
+                amountCompleted: 0,
+                completed: false,
+                type: 1
+            },
+            {
+                text: "Cook 6 dishes from Italy",
+                condition: "it",
+                amountNeeded: 6,
+                amountCompleted: 0,
+                completed: false,
+                type: 1
+            },
+            {
+                text: "Cook 2 dishes from Morocco",
+                condition: "ma",
+                amountNeeded: 2,
+                amountCompleted: 0,
+                completed: false,
+                type: 1
+            },
+            {
+                text: "Cook 5 new dishes",
+                condition: "new",
+                amountNeeded: 5,
+                amountCompleted: 0,
+                completed: false,
+                type: 3
+            },
+            {
+                text: "Cook a saved recipe",
+                condition: "saved",
+                amountNeeded: 1,
+                amountCompleted: 0,
+                completed: false,
+                type: 4
+            }
+        ];
+
+        const shuffled = [...allChallenges].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, number);
     };
 
@@ -34,6 +142,11 @@ function ChallengesPage() {
         const newChallenges = getRandomChallenges(amount);
         try {
             const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                return;
+            }
+
             const response = await fetch(`${BASE_AUTH_URL}/addUserChallenges`, {
                 method: "POST",
                 headers: {
@@ -44,23 +157,30 @@ function ChallengesPage() {
                     challenges: newChallenges
                 })
             });
+
             if (!response.ok) {
-                throw new Error('Failed to update user points');
+                throw new Error('Failed to add new challenges');
             }
+
             const data = await response.json();
-            if(data.insertedCount == amount) {
-                console.log("challenges initialized successfully: ", data);
+            if (data.insertedCount === amount) {
+                console.log("Challenges initialized successfully:", data);
+                // After successfully adding challenges, fetch the updated list
+                await getUserChallenges();
             }
+        } catch (error) {
+            console.error("Error initializing challenges:", error);
         }
-        catch {
-            console.log("Error initializing challenges");
-            return;
-        }
-    }
+    };
 
     const getUserChallenges = async () => {
         try {
-            const token = localStorage.getItem('authToken'); 
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                return;
+            }
+
             const response = await fetch(`${BASE_AUTH_URL}/getUserChallenges`, {
                 method: "GET",
                 headers: {
@@ -68,52 +188,126 @@ function ChallengesPage() {
                     "Content-Type": "application/json"
                 }
             });
-    
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-    
+
             const data = await response.json();
             
-            if(data.challenges.length == 0) { //if challenges have not been initialized yet
-                newUserChallenges(3);
-                if(!challenges) {
-                    throw new Error('Error initializing challenges');
-                }
-                return;
-            }
-            else {
-                const incompleteChallenges = data.challenges.filter(challenge => !challenge.completed); //get array of incompleted/current challenges
-
-                if (incompleteChallenges.length < 3) {
-                    newUserChallenges((3-incompleteChallenges.length)) //add new challenges if completed
-                }
-                setUserChallenges(data.challenges) //set the challenges
+            if (!data.challenges || data.challenges.length === 0) {
+                // If no challenges exist, initialize with 3 new challenges
+                await newUserChallenges(3);
                 return;
             }
 
+            setUserChallenges(data.challenges);
+            
+            // Check if we need placeholders for incomplete challenges
+            const incompleteChallenges = data.challenges.filter(challenge => !challenge.completed);
+            if (incompleteChallenges.length < 3) {
+                const newPlaceholders = Array(3 - incompleteChallenges.length).fill().map((_, index) => ({
+                    id: `placeholder-${Date.now()}-${index}`,
+                    type: 1,
+                    condition: 'new'
+                }));
+                setPlaceholders(newPlaceholders);
+            } else {
+                setPlaceholders([]);
+            }
+        } catch (error) {
+            console.error("Error getting user challenges:", error);
+            // If there's an error, try to initialize new challenges
+            await newUserChallenges(3);
         }
-        catch {
-            console.log("Error getting user challenges");
-        }
-    }
+    };
 
-    const currentChallengesList = challenges.filter(challenge => !(challenge.completed)).map((challenge, index) => (
+    const handlePlaceholderClick = async (placeholderId) => {
+        try {
+            // Remove the clicked placeholder
+            setPlaceholders(prevPlaceholders => 
+                prevPlaceholders.filter(p => p.id !== placeholderId)
+            );
+            
+            // Add a new challenge
+            await newUserChallenges(1);
+        } catch (error) {
+            console.error("Error handling placeholder click:", error);
+        }
+    };
+
+    const handleRedeemChallenge = async (challengeId) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                return;
+            }
+
+            const response = await fetch(`${BASE_AUTH_URL}/redeemChallenge`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    challengeId: challengeId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to redeem challenge');
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                // Update local state to reflect the redeemed challenge
+                setUserChallenges(prevChallenges => 
+                    prevChallenges.map(challenge => 
+                        challenge._id === challengeId 
+                            ? { ...challenge, redeemed: true }
+                            : challenge
+                    )
+                );
+                // Refresh points and rank
+                await setPointsRank();
+            }
+        } catch (error) {
+            console.error("Error redeeming challenge:", error);
+        }
+    };
+
+    const currentChallengesList = userChallenges
+        .filter(challenge => !challenge.completed)
+        .map((challenge) => (
+            <ChallengeCard
+                key={challenge._id}
+                text={challenge.text}
+                needed={challenge.amountNeeded}
+                completed={challenge.amountCompleted}
+                type={challenge.type}
+                condition={challenge.condition}
+            />
+        ));
+
+    const placeholderCards = placeholders.map((placeholder) => (
         <ChallengeCard
-            key={index}
-            text={challenge.text}
-            needed={challenge.amountNeeded}
-            completed={challenge.amountCompleted}
-            type={challenge.type}
-            condition={challenge.condition}
+            key={placeholder.id}
+            text=""
+            needed={0}
+            completed={0}
+            type={placeholder.type}
+            condition={placeholder.condition}
+            isPlaceholder={true}
+            onPlaceholderClick={() => handlePlaceholderClick(placeholder.id)}
         />
     ));
 
-    const completedChallengesList = challenges
+    const completedChallengesList = userChallenges
         .filter(challenge => challenge.completed)
-        .map((challenge, index) => (
+        .map((challenge) => (
             <ChallengeCard
-                key={index}
+                key={challenge._id}
                 text={challenge.text}
                 needed={challenge.amountNeeded}
                 completed={challenge.amountCompleted}
@@ -124,9 +318,9 @@ function ChallengesPage() {
 
     const setPointsRank = async () => {
         try {
-            const token = localStorage.getItem('authToken'); 
+            const token = localStorage.getItem('authToken');
             if (!token) {
-                console.log("No auth token found");
+                console.error('No auth token found');
                 return;
             }
             
@@ -139,47 +333,37 @@ function ChallengesPage() {
             });
             
             if (!response.ok) {
-                console.error(`Error fetching user points: ${response.status} ${response.statusText}`);
-                // Set default values to prevent UI breaking
-                setUserPoints(0);
-                setUserRank("Beginner");
-                setNextUserRank("Well Traveled");
-                return;
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            setUserPoints(data.points);
-            if(parseInt(data.points) >= 1000 && parseInt(data.points) < 2000) {
-                setUserRank("Well Traveled");
-                setNextUserRank("Frequent Flyer");
-            }
-            else if(parseInt(data.points) >= 2000 && parseInt(data.points) < 3000) {
-                setUserRank("Frequent Flyer");
-                setNextUserRank("Culinary Explorer");
-            }
-            else if(parseInt(data.points) >= 3000 && parseInt(data.points) < 4000) {
+            setUserPoints(data.points || 0);
+
+            // Set rank based on points
+            if (data.points >= 4000) {
+                setUserRank("Master of Flavors");
+                setNextUserRank("");
+            } else if (data.points >= 3000) {
                 setUserRank("Culinary Explorer");
                 setNextUserRank("Master of Flavors");
-            }
-            else if(parseInt(data.points) >= 4000) {
-                setUserRank("Master of Flavors");
-            }
-            else {
+            } else if (data.points >= 2000) {
+                setUserRank("Frequent Flyer");
+                setNextUserRank("Culinary Explorer");
+            } else if (data.points >= 1000) {
+                setUserRank("Well Traveled");
+                setNextUserRank("Frequent Flyer");
+            } else {
                 setUserRank("Beginner");
-                setNextUserRank("Well Traveled")
+                setNextUserRank("Well Traveled");
             }
-            
-        }
-        catch(error) {
+        } catch (error) {
             console.error("Error in setPointsRank:", error);
-            // Set default values to prevent UI breaking
             setUserPoints(0);
             setUserRank("Beginner");
             setNextUserRank("Well Traveled");
-            return;
         }
     };
-    
+
     const fetchLeaderboard = async () => {
         try {
             const response = await fetch(`${BASE_AUTH_URL}/getLeaderboard`, {
@@ -223,10 +407,13 @@ function ChallengesPage() {
     };
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-        setPointsRank();
-        getUserChallenges();
-        fetchLeaderboard();
+        const initializePage = async () => {
+            await getUserChallenges();
+            await setPointsRank();
+            await fetchLeaderboard();
+        };
+        
+        initializePage();
     }, []);
 
     const handleAccountClick = () => {
@@ -288,8 +475,8 @@ function ChallengesPage() {
             <section className="section">
                 <Leaderboard 
                     topUsers={topUsers} 
-                    userRank={rank} 
-                    userPoints={points}
+                    userRank={userRank} 
+                    userPoints={userPoints}
                     userPosition={userPosition}
                 />
             </section>
@@ -299,25 +486,25 @@ function ChallengesPage() {
                     <h2>Your Rank</h2>
                     <div className="rank-info">
                         <div className="rank-details">
-                            <span className="rank-title">{rank}</span>
-                            <span className="rank-points">{points} points</span>
+                            <span className="rank-title">{userRank}</span>
+                            <span className="rank-points">{userPoints} points</span>
                         </div>
                         <div className="rank-progress">
                             <ProgressBar 
                                 bgColor='#0d4725' 
                                 width='100%' 
-                                completed={(points%1000).toString()}
+                                completed={(userPoints%1000).toString()}
                                 maxCompleted={1000}
                                 labelColor='#ffffff'
                                 height='15px'
                                 labelSize='10px'
                                 baseBgColor='#e0e0de'
                             />
-                            {(rank !== "Master of Flavors") && (
+                            {(userRank !== "Master of Flavors") && (
                                 <div className="next-rank">
                                     <span className="next-rank-label">Next Rank:</span>
-                                    <span className="next-rank-value">{nextrank}</span>
-                                    <span className="progress-label">{(points%1000)}/1000 points</span>
+                                    <span className="next-rank-value">{nextUserRank}</span>
+                                    <span className="progress-label">{(userPoints%1000)}/1000 points</span>
                                 </div>
                             )}
                         </div>
@@ -331,6 +518,7 @@ function ChallengesPage() {
                 </div>
                 <div className="challenges-grid">
                     {currentChallengesList}
+                    {placeholderCards}
                 </div>
             </section>
 

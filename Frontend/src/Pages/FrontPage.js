@@ -526,9 +526,7 @@ function FrontPage() {
                                 // Add more mappings as needed
                             };
                             
-                            console.log("Processing country:", country);
                             const mappedCode = countryMappings[country] || country;
-                            console.log("Mapped to:", mappedCode);
                             return mappedCode;
                         })
                 )];

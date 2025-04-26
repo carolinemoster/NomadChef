@@ -4,6 +4,7 @@
     perspective: 1000px;
     cursor: pointer;
     position: relative;
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .challenge-card-inner {
@@ -126,4 +127,98 @@
     .recipe-count {
         font-size: 1.2rem;
     }
+}
+
+.challenge-card.completed {
+    border: 2px solid #0d4725;
+}
+
+.completed-badge {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background-color: #0d4725;
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.completed-badge svg {
+    font-size: 1.2em;
+    color: #ffd700;
+}
+
+.redeem-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ffd700;
+    border: none;
+    border-radius: 25px;
+    color: #0d4725;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.redeem-button:hover {
+    background-color: #ffed4a;
+    transform: scale(1.05);
+}
+
+.redeem-button svg {
+    font-size: 1.2em;
+}
+
+.redeemed-text {
+    margin-top: 20px;
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.challenge-card.placeholder {
+    background: linear-gradient(135deg, #0d4725 0%, #1a6a3a 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 6px 16px rgba(13, 71, 37, 0.2);
+}
+
+.challenge-card.placeholder .challenge-card-front {
+    background: linear-gradient(135deg, #0d4725 0%, #1a6a3a 100%);
+}
+
+.challenge-card.placeholder .challenge-title {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+.placeholder-text {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 15px 0;
+}
+
+.placeholder-icon {
+    font-size: 2rem;
+    color: #ffd700;
+    margin-top: 20px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.challenge-card.fading {
+    opacity: 0;
+    transform: scale(0.95);
 }
