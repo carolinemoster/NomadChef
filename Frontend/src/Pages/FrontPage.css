@@ -686,14 +686,24 @@ html, body, #root {
 }
 
 .section-heading-here {
-    font-weight: 300;
+    color: #0d4725;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
+
 /* Add these styles if they don't already exist */
 .section h1 {
     color: #0d4725;
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 20px;
     text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
 /* Add specific styles for recommended section */
