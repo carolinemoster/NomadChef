@@ -110,12 +110,15 @@ html, body, #root {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     position: relative;
     overflow: hidden;
     min-height: 300px;
     width: 100%;
     box-sizing: border-box;
+    perspective: 1000px;
+    transform-style: preserve-3d;
 }
 
 .challenge-card:hover {
@@ -147,6 +150,7 @@ html, body, #root {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 10px;
 }
 
@@ -858,3 +862,4 @@ Map {
         font-size: 1.1rem;
     }
 }
+

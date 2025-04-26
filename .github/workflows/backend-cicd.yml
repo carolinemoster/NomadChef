@@ -92,11 +92,11 @@ jobs:
         zip -r ../function.zip .
         cd ..
 
-    - name: Deploy lambda function to authentication service
-      run: |
-        aws lambda update-function-code \
-          --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
-          --zip-file fileb://function.zip
+    # - name: Deploy lambda function to authentication service
+    #   run: |
+    #     aws lambda update-function-code \
+    #       --function-name ${{ secrets.AUTH_SERVICE_ARN }} \
+    #       --zip-file fileb://function.zip
     
     # - name: Deploy lambda function to recipe service
 

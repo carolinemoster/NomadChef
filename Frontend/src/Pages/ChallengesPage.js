@@ -18,13 +18,8 @@ function ChallengesPage() {
     const [nextrank, setNextUserRank] = useState("Well Traveled");
     const [challenges, setUserChallenges] = useState([]);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [topUsers, setTopUsers] = useState([
-        { username: 'ChefMaster', points: 4500 },
-        { username: 'FoodExplorer', points: 3800 },
-        { username: 'CulinaryNomad', points: 3200 },
-        { username: 'SpiceAdventurer', points: 2900 },
-        { username: 'TasteTraveler', points: 2500 }
-    ]);
+    const [topUsers, setTopUsers] = useState([]);
+    const [userPosition, setUserPosition] = useState(0);
 
     const handleMouseMove = (e) => {
         setMousePosition({ x: e.clientX, y: e.clientY });
@@ -171,10 +166,53 @@ function ChallengesPage() {
         }
     };
     
+    const fetchLeaderboard = async () => {
+        try {
+            const response = await fetch(`${BASE_AUTH_URL}/getLeaderboard`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            if (data.leaderboard && Array.isArray(data.leaderboard)) {
+                // Format the leaderboard data to match the expected structure
+                const formattedLeaderboard = data.leaderboard.map(user => ({
+                    username: user.name || 'Anonymous User',
+                    points: user.points || 0
+                }));
+                
+                setTopUsers(formattedLeaderboard);
+                
+                // Find user's position in leaderboard if they're not in top 5
+                // This would require an additional API endpoint to get user's rank
+                // For now, we'll use a placeholder value
+                setUserPosition(15); // This should be replaced with actual position
+            }
+        } catch (error) {
+            console.error("Error fetching leaderboard:", error);
+            // Fallback to default data if API call fails
+            setTopUsers([
+                { username: 'ChefMaster', points: 4500 },
+                { username: 'FoodExplorer', points: 3800 },
+                { username: 'CulinaryNomad', points: 3200 },
+                { username: 'SpiceAdventurer', points: 2900 },
+                { username: 'TasteTraveler', points: 2500 }
+            ]);
+        }
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
         setPointsRank();
         getUserChallenges();
+        fetchLeaderboard();
     }, []);
 
     const handleAccountClick = () => {
@@ -238,7 +276,7 @@ function ChallengesPage() {
                     topUsers={topUsers} 
                     userRank={rank} 
                     userPoints={points}
-                    userPosition={15} // This would be calculated based on actual user position
+                    userPosition={userPosition}
                 />
             </section>
 

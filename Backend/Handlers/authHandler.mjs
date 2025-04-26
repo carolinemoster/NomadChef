@@ -279,7 +279,7 @@ export const handler = async (event) => {
                 return formatResponse(result.statusCode, result.body);
             }
             case '/auth/getLeaderboard': {
-                if (event.httpMethod !== GET) {
+                if (event.httpMethod !== 'GET') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
 
