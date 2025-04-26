@@ -643,8 +643,8 @@ function RecipePage() {
 
             // Trigger front page refresh
             localStorage.setItem('recipeCompleted', Date.now().toString());
-            addPoints(50);
-            updateChallenges();
+            await addPoints(50);
+            await updateChallenges();
             navigate('/home');
         } catch (error) {
             console.error('Error submitting survey:', error);

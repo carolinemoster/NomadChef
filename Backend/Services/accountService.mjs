@@ -224,7 +224,7 @@ export async function getUserPoints(id) {
             body: user
         };
     }
-    catch {
+    catch (error) {
         console.error("Error getting user points:", error);
         return {
             statusCode: 500,
@@ -270,6 +270,7 @@ export async function addUserPoints(id, pointAmount) {
         };
     }
 }
+
 export async function updateUserData(id, updateData) {
     try {
         const db = await getDb();
@@ -412,6 +413,35 @@ export async function updateUserChallenge(challengeId) {
         return {
             statusCode: 400,
             body: {error: "Failed to add user challenges"}
+        };
+    }
+}
+
+export async function getLeaderboard(limit = 5) {
+    try {
+        const db = await getDb();
+        const collection = db.collection('users');
+        
+        // Find top users sorted by points in descending order
+        // Only retrieve necessary fields (name and points)
+        const leaderboard = await collection
+            .find(
+                { points: { $exists: true } }, // Only include users who have points
+                { projection: { name: 1, points: 1 } } // Only return name and points fields
+            )
+            .sort({ points: -1 }) // Sort by points in descending order
+            .limit(limit) // Limit to specified number of results (default 5)
+            .toArray();
+        
+        return {
+            statusCode: 200,
+            body: { leaderboard }
+        };
+    } catch (error) {
+        console.error("Error getting leaderboard:", error);
+        return {
+            statusCode: 500,
+            body: { error: 'Failed to retrieve leaderboard' }
         };
     }
 }

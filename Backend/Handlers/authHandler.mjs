@@ -1,4 +1,4 @@
-import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges} from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, getLeaderboard} from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -276,6 +276,14 @@ export const handler = async (event) => {
             
                 const updateCountry = parseBody(event);
                 const result = await updateUserCountries(decoded.id, updateCountry);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/getLeaderboard': {
+                if (event.httpMethod !== GET) {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                const result = await getLeaderboard();
                 return formatResponse(result.statusCode, result.body);
             }
             default:
