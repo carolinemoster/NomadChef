@@ -207,7 +207,7 @@ export async function getUserPoints(id) {
     try {
         const db = await getDb();
         const collection = db.collection('users');
-        await usersCollection.updateOne(
+        await collection.updateOne(
             { _id: new ObjectId(String(id)), points: { $exists: false } },
             { $set: { points: 0, challengesCompleted: 0} }
         );
