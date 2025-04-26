@@ -12,6 +12,7 @@ import RecipeCard from '../Components/RecipeCard/RecipeCard';
 import SmallRecipeCard from '../Components/SmallRecipeCard/SmallRecipeCard';
 import ProgressBar from '@ramonak/react-progress-bar'
 import axios from 'axios';
+import Globe3D from '../Components/Globe3D/Globe3D';
 
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe";
 const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData";
@@ -65,6 +66,7 @@ function FrontPage() {
     const [recommendedRecipes, setRecommendedRecipes] = useState([]);
     const [tooltipRef, setTooltipRef] = useState(null);
     const mapContainerRef = useRef(null);
+    const [is3DView, setIs3DView] = useState(false);
 
     useEffect(() => {
         // Create tooltip element if it doesn't exist
@@ -1198,6 +1200,10 @@ function FrontPage() {
         return name;
     };
 
+    const toggleView = () => {
+        setIs3DView(!is3DView);
+    };
+
     return (
         <div className="front-page">
             <nav className="navbar background">
@@ -1233,22 +1239,34 @@ function FrontPage() {
 
             <section className="section">
                 <div className="map-and-recipes-container">
-                    <div 
-                        className="map-container" 
+                    <div className="map-container" 
                         onMouseMove={handleMouseMove}
                         onMouseLeave={handleMapMouseLeave}
                         ref={mapContainerRef}
                     >
-                        <Map>
-                            <VectorMap
-                                {...worldMap}
-                                style={{ width: "100%", height: "100%" }}
-                                checkedLayers={completedCountries}
-                                layerProps={mapLayerProps}
-                                currentLayers={completedCountries}
+                        <button onClick={toggleView} className="nav-button view-toggle">
+                            {is3DView ? '2D View' : '3D View'}
+                        </button>
+                        
+                        {is3DView ? (
+                            <Globe3D
+                                completedCountries={completedCountries}
+                                selectedCountry={selectedCountry}
+                                onCountryClick={handleCountryClick}
                                 onMouseLeave={handleMapMouseLeave}
                             />
-                        </Map>
+                        ) : (
+                            <Map>
+                                <VectorMap
+                                    {...worldMap}
+                                    style={{ width: "100%", height: "100%" }}
+                                    checkedLayers={completedCountries}
+                                    layerProps={mapLayerProps}
+                                    currentLayers={completedCountries}
+                                    onMouseLeave={handleMapMouseLeave}
+                                />
+                            </Map>
+                        )}
                         
                         <div className="progress-container" onMouseEnter={handleMapMouseLeave}>
                             <CustomProgressBar />
