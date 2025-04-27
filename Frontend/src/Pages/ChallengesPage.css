@@ -700,7 +700,6 @@ Map {
   font-size: 12px;
   font-weight: 600;
   color: #0d4725;
-  border-left: 2px solid #0d4725;
   /* Remove animation to make it appear instantly */
   transition: none;
 }
