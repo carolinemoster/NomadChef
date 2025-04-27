@@ -1,4 +1,4 @@
-import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges} from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, updateUserChallenge, getLeaderboard, redeemChallenge} from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -215,7 +215,7 @@ export const handler = async (event) => {
                 return formatResponse(userChallenges.statusCode, userChallenges.body);
             }
             case '/auth/addUserChallenges': {
-                if (event.httpMethod !== 'POST') {  // Change PUT to POST
+                if (event.httpMethod !== 'POST') {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
             
@@ -228,6 +228,22 @@ export const handler = async (event) => {
             
                 const updateChallenges = parseBody(event);
                 const result = await addUserChallenges(decoded.id, updateChallenges.challenges);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/redeemChallenge': {
+                if (event.httpMethod !== 'POST') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                let decoded;
+                try {
+                    decoded = verifyToken(event);
+                } catch (error) {
+                    return formatResponse(401, { error: 'Unauthorized: Invalid or expired token' });
+                }
+
+                const { challengeId } = parseBody(event);
+                const result = await redeemChallenge(decoded.id, challengeId);
                 return formatResponse(result.statusCode, result.body);
             }
             case '/auth/updateUserChallenge': {
@@ -276,6 +292,26 @@ export const handler = async (event) => {
             
                 const updateCountry = parseBody(event);
                 const result = await updateUserCountries(decoded.id, updateCountry);
+                return formatResponse(result.statusCode, result.body);
+            }
+            case '/auth/getLeaderboard': {
+                if (event.httpMethod !== 'GET') {
+                    return formatResponse(405, { error: 'Method not allowed' });
+                }
+
+                // Extract userId from token if available
+                let userId = null;
+                if (event.headers && event.headers.Authorization) {
+                    const token = event.headers.Authorization.replace('Bearer ', '');
+                    try {
+                        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                        userId = decoded.userId;
+                    } catch (error) {
+                        console.error("Error verifying token:", error);
+                    }
+                }
+
+                const result = await getLeaderboard(5, userId);
                 return formatResponse(result.statusCode, result.body);
             }
             default:

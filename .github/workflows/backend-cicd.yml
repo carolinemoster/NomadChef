@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - recipeEdits
+      - challengeService
   pull_request:
     branches: [ main ]
 

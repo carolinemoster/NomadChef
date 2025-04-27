@@ -603,7 +603,7 @@ function FrontPage() {
             number: 4,
             instructionsRequired: true,
           },
-        })
+        });
 
         if (fallbackResponse.data && fallbackResponse.data.results) {
           console.log("Fallback found recipes:", fallbackResponse.data.results.length)

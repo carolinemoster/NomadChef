@@ -540,30 +540,34 @@ function RecipePage() {
             console.log("Challenge array recieved");
             for (const challenge of data.challenges) {
 
-                if(challenge.completed == true) { //If challenge is already completed then move on
+                if(challenge.completed === true) { //If challenge is already completed then move on
                     console.log("Completed challenge");
                     continue;
                 }
                 //Update Challenges based on type
                 switch(parseInt(challenge.type)) {
-                    case(1): if((challenge.condition).toLowerCase() == (getCode(origin.country)).toLowerCase()) {
-                        console.log(challenge.id);
-                        updateSingleChallenge(challenge);
+                    case(1): 
+                        if((challenge.condition).toLowerCase() === (getCode(origin.country)).toLowerCase()) {
+                            console.log(challenge.id);
+                            updateSingleChallenge(challenge);
+                        }
                         break;
-                    }
-                    case(2): if((challenge.condition).toLowerCase() == (origin.region).toLowerCase()) {
-                        updateSingleChallenge(challenge);
+                    case(2): 
+                        if((challenge.condition).toLowerCase() === (origin.region).toLowerCase()) {
+                            updateSingleChallenge(challenge);
+                        }
                         break;
-                    }
-                    case(3): if(newRecipe) {
-                        updateSingleChallenge(challenge);
-                        console.log("New recipe challenge hit");
+                    case(3): 
+                        if(newRecipe) {
+                            updateSingleChallenge(challenge);
+                            console.log("New recipe challenge hit");
+                        }
                         break;
-                    }
-                    case(4): if(!newRecipe) {
-                        updateSingleChallenge(challenge);
+                    case(4): 
+                        if(!newRecipe) {
+                            updateSingleChallenge(challenge);
+                        }
                         break;
-                    }
                     default:
                         break;
                 } 
@@ -643,8 +647,8 @@ function RecipePage() {
 
             // Trigger front page refresh
             localStorage.setItem('recipeCompleted', Date.now().toString());
-            addPoints(50);
-            updateChallenges();
+            await addPoints(50);
+            await updateChallenges();
             navigate('/home');
         } catch (error) {
             console.error('Error submitting survey:', error);

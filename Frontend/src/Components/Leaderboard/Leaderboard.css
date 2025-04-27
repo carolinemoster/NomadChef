@@ -6,6 +6,7 @@
     width: 90%;
     max-width: 1200px;
     margin: 0 auto;
+    margin-top: 30px;
 }
 
 .leaderboard-title {
@@ -46,6 +47,12 @@
 }
 
 .leaderboard-item:hover {
+    transform: translateX(5px);
+}
+
+.leaderboard-item.current-user {
+    background: rgba(13, 71, 37, 0.15);
+    border: 2px solid #0d4725;
     transform: translateX(5px);
 }
 
@@ -127,6 +134,43 @@
     font-size: 1.1rem;
     color: #0d4725;
     font-weight: 600;
+}
+
+.user-badge {
+    background: #0d4725;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
+.rank-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    background: rgba(13, 71, 37, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.rank-title-label {
+    font-size: 1rem;
+    color: #0d4725;
+    font-weight: 600;
+}
+
+.rank-title-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0d4725;
+    background: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(13, 71, 37, 0.1);
 }
 
 @media (max-width: 768px) {

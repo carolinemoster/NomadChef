@@ -413,7 +413,7 @@ html, body, #root {
 
 .text-big {
   font-weight: 500;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana,
+  font-family: Geneva, "Segoe UI", Tahoma, Verdana,
       sans-serif;
   font-size: 30px;
 }
@@ -585,6 +585,7 @@ html, body, #root {
     color: #525453;
     display: flex;
     flex-direction: column;
+    font-family: Georgia, "Segoe UI", Tahoma, Verdana, sans-serif;
     justify-content: flex-start;
     height: 100%;
     max-height: 400px;
