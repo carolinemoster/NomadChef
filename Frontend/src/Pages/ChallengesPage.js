@@ -139,6 +139,7 @@ function ChallengesPage() {
     };
 
     const newUserChallenges = async (amount) => {
+        console.log("Calling newUserChallenges with amount:", amount);
         const newChallenges = getRandomChallenges(amount);
         try {
             const token = localStorage.getItem('authToken');
@@ -152,6 +153,7 @@ function ChallengesPage() {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
+                    
                 },
                 body: JSON.stringify({
                     challenges: newChallenges
@@ -189,14 +191,18 @@ function ChallengesPage() {
                 }
             });
 
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
+
+            console.log("Data:", data);
             
             if (!data.challenges || data.challenges.length === 0) {
                 // If no challenges exist, initialize with 3 new challenges
+                console.log("No challenges found, initializing with 3 new challenges");
                 await newUserChallenges(3);
                 return;
             }
@@ -308,6 +314,7 @@ function ChallengesPage() {
         .map((challenge) => (
             <ChallengeCard
                 key={challenge._id}
+                challengeId={challenge._id}
                 text={challenge.text}
                 needed={challenge.amountNeeded}
                 completed={challenge.amountCompleted}
