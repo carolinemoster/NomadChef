@@ -244,11 +244,11 @@ export async function addUserPoints(id, pointAmount) {
                 body: { error: 'User not found' }
             };
         }
-        await usersCollection.updateOne(
+        await collection.updateOne(
             { _id: new ObjectId(String(id)), points: { $exists: false } },
             { $set: { points: 0, challengesCompleted: 0} }
         );
-        await usersCollection.updateOne(
+        await collection.updateOne(
             { _id: new ObjectId(String(id)) },
             {
                 $inc: {
@@ -416,7 +416,7 @@ export async function updateUserChallenge(challengeId) {
     }
 }
 
-export async function getLeaderboard(limit = 5) {
+export async function getLeaderboard(limit = 5, userId = null) {
     try {
         const db = await getDb();
         const collection = db.collection('users');
@@ -432,9 +432,32 @@ export async function getLeaderboard(limit = 5) {
             .limit(limit) // Limit to specified number of results (default 5)
             .toArray();
         
+        // If userId is provided, find the user's position in the leaderboard
+        let userPosition = null;
+        if (userId) {
+            // Get the user's points
+            const user = await collection.findOne(
+                { _id: new ObjectId(userId) },
+                { projection: { points: 1 } }
+            );
+            
+            if (user && user.points) {
+                // Count how many users have more points than the current user
+                const higherRankedUsers = await collection.countDocuments({
+                    points: { $gt: user.points }
+                });
+                
+                // User's position is the number of users with higher points + 1
+                userPosition = higherRankedUsers + 1;
+            }
+        }
+        
         return {
             statusCode: 200,
-            body: { leaderboard }
+            body: { 
+                leaderboard,
+                userPosition: userPosition || 0
+            }
         };
     } catch (error) {
         console.error("Error getting leaderboard:", error);

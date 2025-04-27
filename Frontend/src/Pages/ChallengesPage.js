@@ -373,10 +373,17 @@ function ChallengesPage() {
 
     const fetchLeaderboard = async () => {
         try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No auth token found');
+                return;
+            }
+
             const response = await fetch(`${BASE_AUTH_URL}/getLeaderboard`, {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 }
             });
 
@@ -395,10 +402,10 @@ function ChallengesPage() {
                 
                 setTopUsers(formattedLeaderboard);
                 
-                // Find user's position in leaderboard if they're not in top 5
-                // This would require an additional API endpoint to get user's rank
-                // For now, we'll use a placeholder value
-                setUserPosition(15); // This should be replaced with actual position
+                // Use the userPosition returned from the backend
+                if (data.userPosition !== undefined) {
+                    setUserPosition(data.userPosition);
+                }
             }
         } catch (error) {
             console.error("Error fetching leaderboard:", error);

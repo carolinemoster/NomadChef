@@ -1,4 +1,4 @@
-import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, getLeaderboard, redeemChallenge} from '../Services/accountService.mjs';
+import { signUp, login, getUserData, updateUserData, getUserCountries, updateUserCountries, getUserPoints, addUserPoints, getUserChallenges, addUserChallenges, updateUserChallenge, getLeaderboard, redeemChallenge} from '../Services/accountService.mjs';
 import jwt from 'jsonwebtoken';
 
 // Helper to format Lambda response
@@ -299,7 +299,19 @@ export const handler = async (event) => {
                     return formatResponse(405, { error: 'Method not allowed' });
                 }
 
-                const result = await getLeaderboard();
+                // Extract userId from token if available
+                let userId = null;
+                if (event.headers && event.headers.Authorization) {
+                    const token = event.headers.Authorization.replace('Bearer ', '');
+                    try {
+                        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                        userId = decoded.userId;
+                    } catch (error) {
+                        console.error("Error verifying token:", error);
+                    }
+                }
+
+                const result = await getLeaderboard(5, userId);
                 return formatResponse(result.statusCode, result.body);
             }
             default:
