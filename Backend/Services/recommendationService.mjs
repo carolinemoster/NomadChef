@@ -31,8 +31,7 @@ export const recommendationService = {
         number: limit + Math.max(excludeIds.length, 10),
         addRecipeInformation: true,
         sort: 'popularity',
-        fillIngredients: true,
-        cuisine: '!american'  // Exclude American cuisine
+        fillIngredients: true
       };
       
       // Apply diet preference

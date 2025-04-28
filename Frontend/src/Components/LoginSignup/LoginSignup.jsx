@@ -25,7 +25,7 @@ const LoginSignup = () => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
 
     const [lovedIngredient, setLovedIngredient] = useState('');
     const [lovedIngredients, setLovedIngredients] = useState([]);
@@ -157,7 +157,7 @@ const LoginSignup = () => {
         setSignupErrors({});
         
         const errors = {};
-        if (!name.trim()) errors.name = "Name is required";
+        if (!username.trim()) errors.username = "Username is required";
         if (!email.trim()) errors.email = "Email is required";
         if (!password.trim()) errors.password = "Password is required";
         if (password.length < 5) errors.password = "Password must be at least 5 characters";
@@ -175,7 +175,7 @@ const LoginSignup = () => {
         try {
             // First create the user account
             const signupResponse = await axios.post(`${apiBaseUrl}/auth/signup`, {
-                name,
+                name: username,
                 email,
                 password
             }, {
@@ -201,7 +201,7 @@ const LoginSignup = () => {
             };
 
             await axios.post(`${apiBaseUrl}/auth/updateUserData`, {
-                name,
+                name: username,
                 email,
                 preferences: preferences
             }, {
@@ -311,12 +311,12 @@ const LoginSignup = () => {
                                             <img src={user_icon} alt="" />
                                             <input 
                                                 type="text" 
-                                                placeholder='Name' 
-                                                value={name} 
-                                                onChange={(e) => setName(e.target.value)}
+                                                placeholder='Username' 
+                                                value={username} 
+                                                onChange={(e) => setUsername(e.target.value)}
                                             />
                                         </div>
-                                        {signupErrors.name && <div className="error-message">{signupErrors.name}</div>}
+                                        {signupErrors.username && <div className="error-message">{signupErrors.username}</div>}
                                     </div>
                                     <div className="input-container">
                                         <div className="input">
