@@ -271,7 +271,7 @@ const AccountPage = () => {
                         <div className="info-section">
                             <h2>Personal Details</h2>
                             <div className="info-item">
-                                <label>Name:</label>
+                                <label>Username:</label>
                                 {isEditing ? (
                                     <>
                                         <input
