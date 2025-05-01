@@ -46,7 +46,7 @@ This website is more than just a recipe generator—it's a journey across cultur
 
 To get started, read our user manual located here: [User Manual](docs/USER-MANUAL.md)
 
-## *Authors*<br>
+## **Authors**<br>
 
 This project was developed by:
 
