@@ -41,3 +41,18 @@ A progress bar displays how many countries (out of 195) the user has explored.
 ## **Conclusion**<br>
 
 This website is more than just a recipe generator—it's a journey across cultures. By making global cooking fun, accessible, and meaningful, users will gain confidence in the kitchen and a deeper appreciation for the diversity of food traditions around the world.
+
+## **Getting Started**<br>
+
+To get started, read our user manual located here: [User Manual](docs/USER-MANUAL.md)
+
+## *Authors*<br>
+
+This project was developed by:
+
+- Caroline Moster 
+- Bryce Rayner
+- Arnav Naval 
+
+Purdue University, May 2025  
+Course: ECE49595
