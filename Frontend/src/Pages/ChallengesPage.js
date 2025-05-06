@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ChallengesPage.css';
 import wisk_icon from '../Components/Assets/wisk.png';
 import styled from 'styled-components'
@@ -20,11 +20,7 @@ function ChallengesPage() {
     const [nextUserRank, setNextUserRank] = useState("Well Traveled");
     const [topUsers, setTopUsers] = useState([]);
     const [userPosition, setUserPosition] = useState(0);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-    const handleMouseMove = (e) => {
-        setMousePosition({ x: e.clientX, y: e.clientY });
-    };
+    const [leaderboard, setLeaderboard] = useState([]);
 
     const getRandomChallenges = (number) => {
         const allChallenges = [
@@ -428,7 +424,29 @@ function ChallengesPage() {
         };
         
         initializePage();
-    }, []);
+
+        // Add event listener for browser back button
+        const handlePopState = () => {
+            window.location.reload();
+        };
+
+        // Add event listener for browser reload button
+        const handleBeforeUnload = () => {
+            // Clear any cached data if needed
+            sessionStorage.removeItem("userChallenges");
+            sessionStorage.removeItem("userPoints");
+            sessionStorage.removeItem("userRank");
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        // Clean up function
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [getUserChallenges]);
 
     const handleAccountClick = () => {
         navigate('/account');

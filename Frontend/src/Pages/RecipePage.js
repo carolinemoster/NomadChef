@@ -260,14 +260,31 @@ function RecipePage() {
             getRecipe(RecipeID);
             getInstructions(RecipeID);
         }
+
+        // Add event listener for browser back button
+        const handlePopState = () => {
+            window.location.reload();
+        };
+
+        // Add event listener for browser reload button
+        const handleBeforeUnload = () => {
+            // Clear any cached data if needed
+            sessionStorage.removeItem("recipeDetails");
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
         
         // Clean up function
         return () => {
             // Reset the refs when component unmounts
             recipeRequestRef.current = false;
             culturalRequestRef.current = false;
+            // Remove event listeners
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [RecipeID]); // Runs when RecipeID changes
+    }, [RecipeID]);
     
     const handleClick = () => {
         getInstructions(RecipeID);

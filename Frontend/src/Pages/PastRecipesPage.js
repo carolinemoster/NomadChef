@@ -70,8 +70,27 @@ function PastRecipesPage() {
         window.scrollTo(0, 0);
         getHistory();
         getUserInfo();
-    }, []); // Add comment to explain why we're ignoring the dependency warning
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        // Add event listener for browser back button
+        const handlePopState = () => {
+            window.location.reload();
+        };
+
+        // Add event listener for browser reload button
+        const handleBeforeUnload = () => {
+            // Clear any cached data if needed
+            sessionStorage.removeItem("recipeHistory");
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        // Cleanup event listeners
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
 
     useEffect(() => {
         if (searchQuery) {

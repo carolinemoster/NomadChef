@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Globe from 'react-globe.gl';
 import './Globe3D.css';
 
@@ -11,7 +11,6 @@ const Globe3D = ({
   height = 600 
 }) => {
   const globeRef = useRef();
-  const [isLoading, setIsLoading] = useState(false);
 
   // Country code to name mapping
   const countryCodeToName = {

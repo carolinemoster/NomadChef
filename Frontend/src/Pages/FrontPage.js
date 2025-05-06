@@ -17,7 +17,6 @@ import axios from "axios"
 import Globe3D from "../Components/Globe3D/Globe3D"
 
 const BASE_USER_RECIPES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/user-recipe"
-const BASE_USER_INFO = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/getUserData"
 const BASE_USER_COUNTRIES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserCountries"
 const BASE_RECIPES_URL = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/recipes"
 const BASE_RECOMMEND_RECIPES_URL =
@@ -25,7 +24,7 @@ const BASE_RECOMMEND_RECIPES_URL =
 const BASE_USER_PREFERENCES = "https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth/getUserData"
 
 function FrontPage() {
-  const Map = styled.div`
+    const Map = styled.div`
         width: 100% !important;
         max-width: 1200px;
         margin: 0 auto;
@@ -37,25 +36,25 @@ function FrontPage() {
 
             path {
                 fill: rgb(255, 255, 255);
-                cursor: pointer;
-                outline: none;
+            cursor: pointer;
+            outline: none;
                 transition: all 0.3s ease;
 
-                &:hover {
-                    fill: #2d8b4e;
-                }
+            &:hover {
+                fill: #2d8b4e;
+            }
 
-                &:focus {
-                    fill: #2d8b4e;
-                }
+            &:focus {
+                fill: #2d8b4e;
+            }
 
-                &[aria-checked='true'] {
+            &[aria-checked='true'] {
                     fill: #2d8b4e !important;
-                }
+            }
 
-                &[aria-current='true'] {
+            &[aria-current='true'] {
                     fill: #2d8b4e !important;
-                }
+            }
             }
         }
         `
@@ -65,62 +64,61 @@ function FrontPage() {
   const [selectedCountryList, setSelectedCountryList] = useState([])
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [completedCountries, setCountries] = useState([])
-  const [completedCountriesCount, setCountriesCount] = useState(0)
   const [recommendedRecipes, setRecommendedRecipes] = useState([])
   const [tooltipRef, setTooltipRef] = useState(null)
   const mapContainerRef = useRef(null)
   const [is3DView, setIs3DView] = useState(false)
 
-  useEffect(() => {
-    // Create tooltip element if it doesn't exist
-    if (!tooltipRef) {
-      const tooltip = document.createElement("div")
-      tooltip.className = "map-tooltip"
-      document.body.appendChild(tooltip)
-      setTooltipRef(tooltip)
-    }
+    useEffect(() => {
+        // Create tooltip element if it doesn't exist
+        if (!tooltipRef) {
+            const tooltip = document.createElement("div")
+            tooltip.className = "map-tooltip"
+            document.body.appendChild(tooltip)
+            setTooltipRef(tooltip)
+        }
+        
+        // Clean up when component unmounts
+        return () => {
+            if (tooltipRef && document.body.contains(tooltipRef)) {
+                document.body.removeChild(tooltipRef)
+            }
+        }
+    }, [tooltipRef])
 
-    // Clean up when component unmounts
-    return () => {
-      if (tooltipRef) {
-        document.body.removeChild(tooltipRef)
-      }
-    }
-  }, [])
-
-  const handleMouseMove = (e) => {
-    if (tooltipRef) {
+    const handleMouseMove = (e) => {
+        if (tooltipRef) {
       tooltipRef.style.left = `${e.clientX}px`
       tooltipRef.style.top = `${e.clientY}px`
-    }
+        }
   }
 
-  const mapLayerProps = {
-    onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
-    onMouseEnter: ({ target }) => {
+    const mapLayerProps = {
+        onClick: ({ target }) => handleCountryClick(target.attributes.name.value),
+        onMouseEnter: ({ target }) => {
       const countryName = target.attributes.name.value
-      // Update tooltip content and make it visible
-      if (tooltipRef) {
+            // Update tooltip content and make it visible
+            if (tooltipRef) {
         tooltipRef.textContent = countryName
         tooltipRef.style.display = "block"
-      }
-    },
-    onMouseLeave: () => {
-      // Hide tooltip
-      if (tooltipRef) {
+            }
+        },
+        onMouseLeave: () => {
+            // Hide tooltip
+            if (tooltipRef) {
         tooltipRef.style.display = "none"
-      }
-    },
-    onMouseMove: handleMouseMove,
-    style: {
+            }
+        },
+        onMouseMove: handleMouseMove,
+        style: {
       cursor: "pointer",
       transition: "fill 0.2s ease",
     },
-  }
+        }
 
-  const handleCountryClick = (countrySelect) => {
-    // Reset the selection if clicking the same country again
-    if (countrySelect === selectedCountry) {
+    const handleCountryClick = (countrySelect) => {
+        // Reset the selection if clicking the same country again
+        if (countrySelect === selectedCountry) {
       setSelectedCountry(null)
       setSelectedCountryList([])
       return
@@ -132,20 +130,20 @@ function FrontPage() {
       const countrySelectLower = countrySelect.toLowerCase()
 
       const matchingRecipes = history.filter((r) => {
-        if (!r.recipe.origin || !r.recipe.origin.country) {
+                if (!r.recipe.origin || !r.recipe.origin.country) {
           return false
-        }
-
+                }
+                
         const recipeCountry = r.recipe.origin.country.toLowerCase()
-
-        // Direct match
-        if (recipeCountry === countrySelectLower) {
+                
+                // Direct match
+                if (recipeCountry === countrySelectLower) {
           return true
-        }
-
-        // Check common variations
-        const variations = {
-          // A
+                }
+                
+                // Check common variations
+                const variations = {
+                    // A
           af: ["afghanistan", "afghan"],
           al: ["albania", "albanian"],
           dz: ["algeria", "algerian"],
@@ -386,15 +384,15 @@ function FrontPage() {
           zm: ["zambia", "zambian"],
           zw: ["zimbabwe", "zimbabwean"],
         }
-
-        // Check if the recipe country matches any variation of the selected country
-        if (variations[countrySelectLower] && variations[countrySelectLower].includes(recipeCountry)) {
+                
+                // Check if the recipe country matches any variation of the selected country
+                if (variations[countrySelectLower] && variations[countrySelectLower].includes(recipeCountry)) {
           return true
-        }
-
-        // Check reverse mapping (if recipe has code and selected is full name)
-        for (const [code, names] of Object.entries(variations)) {
-          if (names.includes(countrySelectLower) && recipeCountry === code) {
+                }
+                
+                // Check reverse mapping (if recipe has code and selected is full name)
+                for (const [code, names] of Object.entries(variations)) {
+                    if (names.includes(countrySelectLower) && recipeCountry === code) {
             return true
           }
         }
@@ -423,97 +421,92 @@ function FrontPage() {
       <p>No recipe history available</p>
     )
 
-  const recipeClicked = (recipeID) => {
+    const recipeClicked = (recipeID) => {
     navigate("/Recipe", { state: { recipeID } })
-  }
-  const getCountries = async () => {
-    try {
+      }
+    const getCountries = async () => {
+        try {
       const token = localStorage.getItem("authToken")
       console.log("Fetching countries data...")
-      const response = await fetch(BASE_USER_COUNTRIES, {
-        method: "GET",
-        headers: {
+        const response = await fetch(BASE_USER_COUNTRIES, {
+            method: "GET",
+            headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       })
 
-      if (!response.ok) {
+            if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
-      }
+            }
 
       const jsonResponse = await response.json()
       console.log("Full countries response:", jsonResponse)
-
-      // Get the country codes and filter out null/undefined values
+            
+            // Get the country codes and filter out null/undefined values
       const countriesCompletedIDs = jsonResponse.countriesCompletedIDs || []
       console.log("Raw country codes:", countriesCompletedIDs)
-
-      // Convert to lowercase and ensure they match the map's format
-      const formattedCountryCodes = countriesCompletedIDs
+            
+            // Convert to lowercase and ensure they match the map's format
+            const formattedCountryCodes = countriesCompletedIDs
         .filter((code) => code !== null && code !== undefined)
         .map((code) => code.toLowerCase())
         .map((code) => {
-          // Special handling for certain country codes if needed
-          // For example, if 'USA' needs to be 'us', or 'GBR' needs to be 'gb'
+                    // Special handling for certain country codes if needed
+                    // For example, if 'USA' needs to be 'us', or 'GBR' needs to be 'gb'
           switch (code) {
             case "usa":
               return "us"
             case "gbr":
               return "gb"
-            // Add more cases as needed
+                        // Add more cases as needed
             default:
               return code
-          }
+                    }
         })
-
+                
       console.log("Formatted country codes for map:", formattedCountryCodes)
-
-      // Update the state
+            
+            // Update the state
       setCountries(formattedCountryCodes)
-      setCountriesCount(formattedCountryCodes.length)
-
-      // Log the current state of the map's layers
-      console.log("Current map layers:", completedCountries)
-    } catch (error) {
+        } catch (error) {
       console.error("Error fetching countries:", error)
       setCountries([])
-      setCountriesCount(0)
-    }
+        }
   }
-  const getHistory = async () => {
-    try {
+    const getHistory = async () => {  
+        try {
       const token = localStorage.getItem("authToken")
       console.log("Fetching recipe history...")
-
-      const response = await fetch(BASE_USER_RECIPES, {
-        method: "GET",
-        headers: {
+            
+        const response = await fetch(BASE_USER_RECIPES, {
+            method: "GET",  
+            headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       })
 
-      if (!response.ok) {
+            if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
-      }
+            }
 
       const data = await response.json()
       console.log("Recipe history received:", data)
 
-      // Make sure we have recipes before setting them
-      if (data && Array.isArray(data.recipes)) {
+            // Make sure we have recipes before setting them
+            if (data && Array.isArray(data.recipes)) {
         setHistory(data.recipes)
-
-        // Extract and format country codes from recipe history
+                
+                // Extract and format country codes from recipe history
         const completedCountryCodes = [
           ...new Set(
-            data.recipes
+                    data.recipes
               .filter((recipe) => recipe.recipe.origin && recipe.recipe.origin.country)
               .map((recipe) => {
                 const country = recipe.recipe.origin.country.toLowerCase()
-                // Map country names to their ISO codes
-                const countryMappings = {
+                            // Map country names to their ISO codes
+                            const countryMappings = {
                   "united states": "us",
                   usa: "us",
                   "united states of america": "us",
@@ -532,7 +525,7 @@ function FrontPage() {
                   greece: "gr",
                   turkey: "tr",
                   morocco: "ma",
-                  // Add more mappings as needed
+                                // Add more mappings as needed
                 }
 
                 console.log("Processing country:", country)
@@ -544,54 +537,51 @@ function FrontPage() {
         ]
 
         console.log("Formatted country codes for map:", completedCountryCodes)
-
-        // Update the completed countries state
+                
+                // Update the completed countries state
         setCountries(completedCountryCodes)
-        setCountriesCount(completedCountryCodes.length)
-      } else {
+            } else {
         console.log("No recipes found in response:", data)
         setHistory([])
         setCountries([])
-        setCountriesCount(0)
-      }
-    } catch (error) {
+            }
+        } catch (error) {
       console.error("Error fetching recipe history:", error)
       setHistory([])
       setCountries([])
-      setCountriesCount(0)
     }
   }
-  const getRecommendedRecipes = async () => {
-    // Check if we already have cached recommendations in this session
+    const getRecommendedRecipes = async () => {
+        // Check if we already have cached recommendations in this session
     const cachedRecommendations = sessionStorage.getItem("recommendedRecipes")
-    if (cachedRecommendations) {
+        if (cachedRecommendations) {
       console.log("Using cached recommended recipes")
       setRecommendedRecipes(JSON.parse(cachedRecommendations))
       return
-    }
+        }
 
-    try {
+        try {
       const token = localStorage.getItem("authToken")
-      const response = await fetch(`${BASE_RECOMMEND_RECIPES_URL}`, {
-        method: "GET",
-        headers: {
+            const response = await fetch(`${BASE_RECOMMEND_RECIPES_URL}`, {
+                method: "GET",
+                headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       })
 
-      if (!response.ok) {
+            if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`)
-      }
+            }
 
       const data = await response.json()
       console.log("Recommended recipes received:", data)
 
-      if (data && Array.isArray(data.results)) {
-        // Cache the recommendations in sessionStorage
+            if (data && Array.isArray(data.results)) {
+                // Cache the recommendations in sessionStorage
         sessionStorage.setItem("recommendedRecipes", JSON.stringify(data.results))
         setRecommendedRecipes(data.results)
-      } else {
+            } else {
         console.log("No recipes found, trying without filters...")
         // Try one more time without any filters
         const fallbackResponse = await axios.get(`${BASE_RECIPES_URL}/search`, {
@@ -609,8 +599,8 @@ function FrontPage() {
           console.log("Fallback found recipes:", fallbackResponse.data.results.length)
           setRecommendedRecipes(fallbackResponse.data.results)
         }
-      }
-    } catch (error) {
+            }
+        } catch (error) {
       console.error("Error fetching recommended recipes:", error)
       if (error.response) {
         console.error("Error response:", {
@@ -634,22 +624,42 @@ function FrontPage() {
       console.error("Error fetching user preferences:", error)
     }
   }
-  useEffect(() => {
+    useEffect(() => {
     window.scrollTo(0, 0)
     checkUserPreferences()
     getHistory()
     getRecommendedRecipes()
+
+    // Add event listener for browser back button
+    const handlePopState = () => {
+      window.location.reload();
+    };
+
+    // Add event listener for browser reload button
+    const handleBeforeUnload = () => {
+      // Clear any cached data if needed
+      sessionStorage.removeItem("recommendedRecipes");
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [])
 
   const handleAccountClick = () => {
     navigate("/account")
   }
 
-  const handlePastRecipesClick = () => {
+    const handlePastRecipesClick = () => {
     navigate("/pastrecipes")
-  }
+    }
 
-  const handleBrandClick = () => {
+    const handleBrandClick = () => {
     navigate("/home")
   }
 
@@ -657,56 +667,56 @@ function FrontPage() {
     navigate("/challenges")
   }
 
-  const handleLogout = () => {
-    // Clear the auth token
+    const handleLogout = () => {
+        // Clear the auth token
     localStorage.removeItem("authToken")
-    // Navigate to login page
+        // Navigate to login page
     navigate("/")
   }
 
-  const responsive = {
-    superLargeDesktop: {
-      breakpoint: { max: 4000, min: 3000 },
+    const responsive = {
+        superLargeDesktop: {
+            breakpoint: { max: 4000, min: 3000 },
       items: 5,
-    },
-    desktop: {
-      breakpoint: { max: 3000, min: 1024 },
+        },
+        desktop: {
+            breakpoint: { max: 3000, min: 1024 },
       items: 4,
-    },
-    tablet: {
-      breakpoint: { max: 1024, min: 464 },
+        },
+        tablet: {
+            breakpoint: { max: 1024, min: 464 },
       items: 2,
-    },
-    mobile: {
-      breakpoint: { max: 464, min: 0 },
+        },
+        mobile: {
+            breakpoint: { max: 464, min: 0 },
       items: 1,
     },
-  }
+        }
 
-  const CustomProgressBar = () => {
-    const validCountryCodes = completedCountries.length;
+    const CustomProgressBar = () => {
+        const validCountryCodes = completedCountries.length;
     const percentage = validCountryCodes > 0 ? Math.min(Math.round((validCountryCodes / 195) * 100), 100) : 0;
-
-    return (
+        
+        return (
       <>
-        <div className="progress-stats">
-          <span>{validCountryCodes} of 195 countries explored</span>
-          <span>{percentage}% completed</span>
-        </div>
+                <div className="progress-stats">
+                    <span>{validCountryCodes} of 195 countries explored</span>
+                    <span>{percentage}% completed</span>
+                </div>
         <div className="progress-bar">
-          <ProgressBar
-            completed={percentage}
+                <ProgressBar 
+                    completed={percentage}
             bgColor="#0d4725"
             height="15px"
             labelColor="#ffffff"
             labelSize="10px"
             baseBgColor="#e0e0de"
             customLabel={`${percentage}%`}
-          />
-        </div>
+                />
+            </div>
       </>
-    );
-  };
+        );
+    };
 
   const recommendedList =
     recommendedRecipes.length > 0 ? (
@@ -721,43 +731,36 @@ function FrontPage() {
       </div>
     )
 
-  useEffect(() => {
-    const handleStorageChange = (e) => {
+    useEffect(() => {
+        const handleStorageChange = (e) => {
       if (e.key === "recipeCompleted") {
-        // Only refresh recipe history, not recommended recipes
+                // Only refresh recipe history, not recommended recipes
         getHistory()
-      }
+            }
     }
 
     window.addEventListener("storage", handleStorageChange)
 
-    return () => {
+        return () => {
       window.removeEventListener("storage", handleStorageChange)
     }
   }, [])
 
-  useEffect(() => {
+    useEffect(() => {
     console.log("completedCountries updated:", completedCountries)
   }, [completedCountries])
 
-  // Handle when mouse leaves the entire map container
-  const handleMapMouseLeave = () => {
-    if (tooltipRef) {
+    // Handle when mouse leaves the entire map container
+    const handleMapMouseLeave = () => {
+        if (tooltipRef) {
       tooltipRef.style.display = "none"
     }
   }
 
-  // Add this function to handle mouse leaving the SVG map specifically
-  const handleSvgMapMouseLeave = () => {
-    if (tooltipRef) {
-      tooltipRef.style.display = "none"
-    }
-  }
-
-  const getCountryRegion = (countryCode) => {
-    // More comprehensive region mapping
-    const regionMap = {
-      // North America
+    const getCountryRegion = (countryCode) => {
+        // More comprehensive region mapping
+        const regionMap = {
+            // North America
       us: "North America",
       ca: "North America",
       mx: "North America",
@@ -773,8 +776,8 @@ function FrontPage() {
       ht: "North America",
       do: "North America",
       pr: "North America",
-
-      // South America
+            
+            // South America
       co: "South America",
       ve: "South America",
       gy: "South America",
@@ -788,8 +791,8 @@ function FrontPage() {
       cl: "South America",
       ar: "South America",
       uy: "South America",
-
-      // Europe
+            
+            // Europe
       is: "Europe",
       no: "Europe",
       se: "Europe",
@@ -833,8 +836,8 @@ function FrontPage() {
       va: "Europe",
       mt: "Europe",
       cy: "Europe",
-
-      // Asia
+            
+            // Asia
       ru: "Asia",
       kz: "Asia",
       uz: "Asia",
@@ -884,8 +887,8 @@ function FrontPage() {
       qa: "Asia",
       kw: "Asia",
       bh: "Asia",
-
-      // Africa
+            
+            // Africa
       eg: "Africa",
       ly: "Africa",
       tn: "Africa",
@@ -938,8 +941,8 @@ function FrontPage() {
       mu: "Africa",
       sc: "Africa",
       km: "Africa",
-
-      // Oceania
+            
+            // Oceania
       au: "Oceania",
       nz: "Oceania",
       pg: "Oceania",
@@ -956,17 +959,17 @@ function FrontPage() {
       pw: "Oceania",
       nr: "Oceania",
     }
-
-    // Handle case sensitivity and common variations
+        
+        // Handle case sensitivity and common variations
     const code = countryCode.toLowerCase()
-
-    // Try direct lookup first
-    if (regionMap[code]) {
+        
+        // Try direct lookup first
+        if (regionMap[code]) {
       return regionMap[code]
-    }
-
-    // Handle special cases or full country names
-    const specialCases = {
+        }
+        
+        // Handle special cases or full country names
+        const specialCases = {
       "united states": "North America",
       usa: "North America",
       "united kingdom": "Europe",
@@ -978,32 +981,32 @@ function FrontPage() {
       "south africa": "Africa",
       russia: "Asia",
       japan: "Asia",
-      // Add more as needed
+            // Add more as needed
     }
-
-    if (specialCases[code]) {
+        
+        if (specialCases[code]) {
       return specialCases[code]
-    }
-
-    // If we can't determine the region, return unknown
+        }
+        
+        // If we can't determine the region, return unknown
     return "Unknown Region"
   }
 
-  // Helper function to convert country name to ISO code for flag display
-  const getCountryIsoCode = (countryName) => {
+    // Helper function to convert country name to ISO code for flag display
+    const getCountryIsoCode = (countryName) => {
     if (!countryName) return ""
-
-    // Convert to lowercase for case-insensitive matching
+        
+        // Convert to lowercase for case-insensitive matching
     const name = countryName.toLowerCase()
-
-    // Direct ISO code mapping (if the country is already in code format)
-    if (name.length === 2) {
+        
+        // Direct ISO code mapping (if the country is already in code format)
+        if (name.length === 2) {
       return name
-    }
-
-    // Comprehensive country name to ISO code mappings
-    const countryCodeMap = {
-      // A
+        }
+        
+        // Comprehensive country name to ISO code mappings
+        const countryCodeMap = {
+            // A
       afghanistan: "af",
       albania: "al",
       algeria: "dz",
@@ -1264,8 +1267,8 @@ function FrontPage() {
       // Z
       zambia: "zm",
       zimbabwe: "zw",
-
-      // Adding a few missing or commonly used variations
+            
+            // Adding a few missing or commonly used variations
       america: "us",
 
       scotland: "gb",
@@ -1284,8 +1287,8 @@ function FrontPage() {
       "democratic people's republic of korea": "kp",
 
       "united republic of tanzania": "tz",
-
-      // Add common adjective forms that might appear in recipe origins
+            
+            // Add common adjective forms that might appear in recipe origins
       italian: "it",
       french: "fr",
       spanish: "es",
@@ -1329,13 +1332,13 @@ function FrontPage() {
       colombian: "co",
       chilean: "cl",
     }
-
-    // Try to find the country code
-    if (countryCodeMap[name]) {
+        
+        // Try to find the country code
+        if (countryCodeMap[name]) {
       return countryCodeMap[name]
-    }
-
-    // If we can't find a mapping, return the original (this might not work with flagcdn)
+        }
+        
+        // If we can't find a mapping, return the original (this might not work with flagcdn)
     console.log(`No ISO code mapping found for: ${countryName}`)
     return name
   }
@@ -1344,47 +1347,47 @@ function FrontPage() {
     setIs3DView(!is3DView)
   }
 
-  return (
-    <div className="front-page">
-      <nav className="navbar background">
+    return (
+        <div className="front-page">
+            <nav className="navbar background">
         <div className="brand" onClick={handleBrandClick} style={{ cursor: "pointer" }}>
-          NomadChef
+                    NomadChef
           <img src={wisk_icon || "/placeholder.svg"} alt="Whisk Icon" className="whisk" />
-        </div>
+                </div>
         <div className="list-items">
-          <ul className="nav-list">
-            <li>
+                    <ul className="nav-list">
+                        <li>
               <button onClick={handlePastRecipesClick} className="nav-button">
-                Past Recipes
-              </button>
-            </li>
-            <li>
+                                Past Recipes
+                            </button>
+                        </li>
+                        <li>
               <button onClick={handleChallengesClick} className="nav-button">
                 Challenges
               </button>
             </li>
             <li>
               <button onClick={handleAccountClick} className="nav-button">
-                Account
-              </button>
-            </li>
-            <li>
+                                Account
+                            </button>
+                        </li>
+                        <li>
               <button onClick={handleLogout} className="nav-button logout-button">
-                Logout
-              </button>
-            </li>
-          </ul>
-        </div>
-      </nav>
+                                Logout
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
 
-      <section className="section">
-        <div className="map-and-recipes-container">
-          <div
-            className="map-container"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMapMouseLeave}
-            ref={mapContainerRef}
-          >
+            <section className="section">
+                <div className="map-and-recipes-container">
+                    <div 
+                        className="map-container" 
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMapMouseLeave}
+                        ref={mapContainerRef}
+                    >
             <button onClick={toggleView} className="nav-button view-toggle">
               {is3DView ? "2D View" : "3D View"}
             </button>
@@ -1397,93 +1400,93 @@ function FrontPage() {
                 onMouseLeave={handleMapMouseLeave}
               />
             ) : (
-              <Map>
-                <VectorMap
-                  {...worldMap}
-                  style={{ width: "100%", height: "100%" }}
-                  checkedLayers={completedCountries}
-                  layerProps={mapLayerProps}
-                  currentLayers={completedCountries}
-                  onMouseLeave={handleMapMouseLeave}
-                />
-              </Map>
+                        <Map>
+                            <VectorMap
+                                {...worldMap}
+                                style={{ width: "100%", height: "100%" }}
+                                checkedLayers={completedCountries}
+                                layerProps={mapLayerProps}
+                                currentLayers={completedCountries}
+                                onMouseLeave={handleMapMouseLeave}
+                            />
+                        </Map>
             )}
-
-            <div className="progress-container" onMouseEnter={handleMapMouseLeave}>
-              <CustomProgressBar />
-            </div>
-          </div>
-
-          {selectedCountry && selectedCountryList.length > 0 && (
-            <div className="country-recipes-panel">
+                        
+                        <div className="progress-container" onMouseEnter={handleMapMouseLeave}>
+                            <CustomProgressBar />
+                        </div>
+                    </div>
+                    
+                    {selectedCountry && selectedCountryList.length > 0 && (
+                        <div className="country-recipes-panel">
               <button className="close-country-recipes" onClick={handleCloseCountryRecipes}>
                 ×
               </button>
-              <div className="country-card">
-                <h2>{selectedCountry}</h2>
-                {console.log("Selected country:", selectedCountry)}
-                <div className="country-info">
-                  <div className="country-flag">
-                    <img
-                      src={`https://flagcdn.com/w320/${getCountryIsoCode(selectedCountry)}.png`}
-                      alt={`${selectedCountry} flag`}
-                      onError={(e) => {
+                            <div className="country-card">
+                                <h2>{selectedCountry}</h2>
+                                {console.log("Selected country:", selectedCountry)}
+                                <div className="country-info">
+                                    <div className="country-flag">
+                                        <img 
+                                            src={`https://flagcdn.com/w320/${getCountryIsoCode(selectedCountry)}.png`} 
+                                            alt={`${selectedCountry} flag`}
+                                            onError={(e) => {
                         e.target.onerror = null
                         e.target.src = "https://via.placeholder.com/320x213?text=Flag+Not+Available"
-                      }}
-                    />
-                  </div>
-                  <div className="country-stats">
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="country-stats">
                     <p>
                       <strong>Recipes Completed:</strong> {selectedCountryList.length}
                     </p>
                     <p>
                       <strong>Region:</strong> {getCountryRegion(selectedCountry)}
                     </p>
-                  </div>
-                </div>
-              </div>
-
-              <h3>Recipes from {selectedCountry}</h3>
-              <div className="country-recipes-list">
-                {selectedCountryList.map((item, index) => (
-                  <div
-                    key={`recipe-${index}`}
-                    className="country-recipe-card"
-                    onClick={() => recipeClicked(item.recipeId)}
-                  >
-                    <SmallRecipeCard
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3>Recipes from {selectedCountry}</h3>
+                            <div className="country-recipes-list">
+                                {selectedCountryList.map((item, index) => (
+                                    <div 
+                                        key={`recipe-${index}`} 
+                                        className="country-recipe-card"
+                                        onClick={() => recipeClicked(item.recipeId)}
+                                    >
+                                        <SmallRecipeCard 
                       image={item.recipe?.image || "No image available"}
                       name={item.recipe?.title || "Untitled Recipe"}
-                      fallbackText="No image available"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
+                                            fallbackText="No image available"
+                                        /> 
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
 
-      <section className="section">
+            <section className="section">
         <PromptBox />
-      </section>
-      <section className="section">
+            </section>
+            <section className="section">
         <h1 className="section-heading-here">Recommended Recipes</h1>
-        <div className="slider">
+                <div className="slider">
           <Carousel responsive={responsive}>{recommendedList}</Carousel>
-        </div>
-      </section>
-      <section className="section">
-        <h1>History</h1>
-        <div className="slider">
+                </div>
+            </section>
+            <section className="section">
+                <h1>History</h1>
+                <div className="slider">
           <Carousel responsive={responsive}>{historylist}</Carousel>
-        </div>
-      </section>
-      <footer className="footer">
+                </div>
+            </section>
+            <footer className="footer">
         <p className="text-footer">Copyright ©-All rights are reserved</p>
-      </footer>
-    </div>
+            </footer>
+        </div>
   )
 }
 
