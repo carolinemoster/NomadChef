@@ -15,6 +15,18 @@ const LoginSignup = () => {
     const [action, setAction] = useState("Sign In");
     // State for multi-step form (page 1: basic info, page 2: preferences)
     const [page, setPage] = useState(1);
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        dietaryRestrictions: [],
+        cookingSkills: '',
+        spicePreference: '',
+        cuisineInterests: [],
+        lovedIngredients: [],
+        dislikedIngredients: []
+    });
 
     // States for user preferences
     const [dietaryRestrictions, setDietaryRestrictions] = useState([]);

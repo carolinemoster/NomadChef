@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import './AccountPage.css';
 import wisk_icon from '../Components/Assets/wisk.png';
 import { useNavigate } from 'react-router-dom';
-import ProgressBar from '@ramonak/react-progress-bar';
 import axios from 'axios';
 
 const AccountPage = () => {
@@ -13,7 +12,6 @@ const AccountPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
-    const [points, setUserPoints] = useState(0);
     const BASE_AUTH_URL = 'https://b60ih09kxi.execute-api.us-east-2.amazonaws.com/dev/auth';
 
     useEffect(() => {
@@ -53,8 +51,27 @@ const AccountPage = () => {
                 }
             }
         };
-        getUserPoints();
         fetchUserData();
+
+        // Add event listener for browser back button
+        const handlePopState = () => {
+            window.location.reload();
+        };
+
+        // Add event listener for browser reload button
+        const handleBeforeUnload = () => {
+            // Clear any cached data if needed
+            sessionStorage.removeItem("userData");
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        
+        // Clean up function
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -113,7 +130,6 @@ const AccountPage = () => {
             }
 
             const data = await response.json();
-            setUserPoints(data.points);
         }
         catch(error) {
             console.log(error);
